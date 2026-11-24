@@ -52,7 +52,17 @@ function buildCompact(strip) {
   if (!items.length) root.appendChild(emptyNote());
   editEvents(root, '[data-id]', function (id) { setOn(mode, id, false); },
     function (rects, x, y, id) { return dropMini(rects, x, y, id, strip); },
-    function (id, d) { moveMini(mode, id, d.to, d.how === 'after'); }, strip);
+    function (id, d) { moveMini(mode, id, d.to, d.how === 'after'); },
+    function () {
+      var prev = null;
+      CFG.mini[mode].filter(function (t) { return t.on; }).forEach(function (t) {
+        var e = $('[data-id="' + t.id + '"]', root);
+        if (!e) return;
+        root.appendChild(e);
+        if (!strip) e.classList.toggle('sep', !!prev && prev.g !== CSPEC[t.id].g);
+        prev = CSPEC[t.id];
+      });
+    });
   return {
     el: root,
     update: function (s) {

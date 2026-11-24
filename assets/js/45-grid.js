@@ -22,6 +22,19 @@ function repack() {
   });
 }
 
+// Переставляет уже построенные плитки по модели (при перетаскивании).
+function reflowFull(grid) {
+  var by = {};
+  gridView.forEach(function (r) { r.items.forEach(function (x) { by[x.id] = x; }); });
+  gridView = [];
+  CFG.rows.forEach(function (row) {
+    var items = shownIn(row).map(function (id) { return by[id]; }).filter(Boolean);
+    items.forEach(function (x) { grid.appendChild(x.b.el); });
+    if (items.length) gridView.push({ items: items });
+  });
+  packSig = ''; repack();
+}
+
 function buildFull() {
   var el = mk('<div class="full look-' + CFG.look + (editing ? ' editing' : '') + '"><div class="grid"></div></div>'), grid = $('.grid', el);
   gridView = []; packSig = '';
@@ -37,16 +50,16 @@ function buildFull() {
   });
   if (!gridView.length) el.appendChild(emptyNote());
   repack();
-  editEvents(el, '.tile', function (id) { setOn('full', id, false); }, dropAt, function (id, d) { moveTile(id, d.to, d.how); });
+  editEvents(el, '.tile', function (id) { setOn('full', id, false); }, dropAt, function (id, d) { moveTile(id, d.to, d.how); }, function () { reflowFull(grid); });
   return {
     el: el,
     update: function (s) { gridView.forEach(function (r) { r.items.forEach(function (x) { x.b.update(s); }); }); repack(); }
   };
 }
 
-// Правка: крестик скрывает, перетаскивание показывает, куда встанет плитка, и переносит её, когда отпустили.
-// До этого ничего не двигается.
-function editEvents(el, sel, hide, calc, move, strip) {
+// Правка: крестик скрывает; плитку можно взять и таскать: она идёт за мышью, остальные плавно расступаются.
+// Порядок меняется сразу в модели (исходный запоминается), при отпускании сохраняется, при отмене возвращается.
+function editEvents(el, sel, hide, calc, move, reflow) {
   if (!editing) return;
   el.addEventListener('click', function (e) {
     if (!e.target.closest('.ed')) return;
@@ -55,57 +68,86 @@ function editEvents(el, sel, hide, calc, move, strip) {
   });
   el.addEventListener('pointerdown', function (e) {
     var n = e.button === 0 && !e.target.closest('.ed') && e.target.closest(sel);
-    if (n) dragTile(el, n, e, sel, calc, move, strip);
+    if (n) dragTile(el, n, e, sel, calc, move, reflow);
   });
 }
 
-function dragTile(el, n, e, sel, calc, move, strip) {
-  var id = n.getAttribute('data-id'), x0 = e.clientX, y0 = e.clientY, on = false, drop = null, z = CFG.scale / 100;
-  var mode = curMode(), mark, ghost, base = el.getBoundingClientRect(), rects;
+function dragTile(el, n, e, sel, calc, move, reflow) {
+  var id = n.getAttribute('data-id'), x0 = e.clientX, y0 = e.clientY, on = false, z = CFG.scale / 100;
+  var rects, gx = 0, gy = 0, ptr = null, snap = JSON.stringify([CFG.rows, CFG.mini]), mode = curMode();
   e.preventDefault();
   try { el.setPointerCapture(e.pointerId); } catch (err) { /* синтетические события без захвата */ }
+  function model() { return JSON.stringify([CFG.rows, CFG.mini]); }
+  // Места плиток по раскладке (без сдвигов от анимации).
+  function measure() {
+    var ts = $$(sel, el).filter(function (t) { return !t.hidden; }), keep = ts.map(function (t) { return t.style.transform; });
+    ts.forEach(function (t) { t.style.transform = ''; });
+    var out = ts.map(function (t) {
+      var r = t.getBoundingClientRect();
+      return { id: t.getAttribute('data-id'), el: t, l: r.left, t: r.top, r: r.right, b: r.bottom, half: mode === 'full' && !t.classList.contains('w2') };
+    });
+    ts.forEach(function (t, i) { t.style.transform = keep[i]; });
+    return out;
+  }
+  function slot() { return rects.filter(function (o) { return o.id === id; })[0]; }
+  function place() {
+    var r = slot();
+    if (r && ptr) n.style.transform = 'translate(' + (ptr.x - gx - r.l) / z + 'px,' + (ptr.y - gy - r.t) / z + 'px)';
+  }
   function start() {
     on = true;
+    rects = measure();
+    var r = slot();
+    gx = x0 - r.l; gy = y0 - r.t;
     n.classList.add('drag'); el.classList.add('dragging');
-    mark = mk('<div class="mark"></div>'); ghost = mk('<div class="dghost">' + I(CSPEC[id] && mode !== 'full' ? CSPEC[id].icon : id) + '</div>');
-    el.appendChild(mark); el.appendChild(ghost);
-    rects = $$(sel, el).filter(function (t) { return !t.hidden; }).map(function (t) {
-      var r = t.getBoundingClientRect();
-      return { id: t.getAttribute('data-id'), l: r.left, t: r.top, r: r.right, b: r.bottom, half: mode === 'full' && !t.classList.contains('w2') };
+  }
+  // Остальные плитки плавно уезжают на новые места.
+  function step(d) {
+    var before = model(), vis = {};
+    rects.forEach(function (o) { var r = o.el.getBoundingClientRect(); vis[o.id] = { l: r.left, t: r.top }; });
+    move(id, d);
+    if (model() === before) return;
+    reflow();
+    rects = measure();
+    rects.forEach(function (o) {
+      if (o.id === id || !vis[o.id]) return;
+      var dx = (vis[o.id].l - o.l) / z, dy = (vis[o.id].t - o.t) / z;
+      if (!dx && !dy) return;
+      o.el.style.transition = 'none';
+      o.el.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
     });
-  }
-  function box(l, t, r, b) {
-    mark.hidden = false;
-    mark.style.cssText = 'left:' + (l - base.left) / z + 'px;top:' + (t - base.top) / z + 'px;width:' + (r - l) / z + 'px;height:' + (b - t) / z + 'px';
-  }
-  function show() {
-    mark.hidden = true;
-    if (!drop) return;
-    var r = rects.filter(function (o) { return o.id === drop.to; })[0], g = 4 * z, mid = (r.l + r.r) / 2;
-    var line = drop.how === 'before' || drop.how === 'after';
-    mark.classList.toggle('line', line);
-    if (strip) { var x = drop.how === 'before' ? r.l : r.r; box(x - 1.5 * z, r.t, x + 1.5 * z, r.b); }
-    else if (line) {
-      var y = drop.how === 'before' ? r.t - (mode === 'full' ? g : 0) : r.b + (mode === 'full' ? g : 0);
-      var all = mode === 'full' ? [Math.min.apply(null, rects.map(function (o) { return o.l; })), Math.max.apply(null, rects.map(function (o) { return o.r; }))] : [r.l, r.r];
-      box(all[0], y - 1.5 * z, all[1], y + 1.5 * z);
-    } else box(drop.how === 'right' ? mid : r.l, r.t, drop.how === 'left' ? mid : r.r, r.b);
+    void el.offsetWidth;
+    rects.forEach(function (o) {
+      if (o.id === id) return;
+      o.el.style.transition = 'transform .2s ease';
+      o.el.style.transform = '';
+    });
+    place();
   }
   function onMove(ev) {
     if (!on) {
       if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) < 5) return;
       start();
     }
-    ghost.style.transform = 'translate(' + (ev.clientX - base.left) / z + 'px,' + (ev.clientY - base.top) / z + 'px) translate(-50%,-50%)';
-    drop = calc(rects, ev.clientX, ev.clientY, id);
-    show();
+    ptr = { x: ev.clientX, y: ev.clientY };
+    place();
+    var d = calc(rects, ev.clientX, ev.clientY, id);
+    if (d) step(d);
+  }
+  function clean() {
+    $$(sel, el).forEach(function (t) { t.style.transform = ''; t.style.transition = ''; });
+    n.classList.remove('drag'); el.classList.remove('dragging');
   }
   function end(ev) {
     el.removeEventListener('pointermove', onMove); el.removeEventListener('pointerup', end); el.removeEventListener('pointercancel', end);
     if (!on) return;
-    mark.remove(); ghost.remove(); n.classList.remove('drag'); el.classList.remove('dragging');
-    if (ev.type !== 'pointerup' || !drop || !el.isConnected) return;
-    move(id, drop); saveCfg(); layout();
+    if (ev.type !== 'pointerup' || !el.isConnected) {
+      var o = JSON.parse(snap); CFG.rows = o[0]; CFG.mini = o[1];
+      if (el.isConnected) { clean(); layout(); }
+      return;
+    }
+    n.style.transition = 'transform .15s ease, box-shadow .15s ease'; n.style.transform = '';
+    setTimeout(function () { clean(); saveCfg(); layout(); }, 160);
   }
   el.addEventListener('pointermove', onMove); el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
 }

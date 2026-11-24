@@ -2,7 +2,7 @@
 .editing [data-id] { cursor: grab; touch-action: none; }
 .editing [data-id]::before { content: ""; position: absolute; inset: 0; z-index: 2; border: 1px dashed color-mix(in srgb, var(--accent) 75%, transparent); border-radius: inherit; pointer-events: none; }
 .editing [data-id] > *:not(.ed) { pointer-events: none; }
-.editing [data-id].drag { opacity: .35; }
+.editing [data-id].drag { z-index: 6; transition: none; box-shadow: 0 10px 26px rgba(0, 0, 0, .5); }
 .dragging, .dragging [data-id] { cursor: grabbing; }
 .ed { display: none; position: absolute; right: 3px; top: 3px; width: 22px; height: 22px; padding: 4px; z-index: 3; border-radius: 6px; background: var(--pop); color: var(--text); }
 .editing [data-id]:hover .ed { display: block; }
@@ -10,8 +10,4 @@
 .ed:hover { background: var(--accent); color: var(--on-accent); }
 .cr .ed { top: 7px; }
 .sb .ed { top: 50%; margin-top: -11px; }
-.mark { position: absolute; z-index: 4; pointer-events: none; border-radius: var(--r); background: color-mix(in srgb, var(--accent) 32%, transparent); border: 2px solid var(--accent); }
-.mark.line { border: 0; border-radius: 2px; background: var(--accent); }
-.dghost { position: absolute; left: 0; top: 0; z-index: 5; width: 34px; height: 34px; padding: 8px; pointer-events: none; border-radius: 9px; background: var(--accent); color: var(--on-accent); box-shadow: 0 4px 12px rgba(0, 0, 0, .4); }
-.dghost .i { display: block; width: 18px; height: 18px; }
 .empty { padding: 12px; font-size: 12px; color: var(--dim); text-align: center; }
