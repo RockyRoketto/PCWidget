@@ -111,7 +111,7 @@ var TILE_BUILD = {
         var a = rateParts(n.down), b = rateParts(n.up);
         $('.dn', el).textContent = a[0]; $('.dnu', el).textContent = a[1]; $('.up', el).textContent = b[0]; $('.upu', el).textContent = b[1];
         $('.pg', el).innerHTML = n.ping != null ? '<span class="pgl">пинг </span><b class="s-' + pingLevel(n.ping) + '">' + Math.round(n.ping) + '</b> мс' : '';
-        $('.ls', el).textContent = n.loss ? 'потери ' + Math.round(n.loss) + '%' : '';
+        $('.ls', el).innerHTML = n.loss ? '<span class="lw">потери </span>' + Math.round(n.loss) + '%' : '';
         // корень сжимает разброс: приём и отдача видны на одной шкале
         var q = Math.sqrt, mx = q(Math.max.apply(null, HIST.down.concat(HIST.up, [102400])));
         drawGraph($('.graph', el), HIST.down.map(q), mx);
