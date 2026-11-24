@@ -22,6 +22,8 @@ const (
 	cmdTopmost   = 2
 	cmdSettings  = 3
 	cmdAutostart = 4
+	cmdInstall   = 5
+	cmdUninstall = 6
 	cmdExit      = 9
 	cmdTheme     = 10 // 10..13
 	cmdMode      = 20 // 20..22
@@ -130,11 +132,17 @@ func showMenu() {
 	pAppendMenu.Call(m, mfPopup, submenu(cmdTheme, themeText, themeKeys, app.brief.Theme), uintptr(unsafe.Pointer(utf16("Тема"))))
 	pAppendMenu.Call(m, mfString, cmdSettings, uintptr(unsafe.Pointer(utf16("Настройки…"))))
 	pAppendMenu.Call(m, topFlags, cmdTopmost, uintptr(unsafe.Pointer(utf16("Поверх всех окон"))))
-	autoFlags := uintptr(mfString)
-	if app.settings.autostartEnabled() {
-		autoFlags |= mfChecked
+	pAppendMenu.Call(m, mfSeparator, 0, 0)
+	if installed() {
+		autoFlags := uintptr(mfString)
+		if app.settings.autostartEnabled() {
+			autoFlags |= mfChecked
+		}
+		pAppendMenu.Call(m, autoFlags, cmdAutostart, uintptr(unsafe.Pointer(utf16("Запускать при старте Windows"))))
+		pAppendMenu.Call(m, mfString, cmdUninstall, uintptr(unsafe.Pointer(utf16("Удалить PC Widget…"))))
+	} else {
+		pAppendMenu.Call(m, mfString, cmdInstall, uintptr(unsafe.Pointer(utf16("Установить (автозапуск)…"))))
 	}
-	pAppendMenu.Call(m, autoFlags, cmdAutostart, uintptr(unsafe.Pointer(utf16("Запускать при старте Windows"))))
 	pAppendMenu.Call(m, mfSeparator, 0, 0)
 	pAppendMenu.Call(m, mfString, cmdExit, uintptr(unsafe.Pointer(utf16("Выход"))))
 
@@ -154,6 +162,11 @@ func showMenu() {
 		} else {
 			sendCmd("topmost:0")
 		}
+	case id == cmdInstall:
+		app.settings.save()
+		startInstall()
+	case id == cmdUninstall:
+		startUninstall()
 	case id == cmdAutostart:
 		setAutostart(!app.settings.autostartEnabled())
 	case id == cmdSettings:

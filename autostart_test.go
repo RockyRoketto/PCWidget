@@ -39,7 +39,4 @@ func TestAutostartDefault(t *testing.T) {
 	if s.autostartEnabled() {
 		t.Error("явное «выключено» должно сохраняться")
 	}
-	if autostartKey("a", true) == autostartKey("a", false) {
-		t.Error("ключ обязан различать уровень прав")
-	}
 }

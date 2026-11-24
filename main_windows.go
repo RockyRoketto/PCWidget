@@ -14,7 +14,18 @@ import (
 func main() {
 	runtime.LockOSThread() // окно и WebView живут в этом потоке
 	setDPIAware()
+	// Рабочий каталог (задача планировщика ставит папку установки) не должен наследоваться WebView2:
+	// его процессы переживают виджет и мешали бы удалению папки.
+	_ = os.Chdir(os.TempDir())
 
+	switch cliMode(os.Args[1:]) {
+	case "install":
+		runInstall()
+		return
+	case "uninstall":
+		runUninstall()
+		return
+	}
 	if !singleInstance() {
 		return
 	}

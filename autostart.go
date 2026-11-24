@@ -59,13 +59,5 @@ func utf16BOM(s string) []byte {
 	return b
 }
 
-// autostartKey описывает, с чем создана задача. Изменился путь или уровень прав — задачу пересоздаём.
-func autostartKey(exe string, admin bool) string {
-	if admin {
-		return exe + "|admin"
-	}
-	return exe + "|user"
-}
-
 // autostartEnabled: по умолчанию автозапуск включён (поле не задано).
 func (s Settings) autostartEnabled() bool { return s.Autostart == nil || *s.Autostart }

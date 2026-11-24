@@ -9,12 +9,14 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// schtasks запускает schtasks.exe без окна консоли.
-func schtasks(args ...string) error {
-	c := exec.Command("schtasks.exe", args...)
+// runHidden запускает программу без окна консоли и ждёт завершения.
+func runHidden(name string, args ...string) error {
+	c := exec.Command(name, args...)
 	c.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: windows.CREATE_NO_WINDOW}
 	return c.Run()
 }
+
+func schtasks(args ...string) error { return runHidden("schtasks.exe", args...) }
 
 func isElevated() bool { return windows.GetCurrentProcessToken().IsElevated() }
 
@@ -28,14 +30,15 @@ func currentUser() string {
 	return u
 }
 
-// createTask создаёт (или перезаписывает) задачу автозапуска для exe.
-func createTask(exe string, admin bool) bool {
+// createTask создаёт (или перезаписывает) задачу автозапуска для exe. Права всегда наивысшие:
+// создавать её можно только из установленной копии (см. syncAutostart), а у неё админский манифест.
+func createTask(exe string) bool {
 	f, err := os.CreateTemp("", "pcwidget-task-*.xml")
 	if err != nil {
 		return false
 	}
 	defer os.Remove(f.Name())
-	_, err = f.Write(utf16BOM(taskXML(currentUser(), exe, admin)))
+	_, err = f.Write(utf16BOM(taskXML(currentUser(), exe, true)))
 	f.Close()
 	if err != nil {
 		return false
@@ -43,28 +46,42 @@ func createTask(exe string, admin bool) bool {
 	return schtasks("/Create", "/TN", taskName, "/XML", f.Name(), "/F") == nil
 }
 
-// syncAutostart приводит задачу планировщика в соответствие с настройкой. Вызывается при старте и из меню.
-func syncAutostart() {
+func deleteTask() {
+	if taskExists() {
+		_ = schtasks("/Delete", "/TN", taskName, "/F")
+	}
+}
+
+func selfExe() string {
 	exe, err := os.Executable()
 	if err != nil {
-		return
+		return ""
 	}
 	exe, _ = filepath.Abs(exe)
+	return exe
+}
+
+func installed() bool { return isInstalled(selfExe(), os.Getenv("ProgramFiles")) }
+
+// syncAutostart приводит задачу планировщика в соответствие с настройкой. Вызывается при старте и из меню.
+// Портативная копия (не из каталога установки) задачу не трогает: иначе админская задача
+// запускала бы exe из папки, куда может писать любая программа.
+func syncAutostart() {
+	if !installed() {
+		return
+	}
+	exe := selfExe()
 	if !app.settings.autostartEnabled() {
-		if taskExists() {
-			_ = schtasks("/Delete", "/TN", taskName, "/F")
-		}
+		deleteTask()
 		app.settings.AutostartKey = ""
 		app.settings.save()
 		return
 	}
-	admin := isElevated()
-	key := autostartKey(exe, admin)
-	if app.settings.AutostartKey == key && taskExists() {
+	if app.settings.AutostartKey == exe && taskExists() {
 		return
 	}
-	if createTask(exe, admin) {
-		app.settings.AutostartKey = key
+	if createTask(exe) {
+		app.settings.AutostartKey = exe
 	} else {
 		app.settings.AutostartKey = ""
 	}
