@@ -10,4 +10,10 @@
 .ed:hover { background: var(--accent); color: var(--on-accent); }
 .cr .ed { top: 7px; }
 .sb .ed { top: 50%; margin-top: -11px; }
+/* направляющие при перетаскивании: что с чем поменяется и куда встанет плитка */
+.dragging .g-swap { outline: 2px dashed var(--accent); outline-offset: -4px; box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--accent) 16%, transparent) !important; }
+.dragging .g-t { box-shadow: inset 0 4px 0 0 var(--accent) !important; }
+.dragging .g-b { box-shadow: inset 0 -4px 0 0 var(--accent) !important; }
+.dragging .g-l { box-shadow: inset 4px 0 0 0 var(--accent) !important; }
+.dragging .g-r { box-shadow: inset -4px 0 0 0 var(--accent) !important; }
 .empty { padding: 12px; font-size: 12px; color: var(--dim); text-align: center; }

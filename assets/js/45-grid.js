@@ -137,10 +137,21 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
   }
   // Перестановка только если курсор постоял над новым местом (DWELL) и после прошлой перестановки прошла пауза (COOL):
   // иначе плитки прыгают туда-сюда, пока едут из-под курсора.
+  // Направляющая: подсвечивает плитку-цель и показывает, как встанет перетаскиваемая (обмен, рядом, выше, ниже).
+  var GUIDE = { swap: 'g-swap', before: 'g-t', after: 'g-b', left: 'g-l', right: 'g-r' };
+  function guide(d) {
+    $$(sel, el).forEach(function (t) { t.classList.toggle('g-swap', false); t.classList.toggle('g-t', false); t.classList.toggle('g-b', false); t.classList.toggle('g-l', false); t.classList.toggle('g-r', false); });
+    if (!d) return;
+    var how = d.how;
+    if (mode === 'strip') how = how === 'before' ? 'left' : how === 'after' ? 'right' : how;
+    var o = rects.filter(function (r) { return r.id === d.to; })[0];
+    if (o && GUIDE[how]) o.el.classList.add(GUIDE[how]);
+  }
   function consider() {
     clearTimeout(timer); timer = 0;
     if (!on || !ptr) return;
     var d = calc(rects, ptr.x, ptr.y, id);
+    guide(d);
     if (!d) { pend = null; return; }
     var k = d.to + '/' + d.how, now = Date.now();
     if (!pend || pend.k !== k) pend = { k: k, t: now };
@@ -148,10 +159,11 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
     if (wait > 0) { timer = setTimeout(consider, wait); return; }
     pend = null;
     step(d);
+    guide(null);
     lockUntil = Date.now() + COOL;
   }
   function clean() {
-    clearTimeout(timer);
+    clearTimeout(timer); guide(null);
     $$(sel, el).forEach(function (t) { t.style.transform = ''; t.style.transition = ''; });
     n.classList.remove('drag'); el.classList.remove('dragging');
   }
@@ -165,6 +177,7 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
       return;
     }
     var d = ptr && calc(rects, ptr.x, ptr.y, id);
+    guide(null);
     if (d) step(d); // отпустил над новым местом, не дождавшись паузы
     n.style.transition = 'transform .15s ease, box-shadow .15s ease'; n.style.transform = '';
     setTimeout(function () { clean(); saveCfg(); layout(); }, 160);
