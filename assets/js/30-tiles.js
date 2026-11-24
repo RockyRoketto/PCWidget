@@ -56,7 +56,7 @@ var TILE_BUILD = {
   calendar: function () { return faceTile(calendarFace(), CFG.calView === 'month'); },
 
   weather: function () {
-    var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><div class="wl"><span class="num">0°</span><div class="cap wd1"></div><div class="cap wd2"></div></div><span class="wi"></span></div><div class="wdays"></div></div>');
+    var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><div class="wl"><span class="num">0°</span><div class="wt"><div class="cap wd1"></div><div class="cap wd2"></div></div></div><span class="wi"></span></div><div class="wdays"></div></div>');
     var days = '';
     function t(v) { return Math.round(v) + '°'; }
     return {
