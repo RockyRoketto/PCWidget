@@ -307,10 +307,29 @@ func setEditing(on bool) {
 	}
 	pSetWindowLong.Call(app.hwnd, ^uintptr(19), st)
 	if on {
-		pSetForegroundWindow.Call(app.hwnd)
+		forceForeground(app.hwnd)
 		if app.cr != nil {
 			app.cr.Focus()
 		}
+	}
+}
+
+// forceForeground делает окно активным, даже если Windows не считает нас «владельцем» ввода:
+// на время вызова подключаемся к потоку текущего активного окна.
+func forceForeground(h uintptr) {
+	fg, _, _ := pGetForeground.Call()
+	cur, _, _ := pGetCurThreadID.Call()
+	var other uintptr
+	if fg != 0 && fg != h {
+		other, _, _ = pGetWinThreadPID.Call(fg, 0)
+	}
+	attached := other != 0 && other != cur
+	if attached {
+		pAttachThreadInput.Call(cur, other, 1)
+	}
+	pSetForegroundWindow.Call(h)
+	if attached {
+		pAttachThreadInput.Call(cur, other, 0)
 	}
 }
 

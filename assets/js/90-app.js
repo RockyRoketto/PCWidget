@@ -77,8 +77,20 @@ document.addEventListener('mousedown', function (e) {
   if (!n || n.hasAttribute('data-drag')) post('drag');
 });
 // Поля ввода: окну виджета нужна активация, иначе клавиатура не доходит.
-document.addEventListener('focusin', function (e) { if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') post('edit:1'); });
-document.addEventListener('focusout', function (e) { if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') post('edit:0'); });
+// Выход из режима отложен: пока Go переносит фокус, поле на миг теряет его, и без паузы получалось мигание.
+var editing = false, editTimer = 0;
+function isTextInput(n) { return n && n.tagName === 'INPUT' && n.type !== 'checkbox'; }
+document.addEventListener('focusin', function (e) {
+  if (!isTextInput(e.target)) return;
+  clearTimeout(editTimer);
+  if (!editing) { editing = true; post('edit:1'); }
+});
+document.addEventListener('focusout', function () {
+  clearTimeout(editTimer);
+  editTimer = setTimeout(function () {
+    if (editing && !isTextInput(document.activeElement)) { editing = false; post('edit:0'); }
+  }, 300);
+});
 document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });
 document.addEventListener('contextmenu', function (e) { e.preventDefault(); post('menu'); });
 
