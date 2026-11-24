@@ -13,7 +13,7 @@ function applyBody() {
 }
 
 function layout() {
-  hideTip();
+  hideTip(true);
   rootEl.innerHTML = '';
   view = [];
   applyBody();

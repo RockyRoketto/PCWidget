@@ -75,12 +75,25 @@ function showTip() {
   Tip.last = msg;
   post('tip:' + msg);
 }
-function hideTip() {
+function hideTip(mute) {
   clearTimeout(Tip.timer);
   Tip.row = null;
+  if (mute === true) Tip.mute = { x: null, y: null }; // перестройка раскладки: мышь не двигалась, подсказку не звать
   if (Tip.last) { Tip.last = ''; post('tipoff'); }
 }
+// После перестройки (смена темы, режима) мышь стоит на месте, но браузер шлёт mouseover новой плитке.
+// Подсказки ждут настоящего движения (> 3 px от первой точки после перестройки).
+document.addEventListener('mousemove', function (e) {
+  var m = Tip.mute; if (!m) return;
+  if (m.x === null) { m.x = e.screenX; m.y = e.screenY; return; }
+  if (Math.abs(e.screenX - m.x) + Math.abs(e.screenY - m.y) > 3) {
+    Tip.mute = null;
+    var t = e.target.closest ? e.target.closest('[data-tip]') : null;
+    if (t) { Tip.row = t; Tip.timer = setTimeout(showTip, 250); }
+  }
+});
 document.addEventListener('mouseover', function (e) {
+  if (Tip.mute) return;
   var t = e.target.closest ? e.target.closest('[data-tip]') : null;
   if (t === Tip.row) return;
   clearTimeout(Tip.timer);
