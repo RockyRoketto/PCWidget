@@ -1,0 +1,18 @@
+# сборка
+*.exe
+*.syso
+/dist/
+/build/
+
+# скачанное
+assets/lhm.zip
+*.dll
+
+# личное и локальное
+/docs/
+STATUS.local.md
+settings.json
+*.log
+.env
+*.png.local
+screenshots/

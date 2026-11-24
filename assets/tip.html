@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>tip</title>
+<style>/*{{CSS}}*/</style>
+</head>
+<body class="theme-glass">
+<div id="tip"></div>
+<script>
+(function () {
+  var post = function (m) { window.chrome.webview.postMessage(m); };
+  var tip = document.getElementById('tip');
+  // Go присылает {html, theme}; страница сообщает размер плашки, Go ставит окно рядом с виджетом.
+  window.__tip = function (o) {
+    document.body.className = 'theme-' + o.theme;
+    tip.innerHTML = o.html;
+    var r = tip.getBoundingClientRect();
+    post('size:' + Math.ceil(r.width) + ',' + Math.ceil(r.height));
+  };
+  post('ready');
+})();
+</script>
+</body>
+</html>

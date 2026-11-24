@@ -1,0 +1,68 @@
+package main
+
+import (
+	"embed"
+	"errors"
+	"io/fs"
+	"sort"
+	"strings"
+)
+
+//go:embed assets
+var assetsFS embed.FS
+
+// buildPage склеивает assets/index.html с css/*.css и js/*.js (по алфавиту)
+// в одну строку для NavigateToString. Порядок JS задавай числовыми префиксами.
+func buildPage() (string, error) {
+	idx, err := assetsFS.ReadFile("assets/index.html")
+	if err != nil {
+		return "", err
+	}
+	css, err := concatGlob("assets/css/*.css")
+	if err != nil {
+		return "", err
+	}
+	js, err := concatGlob("assets/js/*.js")
+	if err != nil {
+		return "", err
+	}
+	page := string(idx)
+	if !strings.Contains(page, "/*{{CSS}}*/") || !strings.Contains(page, "/*{{JS}}*/") {
+		return "", errors.New("index.html: нет меток /*{{CSS}}*/ или /*{{JS}}*/")
+	}
+	// JS вставляем последним, чтобы метки внутри него не обрабатывались.
+	page = strings.Replace(page, "/*{{CSS}}*/", css, 1)
+	page = strings.Replace(page, "/*{{JS}}*/", js, 1)
+	return page, nil
+}
+
+// buildTipPage собирает страницу окна подсказки: те же стили, что у виджета.
+func buildTipPage() (string, error) {
+	idx, err := assetsFS.ReadFile("assets/tip.html")
+	if err != nil {
+		return "", err
+	}
+	css, err := concatGlob("assets/css/*.css")
+	if err != nil {
+		return "", err
+	}
+	return strings.Replace(string(idx), "/*{{CSS}}*/", css, 1), nil
+}
+
+func concatGlob(pattern string) (string, error) {
+	names, err := fs.Glob(assetsFS, pattern)
+	if err != nil {
+		return "", err
+	}
+	sort.Strings(names)
+	var sb strings.Builder
+	for _, n := range names {
+		b, err := assetsFS.ReadFile(n)
+		if err != nil {
+			return "", err
+		}
+		sb.Write(b)
+		sb.WriteByte('\n')
+	}
+	return sb.String(), nil
+}

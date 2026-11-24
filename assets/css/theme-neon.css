@@ -1,0 +1,19 @@
+/* Тема «Неон»: тёмный фон, яркое свечение, кольцевые индикаторы у CPU и GPU. */
+body.theme-neon {
+  --text: #f4f7ff; --dim: rgba(190, 200, 255, .6); --accent: #19f0ff; --alarm: #ff3b6b;
+  --root-bg: #090913; --tile-bg: rgba(24, 22, 52, .75); --tile-border: rgba(25, 240, 255, .28); --line: rgba(25, 240, 255, .2);
+  --radius: 14px; --bar-bg: rgba(255, 255, 255, .08);
+}
+body.theme-neon .tile { box-shadow: 0 0 12px -4px rgba(25, 240, 255, .5), inset 0 0 14px -8px rgba(255, 43, 214, .6); }
+body.theme-neon .bar i { background: linear-gradient(90deg, #19f0ff, #ff2bd6); box-shadow: 0 0 8px rgba(25, 240, 255, .8); }
+body.theme-neon .spark polyline { filter: drop-shadow(0 0 3px var(--accent)); }
+body.theme-neon .t-big { text-shadow: 0 0 10px rgba(25, 240, 255, .6); }
+body.theme-neon .tile.alarm .t-big { text-shadow: 0 0 10px var(--alarm); }
+body.theme-neon .t-ico { color: var(--accent); }
+
+body.theme-neon .tile.half .ring { display: block; position: absolute; right: 8px; top: 30px; width: 44px; height: 44px; transform: rotate(-90deg); }
+body.theme-neon .ring circle { fill: none; stroke-width: 3.4; }
+body.theme-neon .r-bg { stroke: rgba(255, 255, 255, .1); }
+body.theme-neon .r-fg { stroke: var(--accent); stroke-linecap: round; filter: drop-shadow(0 0 3px var(--accent)); transition: stroke-dasharray .5s; }
+body.theme-neon .tile.alarm .r-fg { stroke: var(--alarm); filter: drop-shadow(0 0 3px var(--alarm)); }
+body.theme-neon .tile.half .t-big { font-size: 30px; }

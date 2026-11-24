@@ -1,0 +1,7 @@
+/* Тема «Тёмный минимализм»: нейтральный непрозрачный фон, тонкие полоски. */
+body.theme-minimal {
+  --accent: #e9b872; --alarm: #ff5a4f;
+  --root-bg: #1a1a1e; --tile-bg: #232328; --tile-border: transparent;
+  --radius: 8px; --bar-bg: #34343b; --bar-h: 3px;
+}
+body.theme-minimal .t-big { font-weight: 500; }

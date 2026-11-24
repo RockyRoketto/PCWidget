@@ -1,0 +1,164 @@
+package main
+
+import (
+	"unsafe"
+
+	"golang.org/x/sys/windows"
+)
+
+const (
+	nimAdd    = 0
+	nimDelete = 2
+	nifMsg    = 0x1
+	nifIcon   = 0x2
+	nifTip    = 0x4
+	trayID    = 1
+
+	nimModify = 1
+	nifInfo   = 0x10
+	niifWarn  = 0x02
+
+	cmdToggle   = 1
+	cmdTopmost  = 2
+	cmdSettings = 3
+	cmdExit     = 9
+	cmdTheme    = 10 // 10..13
+	cmdMode     = 20 // 20..22
+)
+
+// Порядок совпадает с ключами в странице (assets/js/00-core.js).
+var (
+	themeKeys = []string{"glass", "terminal", "minimal", "neon"}
+	themeText = []string{"Стекло", "Ретро-терминал", "Тёмный минимализм", "Неон"}
+	modeKeys  = []string{"full", "column", "strip"}
+	modeText  = []string{"Полный", "Компакт: колонка", "Компакт: полоска"}
+)
+
+type notifyIconData struct {
+	cbSize           uint32
+	hWnd             uintptr
+	uID              uint32
+	uFlags           uint32
+	uCallbackMessage uint32
+	hIcon            uintptr
+	szTip            [128]uint16
+	dwState          uint32
+	dwStateMask      uint32
+	szInfo           [256]uint16
+	uTimeout         uint32
+	szInfoTitle      [64]uint16
+	dwInfoFlags      uint32
+	guidItem         windows.GUID
+	hBalloonIcon     uintptr
+}
+
+func trayData() notifyIconData {
+	var n notifyIconData
+	n.cbSize = uint32(unsafe.Sizeof(n))
+	n.hWnd = app.hwnd
+	n.uID = trayID
+	return n
+}
+
+func trayAdd() {
+	n := trayData()
+	ico, _, _ := pLoadIcon.Call(0, idiApplication)
+	n.uFlags = nifMsg | nifIcon | nifTip
+	n.uCallbackMessage = wmTray
+	n.hIcon = ico
+	copy(n.szTip[:], windows.StringToUTF16("PC Widget"))
+	pShellNotifyIcon.Call(nimAdd, uintptr(unsafe.Pointer(&n)))
+}
+
+func trayRemove() {
+	n := trayData()
+	pShellNotifyIcon.Call(nimDelete, uintptr(unsafe.Pointer(&n)))
+}
+
+func onTray(lp uintptr) {
+	switch loword(lp) {
+	case wmLButtonUp:
+		toggleVisible()
+	case wmRButtonUp:
+		showMenu()
+	}
+}
+
+// submenu строит подменю с «радио»-отметкой на выбранном пункте.
+func submenu(baseID int, texts, keys []string, current string) uintptr {
+	sm, _, _ := pCreatePopupMenu.Call()
+	for i, t := range texts {
+		fl := uintptr(mfString)
+		if keys[i] == current {
+			fl |= mfChecked
+		}
+		pAppendMenu.Call(sm, fl, uintptr(baseID+i), uintptr(unsafe.Pointer(utf16(t))))
+	}
+	return sm
+}
+
+// showMenu показывает контекстное меню у курсора (из трея и по ПКМ на виджете).
+func showMenu() {
+	m, _, _ := pCreatePopupMenu.Call()
+	defer pDestroyMenu.Call(m) // подменю уничтожаются вместе с родителем
+
+	toggleText := "Скрыть"
+	if !app.visible {
+		toggleText = "Показать"
+	}
+	topFlags := uintptr(mfString)
+	if app.settings.Topmost {
+		topFlags |= mfChecked
+	}
+	curMode := app.brief.Mode
+	if curMode == "compact" {
+		curMode = app.brief.Compact
+	}
+	pAppendMenu.Call(m, mfString, cmdToggle, uintptr(unsafe.Pointer(utf16(toggleText))))
+	pAppendMenu.Call(m, mfPopup, submenu(cmdMode, modeText, modeKeys, curMode), uintptr(unsafe.Pointer(utf16("Размер"))))
+	pAppendMenu.Call(m, mfPopup, submenu(cmdTheme, themeText, themeKeys, app.brief.Theme), uintptr(unsafe.Pointer(utf16("Тема"))))
+	pAppendMenu.Call(m, mfString, cmdSettings, uintptr(unsafe.Pointer(utf16("Настройки…"))))
+	pAppendMenu.Call(m, topFlags, cmdTopmost, uintptr(unsafe.Pointer(utf16("Поверх всех окон"))))
+	pAppendMenu.Call(m, mfSeparator, 0, 0)
+	pAppendMenu.Call(m, mfString, cmdExit, uintptr(unsafe.Pointer(utf16("Выход"))))
+
+	var p point
+	pGetCursorPos.Call(uintptr(unsafe.Pointer(&p)))
+	pSetForegroundWindow.Call(app.hwnd) // иначе меню из трея не закрывается кликом мимо
+	id, _, _ := pTrackPopupMenu.Call(m, tpmReturnCmd|tpmNoNotify|tpmRightButton, uintptr(p.X), uintptr(p.Y), 0, app.hwnd, 0)
+	switch {
+	case id == cmdToggle:
+		toggleVisible()
+	case id == cmdTopmost:
+		on := !app.settings.Topmost
+		setTopmost(on)
+		app.settings.save()
+		if on {
+			sendCmd("topmost:1")
+		} else {
+			sendCmd("topmost:0")
+		}
+	case id == cmdSettings:
+		if !app.visible {
+			toggleVisible()
+		}
+		sendCmd("settings")
+	case id >= cmdTheme && id < cmdTheme+uintptr(len(themeKeys)):
+		sendCmd("theme:" + themeKeys[id-cmdTheme])
+	case id >= cmdMode && id < cmdMode+uintptr(len(modeKeys)):
+		sendCmd("mode:" + modeKeys[id-cmdMode])
+	case id == cmdExit:
+		app.settings.save()
+		pDestroyWindow.Call(app.hwnd)
+	}
+}
+
+// trayNotify показывает всплывающее уведомление Windows (по умолчанию выключено в настройках).
+func trayNotify(text string) {
+	n := trayData()
+	n.uFlags = nifInfo
+	n.dwInfoFlags = niifWarn
+	copy(n.szInfoTitle[:63], windows.StringToUTF16("PC Widget"))
+	copy(n.szInfo[:255], windows.StringToUTF16(text))
+	pShellNotifyIcon.Call(nimModify, uintptr(unsafe.Pointer(&n)))
+}

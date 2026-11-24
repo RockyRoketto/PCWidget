@@ -1,0 +1,57 @@
+package main
+
+import "time"
+
+// collector собирает один снимок Stats из всех источников. Вызывается раз в секунду из одного потока.
+type collector struct {
+	cpu     cpuMeter
+	net     netMeter
+	procs   procMeter
+	perf    *perf
+	gpu     *gpuReader
+	ping    *pinger
+	traffic *traffic
+	lastSav time.Time
+}
+
+func newCollector() *collector {
+	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic()}
+}
+
+func (c *collector) collect() Stats {
+	now := time.Now()
+	s := Stats{TS: now.Unix(), Uptime: uptimeSeconds()}
+
+	if load, ok := c.cpu.load(); ok {
+		s.CPU = &CPUStat{Load: load}
+	}
+
+	var pageUsage *float64
+	if c.perf != nil {
+		c.perf.collect()
+		if v, ok := c.perf.value(c.perf.pageUsage); ok {
+			pageUsage = &v
+		}
+	}
+	s.Mem = readMem(pageUsage)
+	s.Disks = readDisks(c.perf)
+	s.GPU = c.gpu.get()
+	s.Procs = c.procs.top()
+
+	if down, up, dDown, dUp, ok := c.net.read(); ok {
+		c.traffic.add(now, dDown, dUp)
+		n := &NetStat{Down: down, Up: up,
+			DayDown: c.traffic.DayDown, DayUp: c.traffic.DayUp,
+			MonthDown: c.traffic.MonthDown, MonthUp: c.traffic.MonthUp}
+		n.Ping, n.Loss = c.ping.get()
+		s.Net = n
+	}
+	if now.Sub(c.lastSav) > 30*time.Second {
+		c.traffic.save()
+		c.lastSav = now
+	}
+	return s
+}
+
+// close сохраняет накопленное при выходе.
+func (c *collector) close() { c.traffic.save() }

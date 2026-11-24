@@ -1,0 +1,21 @@
+/* Тема «Ретро-терминал»: чёрный фон, зелёный моноширинный текст, шкалы из блоков, лёгкая растровая сетка. */
+body.theme-terminal {
+  --text: #4dff7c; --dim: #23a345; --accent: #4dff7c; --alarm: #ff4d4d;
+  --root-bg: #020a04; --tile-bg: transparent; --tile-border: #14552a; --line: #14552a;
+  --radius: 0; --bar-bg: transparent; --bar-h: 8px; --num-weight: 400;
+  --font: "Cascadia Mono", Consolas, "Courier New", monospace;
+}
+body.theme-terminal #root::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px);
+}
+body.theme-terminal .bar { border-radius: 0; background: repeating-linear-gradient(90deg, #0f3a1c 0 6px, transparent 6px 8px); }
+body.theme-terminal .bar i {
+  border-radius: 0; background: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 8px); transition: none;
+}
+body.theme-terminal .tile.alarm .bar i { background: repeating-linear-gradient(90deg, var(--alarm) 0 6px, transparent 6px 8px); }
+body.theme-terminal .spark polyline { stroke-width: 1; }
+body.theme-terminal .t-sub, body.theme-terminal .tile.slim .t-val { font-size: 10px; }
+body.theme-terminal .btn { background: var(--accent); border-radius: 0; }
+body.theme-terminal .seg button, body.theme-terminal .thr input, body.theme-terminal .trow, body.theme-terminal .orow { border-radius: 0; border-color: #14552a; }
+body.theme-terminal .sw i, body.theme-terminal .sw i::after { border-radius: 0; }
