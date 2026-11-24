@@ -24,6 +24,7 @@ const (
 	cmdAutostart = 4
 	cmdInstall   = 5
 	cmdUninstall = 6
+	cmdPawn      = 7
 	cmdExit      = 9
 	cmdTheme     = 10 // 10..13
 	cmdMode      = 20 // 20..22
@@ -133,6 +134,9 @@ func showMenu() {
 	pAppendMenu.Call(m, mfString, cmdSettings, uintptr(unsafe.Pointer(utf16("Настройки…"))))
 	pAppendMenu.Call(m, topFlags, cmdTopmost, uintptr(unsafe.Pointer(utf16("Поверх всех окон"))))
 	pAppendMenu.Call(m, mfSeparator, 0, 0)
+	if hub.available() && !pawnInstalled() {
+		pAppendMenu.Call(m, mfString, cmdPawn, uintptr(unsafe.Pointer(utf16("Поставить драйвер для температуры CPU…"))))
+	}
 	if installed() {
 		autoFlags := uintptr(mfString)
 		if app.settings.autostartEnabled() {
@@ -162,6 +166,8 @@ func showMenu() {
 		} else {
 			sendCmd("topmost:0")
 		}
+	case id == cmdPawn:
+		installPawnIO(hub)
 	case id == cmdInstall:
 		app.settings.save()
 		startInstall()

@@ -10,7 +10,7 @@
         "identity": {"name": "PCWidget", "version": "1.0.0.0"},
         "description": "PC Widget",
         "minimum-os": "win10",
-        "execution-level": "as invoker",
+        "execution-level": "require administrator",
         "ui-access": false,
         "auto-elevate": false,
         "dpi-awareness": "per monitor v2",

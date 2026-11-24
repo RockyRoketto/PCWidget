@@ -12,10 +12,15 @@ type collector struct {
 	ping    *pinger
 	traffic *traffic
 	lastSav time.Time
+	sensors *sensorHub
 }
 
+// hub — помощник датчиков (нужен ещё меню: пункт установки драйвера).
+var hub *sensorHub
+
 func newCollector() *collector {
-	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic()}
+	hub = startSensors()
+	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), sensors: hub}
 }
 
 func (c *collector) collect() Stats {
@@ -24,6 +29,8 @@ func (c *collector) collect() Stats {
 
 	if load, ok := c.cpu.load(); ok {
 		s.CPU = &CPUStat{Load: load}
+		r := c.sensors.cpu()
+		s.CPU.Temp, s.CPU.Freq, s.CPU.Power = r.Temp, r.Freq, r.Power
 	}
 
 	var pageUsage *float64
@@ -54,4 +61,7 @@ func (c *collector) collect() Stats {
 }
 
 // close сохраняет накопленное при выходе.
-func (c *collector) close() { c.traffic.save() }
+func (c *collector) close() {
+	c.traffic.save()
+	c.sensors.close()
+}

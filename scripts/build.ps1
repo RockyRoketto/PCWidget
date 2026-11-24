@@ -12,6 +12,7 @@ if (-not $SkipTests) {
 if (Get-Command go-winres -ErrorAction SilentlyContinue) {
     go-winres make --in winres/winres.json --out rsrc --arch amd64 2>&1 | Out-Null
 } else { Write-Host 'go-winres not found: icon and manifest skipped' }
+if (-not (Test-Path assets/lhm.zip)) { & "$PSScriptRoot/fetch-lhm.ps1" }
 New-Item -ItemType Directory -Force dist | Out-Null
 $out = go build -trimpath -buildvcs=false -ldflags '-H=windowsgui -s -w' -o dist/widget.exe . 2>&1
 if ($LASTEXITCODE -ne 0) { $out | Select-Object -First 40; Write-Host 'BUILD FAILED'; exit 1 }
