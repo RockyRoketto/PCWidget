@@ -64,10 +64,10 @@ function flipFace() {
 // ---- стрелки ---- координаты от центра, радиус 100
 function dialSvg() {
   var out = '', i, a, p = function (r) { return 'x="' + (Math.sin(a) * r).toFixed(1) + '" y="' + (-Math.cos(a) * r).toFixed(1) + '"'; };
-  for (i = 0; i < 60; i++) if (i % 5) out += '<line class="tk" y1="-99" y2="-95" transform="rotate(' + i * 6 + ')"/>';
+  for (i = 0; i < 60; i++) if (i % 5) out += '<line class="tk" y1="-99" y2="-93" transform="rotate(' + i * 6 + ')"/>';
   for (i = 1; i <= 12; i++) {
     a = i * Math.PI / 6;
-    out += '<text class="mn" ' + p(90) + '>' + two(i * 5) + '</text><text class="hn" ' + p(64) + '>' + i + '</text>';
+    out += '<text class="mn" ' + p(96) + '>' + two(i * 5) + '</text><text class="hn" ' + p(67) + '>' + i + '</text>';
   }
   return out;
 }
