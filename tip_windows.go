@@ -199,7 +199,9 @@ func placeTip() {
 	if y < int(mi.work.T) {
 		y = int(mi.work.T)
 	}
-	pSetWindowPos.Call(tip.hwnd, hwndTopmost, uintptr(x), uintptr(y), uintptr(w), uintptr(h), swpNoActivate|swpShowWindow)
+	// Подсказка стоит сразу за виджетом по Z-порядку: на уровне рабочего стола её закрывают окна программ,
+	// как и сам виджет; если виджет поверх всех окон, то и она тоже.
+	pSetWindowPos.Call(tip.hwnd, app.hwnd, uintptr(x), uintptr(y), uintptr(w), uintptr(h), swpNoActivate|swpShowWindow)
 	tip.cr.Resize()
 	tip.cr.Show()
 }
