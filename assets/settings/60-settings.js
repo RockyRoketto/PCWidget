@@ -45,27 +45,37 @@ function tilesHint(m) {
     '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между плитками:<br>во всю ширину</span></div></div>';
 }
 
+// Только у Стекла: цвет подложки и плотность.
+function glassBlock() {
+  if (CFG.theme !== 'glass') return '';
+  var own = TINTS.indexOf(CFG.tint) < 0;
+  return label('Цвет стекла') + '<div class="tints">' + TINTS.map(function (c) {
+    return '<button class="tint' + (CFG.tint === c ? ' on' : '') + '" data-tint="' + c + '" style="background:' + c + '" aria-label="Цвет ' + c + '"></button>';
+  }).join('') + '<label class="tint custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + CFG.tint + '"' : '') +
+    '><input type="color" data-tintc value="' + CFG.tint + '" aria-label="Свой цвет"></label></div>' +
+    label('Плотность', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла">';
+}
+
 var SET_BODY = {
   look: function () {
     return label('Режим') + modeCards() +
-      label('Тема') + '<div class="cards c2">' + Object.keys(THEMES).map(function (k) {
+      label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
         var t = THEMES[k];
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '"><span class="sw4" style="background:' + t[1] + '">' +
-          t[2].map(function (c, i) { return '<i style="background:' + c + ';width:' + [90, 60, 75][i] + '%"></i>'; }).join('') + '</span>' + t[0] + '</button>'; }).join('') + '</div>' +
+          t[2].map(function (c, i) { return '<i style="background:' + c + ';width:' + [90, 60, 75][i] + '%"></i>'; }).join('') + '</span>' + t[0] + '</button>'; }).join('') + '</div>' + glassBlock() +
       label('Вид плиток в полном режиме') + segment('look', Object.keys(LOOKS).map(function (k) { return [k, LOOKS[k]]; }), CFG.look) +
       label('Цвет цифр') + segment('mono', [[false, 'Свой у каждого'], [true, 'Один']], CFG.mono) +
-      label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale) +
-      '<div data-if-glass' + (CFG.theme === 'glass' ? '' : ' class="dis"') + '>' + label('Плотность стекла', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла"' + (CFG.theme === 'glass' ? '' : ' disabled') + '></div>';
+      label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale);
   },
   tiles: function () {
     var m = curMode();
-    return label('Плитки режима') + segment('mode', Object.keys(MODES).map(function (k) { return [k, MODES[k]]; }), m) + tilesHint(m) +
+    return label('Плитки режима') + segment('mode', Object.keys(MODES).map(function (k) { return [k, MODES[k]]; }), m) + tilesHint(m) + '<div class="tgrid">' +
       modeIds(m).map(function (id) {
         var o = TILE_OPTS[id] && TILE_OPTS[id](), on = isOn(m, id), name = tileName(m, id);
         return '<div class="trow' + (on ? '' : ' off') + (o && setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + (MINI_TINT[id] || id) + '"><div class="m">' + I(id === 'space' ? 'disk' : id) +
           '<span class="nm">' + name + '</span>' + (o ? '<button class="chev" data-open="' + id + '" title="Параметры">' + ICONS.chev + '</button>' : '') +
           toggle('tile:' + id, on, name) + '</div>' + (o ? '<div class="opts">' + o + '</div>' : '') + '</div>';
-      }).join('') + setRow('Расположение', 'Порядок и набор плиток этого режима', ghost('tiles', 'Как в начале'));
+      }).join('') + '</div>' + setRow('Расположение', 'Порядок и набор плиток этого режима', ghost('tiles', 'Как в начале'));
   },
   alarm: function () {
     return Object.keys(THR_ROWS).map(function (k) {
@@ -111,9 +121,11 @@ function buildSettings() {
     var lab = b.parentNode.previousElementSibling, val = lab && $('[data-val]', lab);
     if (val) val.textContent = b.dataset.v + '%';
   }
-  function glassState() {
-    var g = $('[data-if-glass]', body), off = CFG.theme !== 'glass';
-    if (g) { g.classList.toggle('dis', off); $('input', g).disabled = off; }
+  // Отметка выбранного цвета стекла; свой цвет красит последний кружок.
+  function tintMarks() {
+    var own = TINTS.indexOf(CFG.tint) < 0, c = $('.tint.custom', body);
+    $$('.tint[data-tint]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.tint === CFG.tint); });
+    if (c) { c.classList.toggle('on', own); c.style.background = own ? CFG.tint : ''; $('input', c).value = CFG.tint; }
   }
 
   el.addEventListener('click', function (e) {
@@ -127,12 +139,14 @@ function buildSettings() {
     else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
     else if (d.sys) post('sys:' + d.sys);
     else if (d.k === 'mode') { setMode(d.v); changed(); if (setState.tab === 'tiles') render(true); else pick(b); }
-    else if (d.k) { CFG[d.k] = d.k === 'mono' ? d.v === 'true' : /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); glassState(); }
+    else if (d.tint) { CFG.tint = d.tint; changed(); tintMarks(); }
+    else if (d.k === 'theme') { CFG.theme = d.v; changed(); render(); }
+    else if (d.k) { CFG[d.k] = d.k === 'mono' ? d.v === 'true' : /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
     if (t.hasAttribute('data-city')) applyCity(t.value);
-    else if (t.dataset.thr || t.hasAttribute('data-glass')) saveCfg();
+    else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-tintc')) saveCfg();
     else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }
     else if (k === 'autostart') { SYS.autostart = t.checked; post('sys:autostart:' + (t.checked ? 1 : 0)); }
     else if (k && k.indexOf('tile:') === 0) {
@@ -148,7 +162,9 @@ function buildSettings() {
       CFG.thr[k] = Number(t.value); liveCfg();
       var z = t.closest('.thr'); $('.zone', z).style.setProperty('--t', zonePos(CFG.thr[k]) + '%'); $('.t b', z).textContent = t.value + THR_ROWS[k][2];
     } else if (t.hasAttribute('data-glass')) {
-      CFG.glass = Number(t.value); liveCfg(); applySetBody(); $$('[data-val]', body).pop().textContent = t.value + '%';
+      CFG.glass = Number(t.value); liveCfg(); applySetBody(); $('[data-val]', t.previousElementSibling).textContent = t.value + '%';
+    } else if (t.hasAttribute('data-tintc')) {
+      CFG.tint = t.value; liveCfg(); applySetBody(); tintMarks();
     } else if (t.hasAttribute('data-city')) cityTyped(t);
   });
   render(true);

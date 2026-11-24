@@ -11,7 +11,7 @@ function postOnce(key, v) { if (sent[key] !== v) { sent[key] = v; post(key + ':'
 
 function applyBody() {
   document.body.className = bodyClass();
-  document.body.style.setProperty('--glass', CFG.glass / 100);
+  setGlassVars(document.body.style, CFG.glass, CFG.tint);
   rootEl.style.zoom = CFG.scale / 100;
   rootEl.classList.toggle('loading', !dataReady);
   postOnce('corners', CFG.theme === 'terminal' ? 'square' : 'round');
@@ -68,7 +68,7 @@ window.__stats = function (s) {
 window.__sys = function (sys) { SYS = sys; TOPMOST = sys.topmost; };
 
 // Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
-var LIGHT = { glass: 1, thr: 1, notify: 1, city: 1, theme: 1, mono: 1, scale: 1 };
+var LIGHT = { glass: 1, tint: 1, thr: 1, notify: 1, city: 1, theme: 1, mono: 1, scale: 1 };
 function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
 window.__cfg = function (c) {
   var old = CFG;

@@ -15,6 +15,7 @@
   window.__tip = function (o) {
     document.body.className = o.cls;
     document.body.style.setProperty('--glass', o.glass / 100);
+    document.body.style.setProperty('--tint', o.tint);
     tip.style.zoom = o.scale / 100;
     tip.innerHTML = o.html;
     var r = tip.getBoundingClientRect();

@@ -12,7 +12,7 @@ function liveCfg() {
 }
 function applySetBody() {
   document.body.className = bodyClass();
-  document.body.style.setProperty('--glass', Math.max(CFG.glass, 70) / 100); // настройкам нужна читаемая подложка
+  setGlassVars(document.body.style, Math.max(CFG.glass, 70), CFG.tint); // настройкам нужна читаемая подложка
 }
 
 // ---- вызовы из Go ----

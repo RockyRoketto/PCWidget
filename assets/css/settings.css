@@ -1,4 +1,4 @@
-/* Окно настроек. Размер окна постоянный, содержимое вкладки прокручивается внутри. */
+/* Окно настроек. Размер окна постоянный, прокрутки нет: каждая вкладка должна помещаться целиком. */
 #set { height: 100vh; background: var(--bg); }
 .set { height: 100%; display: flex; flex-direction: column; }
 .sh { display: flex; align-items: center; gap: 8px; padding: 10px 10px 6px 18px; font-size: 15px; font-weight: 650; }
@@ -9,8 +9,18 @@
 .stabs button { display: grid; justify-items: center; gap: 3px; padding: 6px 0 8px; font-size: 12px; color: var(--dim); border-bottom: 2px solid transparent; }
 .stabs button.on { color: var(--text); border-bottom-color: var(--accent); }
 .stabs button.on .i { color: var(--accent); }
-.sbody { flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; padding: 2px 8px 14px 18px; scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
-.lab { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin: 13px 0 6px; }
+.sbody { flex: 1; min-height: 0; overflow: hidden; padding: 2px 18px 12px; }
+.tgrid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+.tgrid .trow.open { grid-column: 1 / -1; }
+.tgrid .trow .m { min-height: 34px; gap: 6px; }
+.tgrid .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c3 .tcard { flex-direction: column; gap: 6px; padding: 8px 4px 6px; justify-content: center; }
+.tints { display: flex; gap: 9px; align-items: center; }
+.tint { position: relative; width: 26px; height: 26px; flex: none; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .22); cursor: pointer; }
+.tint.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.tint.custom { background: conic-gradient(#f66, #fd5, #6e6, #5df, #66f, #f6f, #f66); }
+.tint.custom input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; border: 0; }
+.lab { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin: 10px 0 5px; }
 .lab b { color: var(--text); font-weight: 600; }
 .cards { display: grid; gap: 7px; }
 .c3 { grid-template-columns: repeat(3, 1fr); }
@@ -18,7 +28,7 @@
 .card { display: grid; justify-items: center; gap: 6px; padding: 8px 6px 6px; border: 1px solid var(--edge); background: var(--tile); border-radius: var(--r); font-size: 12px; color: var(--dim); }
 .card:hover { color: var(--text); }
 .card.on { border-color: var(--accent); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
-.card svg { height: 32px; }
+.card svg { height: 26px; }
 .tcard { display: flex; align-items: center; gap: 9px; justify-content: flex-start; padding: 6px; text-align: left; }
 .sw4 { width: 44px; height: 30px; flex: none; border-radius: 6px; padding: 5px; display: grid; align-content: center; gap: 4px; border: 1px solid rgba(255, 255, 255, .14); }
 .sw4 i { height: 4px; border-radius: 4px; display: block; }
