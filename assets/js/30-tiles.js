@@ -44,22 +44,19 @@ function bigTile(id, details) {
 function unit(v, u) { return '<b>' + v + '</b> ' + u; }
 function powerText(d) { return d.power != null ? unit(Math.round(d.power), 'Вт') : ''; }
 
+// Часы и календарь: лицо из 25-faces.js, от данных не зависит.
+function faceTile(f) {
+  var el = mk('<div class="tile mid"></div>');
+  el.appendChild(f.el);
+  return { el: el, update: f.tick, tick: f.tick };
+}
+
 var TILE_BUILD = {
-  clock: function () {
-    var el = mk('<div class="tile"><div class="num clk">00:00</div><div class="cap">&nbsp;</div></div>');
-    return {
-      el: el,
-      update: function () {
-        var d = new Date();
-        $('.clk', el).textContent = clockText(d);
-        $('.clk', el).style.fontSize = CFG.clockSec || !CFG.clock24 ? '25px' : '';
-        $('.cap', el).textContent = d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'long' });
-      }
-    };
-  },
+  clock: function () { return faceTile(clockFace()); },
+  calendar: function () { return faceTile(calendarFace()); },
 
   weather: function () {
-    var el = mk('<div class="tile" data-tip="weather"><div class="wx"><span class="wi"></span><span class="num">0°</span></div><div class="cap">&nbsp;</div></div>');
+    var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><span class="wi"></span><span class="num">0°</span></div><div class="cap">&nbsp;</div></div>');
     return {
       el: el,
       update: function (s) {

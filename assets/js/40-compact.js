@@ -15,8 +15,9 @@ function shortUptime(sec) {
 
 // g — группа: между разными группами в колонке тонкая линия. cls — ширина значения в полоске.
 var CSPEC = {
-  clock: { g: 'time', icon: 'clock', cls: 'vt', get: function () { var d = new Date(); return { v: clockText(d), sm: d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' }) }; } },
+  clock: { g: 'time', icon: 'clock', cls: 'vt', clock: true, face: function () { return CFG.clockView === 'digital' ? null : clockFace(); }, get: function () { var d = new Date(); return { v: clockText(d), sm: d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' }) }; } },
   weather: { g: 'time', tip: 'weather', icon: 'weather', cls: 'vt', get: function (s) { var w = s.weather; return w && { v: Math.round(w.temp) + '°', icon: w.icon, sm: 'ощ. ' + Math.round(w.feels) + '°' }; } },
+  calendar: { g: 'time', icon: 'calendar', cls: 'vt', face: calendarFace, get: function () { return { v: new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '') }; } },
   cpu: { g: 'load', m: 'cpu', icon: 'cpu', load: true, alarm: function () { return Alarm.isOn('cpuTemp'); }, get: loadCell('cpu', 'cpuTemp') },
   gpu: { g: 'load', m: 'gpu', icon: 'gpu', load: true, alarm: function () { return Alarm.isOn('gpuTemp'); }, get: loadCell('gpu', 'gpuTemp') },
   mem: { g: 'load', m: 'mem', icon: 'mem', load: true, alarm: function () { return Alarm.isOn('mem'); },
@@ -41,13 +42,14 @@ function buildCompact(strip) {
   var mode = strip ? 'strip' : 'column', list = CFG.mini[mode].filter(function (t) { return t.on; });
   var root = mk('<div class="' + (strip ? 'strip' : 'col') + (editing ? ' editing' : '') + '"></div>');
   var items = list.map(function (t, i) {
-    var sp = CSPEC[t.id], prev = i > 0 && CSPEC[list[i - 1].id];
+    var sp = CSPEC[t.id], face = !strip && sp.face ? sp.face() : null, prev = i > 0 && CSPEC[list[i - 1].id];
     var el = mk('<div class="' + (strip ? 'sb' : 'cr') + '" data-id="' + t.id + '"' + (sp.m ? ' data-m="' + sp.m + '"' : '') + (sp.tip || sp.m ? ' data-tip="' + (sp.tip || sp.m) + '"' : '') + '>' + I(sp.icon) +
       '<span class="num ' + (sp.cls || (sp.load ? 'vv' : 'vr')) + '">0</span><span class="s"></span>' + (sp.load ? '<span class="mb"><i></i></span>' : '') + '</div>');
     if (!strip && prev && prev.g !== sp.g) el.classList.add('sep');
     if (editing) { el.setAttribute('data-nodrag', ''); el.appendChild(editButton()); }
     root.appendChild(el);
-    return { sp: sp, el: el, ic: $('.i', el), v: $('.num', el), s: $('.s', el), mb: $('.mb i', el) };
+    if (face) { el.classList.add('facerow'); $$('.i, .num, .s', el).forEach(function (n) { n.remove(); }); el.appendChild(face.el); }
+    return { sp: sp, face: face, el: el, ic: $('.i', el), v: $('.num', el), s: $('.s', el), mb: $('.mb i', el) };
   });
   if (!items.length) root.appendChild(emptyNote());
   editEvents(root, '[data-id]', function (id) { setOn(mode, id, false); },
@@ -63,23 +65,26 @@ function buildCompact(strip) {
         prev = CSPEC[t.id];
       });
     });
+  function draw(it, s) {
+    if (it.face) return it.face.tick();
+    var d = it.sp.get(s), inline = strip || !d || !d.rate; // в колонке единица скорости стоит справа
+    it.el.hidden = !d; if (!d) return;
+    it.v.innerHTML = d.v + (inline && d.u ? '<small>' + d.u + '</small>' : '');
+    it.v.classList.toggle('sml', !!d.small);
+    ['ok', 'warm', 'hot'].forEach(function (l) { it.v.classList.toggle('s-' + l, d.lv === l); });
+    var ic = d.letter ? '<b class="let">' + esc(d.letter) + '</b>' : d.icon ? ICONS[d.icon] : '';
+    if (ic && it.ico !== ic) { it.ico = ic; it.ic.innerHTML = ic; }
+    var temp = d.t != null;
+    it.s.className = 's ' + (temp ? 's-' + level(d.t, d.thr) : 'u');
+    it.s.textContent = temp ? Math.round(d.t) + '°' : strip ? '' : d.rate ? d.u : d.sm || '';
+    if (it.mb) it.mb.style.width = clamp(d.pct, 0, 100) + '%';
+    it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
+  }
   return {
     el: root,
+    tick: function () { if (S) items.forEach(function (it) { if (it.face || it.sp.clock) draw(it, S); }); },
     update: function (s) {
-      items.forEach(function (it) {
-        var d = it.sp.get(s), inline = strip || !d || !d.rate; // в колонке единица скорости стоит справа
-        it.el.hidden = !d; if (!d) return;
-        it.v.innerHTML = d.v + (inline && d.u ? '<small>' + d.u + '</small>' : '');
-        it.v.classList.toggle('sml', !!d.small);
-        ['ok', 'warm', 'hot'].forEach(function (l) { it.v.classList.toggle('s-' + l, d.lv === l); });
-        var ic = d.letter ? '<b class="let">' + esc(d.letter) + '</b>' : d.icon ? ICONS[d.icon] : '';
-        if (ic && it.ico !== ic) { it.ico = ic; it.ic.innerHTML = ic; }
-        var temp = d.t != null;
-        it.s.className = 's ' + (temp ? 's-' + level(d.t, d.thr) : 'u');
-        it.s.textContent = temp ? Math.round(d.t) + '°' : strip ? '' : d.rate ? d.u : d.sm || '';
-        if (it.mb) it.mb.style.width = clamp(d.pct, 0, 100) + '%';
-        it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
-      });
+      items.forEach(function (it) { draw(it, s); });
       // Ширина значений только растёт: полоска не дёргается, когда «9%» сменяется на «100%».
       if (strip) items.forEach(function (it) {
         it.vw = Math.max(it.vw || 0, it.v.offsetWidth); it.v.style.minWidth = it.vw + 'px';

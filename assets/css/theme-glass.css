@@ -2,5 +2,6 @@
 body.theme-glass {
   --bg: rgba(19, 21, 27, var(--glass, .76)); --tile: rgba(255, 255, 255, .065); --edge: rgba(255, 255, 255, .08);
 }
-/* Выбранный акцентный цвет: заголовки плиток и иконки (цифры и графики остаются своего цвета, в режиме «Один» цвет цифр тоже акцентный). */
+/* Выбран один цвет: им красится всё, что у показателей обычно разноцветное (цифры, графики, полоски), плюс названия и иконки. «Цветной» = класс acc не ставится. */
+body.acc { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--accent); --net: var(--accent); --disk: var(--accent); }
 body.acc .th b, body.acc .th .i, body.acc .cr .i, body.acc .sb .i, body.acc .tipbox h3, body.acc .tipbox h3 .i { color: var(--accent); }

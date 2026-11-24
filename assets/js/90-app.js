@@ -101,4 +101,10 @@ function postSize() {
 }
 new ResizeObserver(postSize).observe(rootEl);
 
+// Часы идут по своему таймеру, ровно по смене секунды (данные от Go приходят со сдвигом).
+(function secTick() {
+  if (view && dataReady) view.tick();
+  setTimeout(secTick, 1005 - Date.now() % 1000);
+})();
+
 post('ready');

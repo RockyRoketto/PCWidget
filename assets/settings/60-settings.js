@@ -22,8 +22,12 @@ var THR_ROWS = {
 var SET_TABS = { look: ['look', 'Вид'], tiles: ['tiles', 'Плитки'], alarm: ['bell', 'Тревоги'], sys: ['sys', 'Система'] };
 var TILE_OPTS = {
   clock: function () {
-    return '<label class="ol">24-часовой формат' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label><label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label>';
+    var strip = curMode() === 'strip', hands = !strip && CFG.clockView === 'analog'; // в полоске часы всегда цифрами
+    return (strip ? '' : segment('clockView', Object.keys(CLOCKS).map(function (k) { return [k, CLOCKS[k]]; }), CFG.clockView)) + (hands ?
+      '<label class="ol">Секундная стрелка' + toggle('clockHand', CFG.clockHand, 'Секундная стрелка') + '</label>' :
+      '<div class="two"><label class="ol">24 часа' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label><label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label></div>');
   },
+  calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>'; },
   procs: function () { return curMode() !== 'full' ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
 };
@@ -42,16 +46,16 @@ function tilesHint(m) {
   var acc = function (x, y, w, h) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" fill="var(--accent)"/>'; };
   return '<p class="hint how">Перетаскивай плитки прямо на виджете. Крестик убирает.</p><div class="hows">' +
     '<div>' + pic(b(2, 2, 52, 8) + b(2, 13, 25, 19) + acc(29, 13, 25, 19)) + '<span>На край плитки:<br>встанут рядом</span></div>' +
-    '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между плитками:<br>во всю ширину</span></div></div>';
+    '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между ними:<br>во всю ширину</span></div></div>';
 }
 
 // Только у Стекла: акцентный цвет и плотность подложки.
 function glassBlock() {
   if (CFG.theme !== 'glass') return '';
   var own = !!CFG.accent && ACCENTS.indexOf(CFG.accent) < 0;
-  return label('Акцентный цвет') + '<div class="tints">' + ACCENTS.map(function (c) {
-    var v = c === ACCENTS[0] ? '' : c; // первый: по умолчанию
-    return '<button class="tint' + (CFG.accent === v ? ' on' : '') + '" data-accent="' + v + '" style="background:' + c + '" title="' + (v ? '' : 'По умолчанию') + '" aria-label="Цвет ' + c + '"></button>';
+  return label('Цвет') + '<div class="tints"><button class="tint multi' + (CFG.accent ? '' : ' on') + '" data-accent="" title="Цветной: у каждого показателя свой" aria-label="Цветной"></button>' + ACCENTS.map(function (c) {
+
+    return '<button class="tint' + (CFG.accent === c ? ' on' : '') + '" data-accent="' + c + '" style="background:' + c + '" aria-label="Цвет ' + c + '"></button>';
   }).join('') + '<label class="tint custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + CFG.accent + '"' : '') +
     '><input type="color" data-tintc value="' + (CFG.accent || ACCENTS[0]) + '" aria-label="Свой цвет"></label></div>' +
     label('Плотность стекла', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла">';
@@ -142,6 +146,7 @@ function buildSettings() {
     else if (d.k === 'mode') { setMode(d.v); changed(); if (setState.tab === 'tiles') render(true); else pick(b); }
     else if (d.accent !== undefined) { CFG.accent = d.accent; changed(); tintMarks(); }
     else if (d.k === 'theme') { CFG.theme = d.v; changed(); render(); }
+    else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
     else if (d.k) { CFG[d.k] = d.k === 'mono' ? d.v === 'true' : /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
   el.addEventListener('change', function (e) {

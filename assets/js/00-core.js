@@ -15,6 +15,8 @@ var THEMES = {
   neon: ['Неон', '#0a0a15', ['#29c8ff', '#b77bff', '#ff5fc8']]
 };
 var LOOKS = { graph: 'Графики', ring: 'Кольца', rows: 'Строки' };
+var CLOCKS = { digital: 'Цифры', flip: 'Перекидные', analog: 'Стрелки' };
+var CALS = { day: 'День', week: 'Неделя', month: 'Месяц' };
 var MODES = { full: 'Полный', column: 'Колонка', strip: 'Полоска' };
 var SCALES = [90, 100, 115, 130];
 // Акцентный цвет Стекла (подписи, выбранное, кнопки, цифры в режиме «Один цвет»): быстрый выбор, плюс свой цвет.
@@ -33,9 +35,9 @@ function setGlassVars(style, density, accent, theme) {
 function defaults() {
   return {
     theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: '',
-    rows: defaultRows(), hide: { clock: 1, weather: 1 }, mini: { column: defaultMini(), strip: defaultMini() },
+    rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
-    notify: false, city: '', clock24: true, clockSec: false, procN: 3, procTab: 'cpu'
+    notify: false, city: '', clock24: true, clockSec: false, clockView: 'digital', clockHand: true, calView: 'month', procN: 3, procTab: 'cpu'
   };
 }
 
@@ -57,7 +59,9 @@ function mergeCfg(saved) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
   ['mono', 'notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
-  c.clock24 = saved.clock24 !== false;
+  ['clock24', 'clockHand'].forEach(function (k) { c[k] = saved[k] !== false; });
+  if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
+  if (CALS[saved.calView]) c.calView = saved.calView;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
   if (saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
   if (typeof saved.accent === 'string' && /^(#[0-9a-f]{6})?$/i.test(saved.accent)) c.accent = saved.accent.toLowerCase();

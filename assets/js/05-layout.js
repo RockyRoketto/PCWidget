@@ -3,16 +3,17 @@
 // Полный режим: CFG.rows — ряды из одной или двух плиток, CFG.hide — скрытые плитки (место в рядах за ними остаётся).
 // Колонка и полоска: свои списки CFG.mini.column и CFG.mini.strip: [{ id, on }].
 
-var TILE_IDS = ['clock', 'weather', 'cpu', 'gpu', 'mem', 'net', 'disks', 'procs', 'records', 'uptime'];
-var OPT_OFF = { clock: 1, weather: 1 };  // по умолчанию выключены
+var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'disks', 'procs', 'records', 'uptime'];
+var OPT_OFF = { clock: 1, weather: 1, calendar: 1 };  // по умолчанию выключены
 var ONLY_WIDE = { procs: 1 };            // рядом с другой не встаёт
 var LOOK_WIDE = { cpu: 1, gpu: 1, mem: 1, net: 1, disks: 1 }; // в виде «Строки» всегда во всю ширину
-var TILE_NAMES = { clock: 'Часы', weather: 'Погода', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён' };
-var MINI_IDS = ['clock', 'weather', 'cpu', 'gpu', 'mem', 'down', 'up', 'ping', 'disk', 'space', 'uptime'];
-var MINI_OFF = { clock: 1, weather: 1, ping: 1, space: 1, uptime: 1 };
-var MINI_NAMES = { clock: 'Часы', weather: 'Погода', cpu: 'CPU', gpu: 'GPU', mem: 'Память', down: 'Сеть: приём', up: 'Сеть: отдача', ping: 'Пинг', disk: 'Диски: скорость', space: 'Диск: занято места', uptime: 'ПК включён' };
+var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён' };
+var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'down', 'up', 'ping', 'disk', 'space', 'uptime'];
+var MINI_OFF = { clock: 1, weather: 1, calendar: 1, ping: 1, space: 1, uptime: 1 };
+var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', down: 'Сеть: приём', up: 'Сеть: отдача', ping: 'Пинг', disk: 'Диски: скорость', space: 'Диск: занято места', uptime: 'ПК включён' };
 
-function defaultRows() { return [['clock', 'weather'], ['cpu', 'gpu'], ['mem'], ['net'], ['disks'], ['procs'], ['records', 'uptime']]; }
+function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['disks'], ['procs'], ['records', 'uptime']]; }
+function defaultHide() { var h = {}; Object.keys(OPT_OFF).forEach(function (id) { h[id] = 1; }); return h; }
 function defaultMini() { return MINI_IDS.map(function (id) { return { id: id, on: !MINI_OFF[id] }; }); }
 
 // Ряды из файла: лишнее и повторы отбрасываются, недостающие плитки встают своим рядом.
@@ -52,11 +53,14 @@ function cleanMini(list) {
 }
 function mergeLayout(c, saved) {
   if (Array.isArray(saved.rows)) {
+    var known = JSON.stringify(saved.rows);
     c.rows = cleanRows(saved.rows); c.hide = {};
-    TILE_IDS.forEach(function (id) { if (saved.hide && saved.hide[id]) c.hide[id] = 1; });
+    TILE_IDS.forEach(function (id) { // плитка новее файла настроек: необязательная остаётся выключенной
+      if ((saved.hide && saved.hide[id]) || (OPT_OFF[id] && known.indexOf('"' + id + '"') < 0)) c.hide[id] = 1;
+    });
   } else if (Array.isArray(saved.tiles)) {
     c.rows = cleanRows(rowsFromTiles(saved.tiles));
-    c.hide = { clock: 1, weather: 1 };
+    c.hide = defaultHide();
     saved.tiles.forEach(function (t) { if (t && TILE_IDS.indexOf(t.id) >= 0) { if (t.on === false) c.hide[t.id] = 1; else delete c.hide[t.id]; } });
   }
   if (saved.mini) ['column', 'strip'].forEach(function (m) { c.mini[m] = cleanMini(saved.mini[m]); });

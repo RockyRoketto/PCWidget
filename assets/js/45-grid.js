@@ -53,7 +53,8 @@ function buildFull() {
   editEvents(el, '.tile', function (id) { setOn('full', id, false); }, dropAt, function (id, d) { moveTile(id, d.to, d.how); }, function () { reflowFull(grid); });
   return {
     el: el,
-    update: function (s) { gridView.forEach(function (r) { r.items.forEach(function (x) { x.b.update(s); }); }); repack(); }
+    update: function (s) { gridView.forEach(function (r) { r.items.forEach(function (x) { x.b.update(s); }); }); repack(); },
+    tick: function () { gridView.forEach(function (r) { r.items.forEach(function (x) { if (x.b.tick) x.b.tick(); }); }); }
   };
 }
 
