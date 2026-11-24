@@ -67,7 +67,7 @@ function dialSvg() {
   for (i = 0; i < 60; i++) if (i % 5) out += '<line class="tk" y1="-99" y2="-93" transform="rotate(' + i * 6 + ')"/>';
   for (i = 1; i <= 12; i++) {
     a = i * Math.PI / 6;
-    out += '<text class="mn" ' + p(96) + '>' + two(i * 5) + '</text><text class="hn" ' + p(67) + '>' + i + '</text>';
+    out += '<text class="mn" ' + p(96) + '>' + two(i * 5) + '</text><text class="hn" ' + p(72) + '>' + i + '</text>';
   }
   return out;
 }
