@@ -117,6 +117,10 @@ func showTipRequest(raw string) {
 	if tip.cr == nil || !app.visible || menu.open {
 		return
 	}
+	if !cursorOverWidget() { // виджет закрыт другим окном: подсказка не нужна
+		hideTip()
+		return
+	}
 	var r struct {
 		Y     float64 `json:"y"`
 		Theme string  `json:"theme"`
@@ -198,4 +202,21 @@ func placeTip() {
 	pSetWindowPos.Call(tip.hwnd, hwndTopmost, uintptr(x), uintptr(y), uintptr(w), uintptr(h), swpNoActivate|swpShowWindow)
 	tip.cr.Resize()
 	tip.cr.Show()
+}
+
+var (
+	pWindowFromPoint = user32.NewProc("WindowFromPoint")
+	pGetAncestor     = user32.NewProc("GetAncestor")
+)
+
+// cursorOverWidget: под курсором именно окно виджета (а не другая программа поверх него).
+func cursorOverWidget() bool {
+	var p point
+	pGetCursorPos.Call(uintptr(unsafe.Pointer(&p)))
+	h, _, _ := pWindowFromPoint.Call(uintptr(uint32(p.X)) | uintptr(uint32(p.Y))<<32)
+	if h == 0 {
+		return false
+	}
+	root, _, _ := pGetAncestor.Call(h, 2) // GA_ROOT
+	return root == app.hwnd || root == tip.hwnd
 }

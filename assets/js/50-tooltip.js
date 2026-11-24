@@ -56,6 +56,7 @@ var TIPS = {
   }
 };
 
+var TIP_DELAY = 700; // мс до появления подсказки; при переходе между плитками, пока она открыта, почти сразу
 var Tip = { row: null, timer: null, last: '' };
 
 // Что нужно окну подсказки и меню, чтобы выглядеть как виджет.
@@ -87,7 +88,7 @@ document.addEventListener('mousemove', function (e) {
   if (Math.abs(e.screenX - m.x) + Math.abs(e.screenY - m.y) > 3) {
     Tip.mute = null;
     var t = tipTarget(e);
-    if (t) { Tip.row = t; Tip.timer = setTimeout(showTip, 250); }
+    if (t) { Tip.row = t; Tip.timer = setTimeout(showTip, TIP_DELAY); }
   }
 });
 document.addEventListener('mouseover', function (e) {
@@ -97,7 +98,7 @@ document.addEventListener('mouseover', function (e) {
   clearTimeout(Tip.timer);
   if (!t) return hideTip();
   Tip.row = t;
-  Tip.timer = setTimeout(showTip, Tip.last ? 0 : 250);
+  Tip.timer = setTimeout(showTip, Tip.last ? 120 : TIP_DELAY);
 });
 document.addEventListener('mouseleave', hideTip);
 document.addEventListener('mousedown', hideTip);
