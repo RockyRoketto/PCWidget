@@ -1,8 +1,12 @@
 /* Часы и календарь. Размеры считаются от ширины самого лица (.face), поэтому одинаковы в плитке и в колонке. */
 body { --flip: #3a3f4d; --flip2: #31353f; --sec: #ff4f6d; }
-body.mono { --sec: var(--accent); }
-body.theme-neon { --flip: #2c2763; --flip2: #221e4f; --sec: var(--mem); }
-body.theme-terminal { --flip: #0c3018; --flip2: #082411; --sec: var(--accent); }
+body.theme-neon { --flip: #2c2763; --flip2: #221e4f; }
+body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
+/* часы и календарь рядом с другой плиткой: квадрат */
+.tile.sq:not(.w2) { aspect-ratio: 1; }
+.tile.sq:not(.w2) .face.month { height: 100%; display: flex; flex-direction: column; }
+.tile.sq:not(.w2) .face.month .cgrid { flex: 1; grid-template-rows: auto; grid-auto-rows: 1fr; }
+.tile.sq:not(.w2) .face.month .cd { height: auto; }
 .face { container-type: inline-size; width: 100%; min-width: 0; }
 .tile.mid { display: flex; flex-direction: column; justify-content: center; }
 .cr.facerow { display: block; height: auto; padding: 5px 4px; }
@@ -32,10 +36,9 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; --sec: var(--accent); }
 /* стрелки */
 .dial { display: block; width: min(100%, 224px); aspect-ratio: 1; margin: 0 auto; font-family: var(--font); }
 .dial text { text-anchor: middle; dominant-baseline: central; fill: var(--text); }
-.hn { font-size: 25px; font-weight: 500; letter-spacing: -.03em; }
-.mn { font-size: 9px; }
-.tk, .tk5 { stroke: var(--text); stroke-width: 1; opacity: .6; }
-.tk5 { display: none; stroke-width: 2; opacity: 1; }
+.hn { font-size: 23px; font-weight: 300; letter-spacing: -.03em; }
+.mn { font-size: 11px; font-weight: 400; opacity: .6; }
+.tk { stroke: var(--text); stroke-width: 1; opacity: .5; }
 .dt { font-size: 13px; }
 .dial .dd { fill: var(--sec); }
 .hh, .mh, .dial .sech { transform-origin: 0 0; }
@@ -46,10 +49,7 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; --sec: var(--accent); }
 .dial .sech line { stroke: var(--sec); stroke-width: 1.6; stroke-linecap: round; }
 .pin { fill: #111; stroke: var(--sec); stroke-width: 2; }
 @container (max-width: 189px) {
-  .mn { display: none; }
-  .tk5 { display: inline; }
-  .hn { font-size: 29px; }
-  .dt { font-size: 16px; }
+  .dt { font-size: 15px; }
   .dial .sech line { stroke-width: 2.2; }
 }
 /* календарь */

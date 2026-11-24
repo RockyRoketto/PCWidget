@@ -75,6 +75,7 @@ function editEvents(el, sel, hide, calc, move, reflow) {
 
 function dragTile(el, n, e, sel, calc, move, reflow) {
   var id = n.getAttribute('data-id'), x0 = e.clientX, y0 = e.clientY, on = false, z = CFG.scale / 100;
+  var DWELL = 280, COOL = 380, timer = 0, pend = null, lockUntil = 0;
   var rects, gx = 0, gy = 0, ptr = null, snap = JSON.stringify([CFG.rows, CFG.mini]), mode = curMode();
   e.preventDefault();
   try { el.setPointerCapture(e.pointerId); } catch (err) { /* синтетические события без захвата */ }
@@ -132,14 +133,30 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
     }
     ptr = { x: ev.clientX, y: ev.clientY };
     place();
-    var d = calc(rects, ev.clientX, ev.clientY, id);
-    if (d) step(d);
+    consider();
+  }
+  // Перестановка только если курсор постоял над новым местом (DWELL) и после прошлой перестановки прошла пауза (COOL):
+  // иначе плитки прыгают туда-сюда, пока едут из-под курсора.
+  function consider() {
+    clearTimeout(timer); timer = 0;
+    if (!on || !ptr) return;
+    var d = calc(rects, ptr.x, ptr.y, id);
+    if (!d) { pend = null; return; }
+    var k = d.to + '/' + d.how, now = Date.now();
+    if (!pend || pend.k !== k) pend = { k: k, t: now };
+    var wait = Math.max(pend.t + DWELL - now, lockUntil - now);
+    if (wait > 0) { timer = setTimeout(consider, wait); return; }
+    pend = null;
+    step(d);
+    lockUntil = Date.now() + COOL;
   }
   function clean() {
+    clearTimeout(timer);
     $$(sel, el).forEach(function (t) { t.style.transform = ''; t.style.transition = ''; });
     n.classList.remove('drag'); el.classList.remove('dragging');
   }
   function end(ev) {
+    clearTimeout(timer);
     el.removeEventListener('pointermove', onMove); el.removeEventListener('pointerup', end); el.removeEventListener('pointercancel', end);
     if (!on) return;
     if (ev.type !== 'pointerup' || !el.isConnected) {
@@ -147,6 +164,8 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
       if (el.isConnected) { clean(); layout(); }
       return;
     }
+    var d = ptr && calc(rects, ptr.x, ptr.y, id);
+    if (d) step(d); // отпустил над новым местом, не дождавшись паузы
     n.style.transition = 'transform .15s ease, box-shadow .15s ease'; n.style.transform = '';
     setTimeout(function () { clean(); saveCfg(); layout(); }, 160);
   }

@@ -45,15 +45,15 @@ function unit(v, u) { return '<b>' + v + '</b> ' + u; }
 function powerText(d) { return d.power != null ? unit(Math.round(d.power), 'Вт') : ''; }
 
 // Часы и календарь: лицо из 25-faces.js, от данных не зависит.
-function faceTile(f) {
-  var el = mk('<div class="tile mid"></div>');
+function faceTile(f, sq) {
+  var el = mk('<div class="tile mid' + (sq ? ' sq' : '') + '"></div>');
   el.appendChild(f.el);
   return { el: el, update: f.tick, tick: f.tick };
 }
 
 var TILE_BUILD = {
-  clock: function () { return faceTile(clockFace()); },
-  calendar: function () { return faceTile(calendarFace()); },
+  clock: function () { return faceTile(clockFace(), CFG.clockView !== 'digital'); },
+  calendar: function () { return faceTile(calendarFace(), CFG.calView === 'month'); },
 
   weather: function () {
     var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><span class="wi"></span><span class="num">0°</span></div><div class="cap">&nbsp;</div></div>');

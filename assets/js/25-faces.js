@@ -64,17 +64,17 @@ function flipFace() {
 // ---- стрелки ---- координаты от центра, радиус 100
 function dialSvg() {
   var out = '', i, a, p = function (r) { return 'x="' + (Math.sin(a) * r).toFixed(1) + '" y="' + (-Math.cos(a) * r).toFixed(1) + '"'; };
-  for (i = 0; i < 60; i++) out += '<line class="' + (i % 5 ? 'tk' : 'tk5') + '" y1="-99" y2="-91" transform="rotate(' + i * 6 + ')"/>';
+  for (i = 0; i < 60; i++) if (i % 5) out += '<line class="tk" y1="-99" y2="-95" transform="rotate(' + i * 6 + ')"/>';
   for (i = 1; i <= 12; i++) {
     a = i * Math.PI / 6;
-    out += '<text class="mn" ' + p(93) + '>' + two(i * 5) + '</text><text class="hn" ' + p(71) + '>' + i + '</text>';
+    out += '<text class="mn" ' + p(90) + '>' + two(i * 5) + '</text><text class="hn" ' + p(64) + '>' + i + '</text>';
   }
   return out;
 }
 function hand(cls, len) { return '<g class="' + cls + '"><line class="stem" y1="0" y2="-20"/><line class="blade" y1="-21" y2="-' + len + '"/></g>'; }
 function analogFace() {
   var el = mk('<div class="face"><svg class="dial" viewBox="-100 -100 200 200">' + dialSvg() +
-    '<text class="dt" x="32" y="0"><tspan class="wd"></tspan><tspan class="dd" dx="4"></tspan></text>' + hand('hh', 50) + hand('mh', 82) +
+    (CFG.clockDate ? '<text class="dt" x="30" y="0"><tspan class="wd"></tspan><tspan class="dd" dx="4"></tspan></text>' : '') + hand('hh', 50) + hand('mh', 82) +
     '<circle class="hub" r="5.5"/>' + (CFG.clockHand ? '<g class="sech"><line y1="17" y2="-97"/></g><circle class="pin" r="4"/>' : '') + '</svg></div>');
   var hh = $('.hh', el), mh = $('.mh', el), sh = $('.sech', el), prev = null, last = '', day = '';
   function rot(n, a) { n.style.transform = 'rotate(' + a + 'deg)'; }
@@ -96,6 +96,7 @@ function analogFace() {
       rot(mh, m * 6 + Math.floor(s / 10)); rot(hh, d.getHours() % 12 * 30 + m / 2);
       if (day === d.toDateString()) return;
       day = d.toDateString();
+      if (!$('.wd', el)) return;
       $('.wd', el).textContent = ruDate(d, { weekday: 'short' }).toUpperCase();
       $('.dd', el).textContent = d.getDate();
     }
@@ -127,7 +128,7 @@ function calHtml(d) {
     }).join('') + '</div>';
 }
 function calendarFace() {
-  var el = mk('<div class="face cal"></div>'), day = '';
+  var el = mk('<div class="face cal ' + CFG.calView + '"></div>'), day = '';
   return {
     el: el,
     tick: function () {

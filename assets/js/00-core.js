@@ -37,7 +37,7 @@ function defaults() {
     theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: '',
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
-    notify: false, city: '', clock24: true, clockSec: false, clockView: 'digital', clockHand: true, calView: 'month', procN: 3, procTab: 'cpu'
+    notify: false, city: '', clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
   };
 }
 
@@ -59,7 +59,7 @@ function mergeCfg(saved) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
   ['mono', 'notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
-  ['clock24', 'clockHand'].forEach(function (k) { c[k] = saved[k] !== false; });
+  ['clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
   if (CALS[saved.calView]) c.calView = saved.calView;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;

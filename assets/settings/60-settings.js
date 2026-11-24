@@ -24,7 +24,7 @@ var TILE_OPTS = {
   clock: function () {
     var strip = curMode() === 'strip', hands = !strip && CFG.clockView === 'analog'; // в полоске часы всегда цифрами
     return (strip ? '' : segment('clockView', Object.keys(CLOCKS).map(function (k) { return [k, CLOCKS[k]]; }), CFG.clockView)) + (hands ?
-      '<label class="ol">Секундная стрелка' + toggle('clockHand', CFG.clockHand, 'Секундная стрелка') + '</label>' :
+      '<div class="two"><label class="ol">Секундная стрелка' + toggle('clockHand', CFG.clockHand, 'Секундная стрелка') + '</label><label class="ol">Дата' + toggle('clockDate', CFG.clockDate, 'Дата на циферблате') + '</label></div>' :
       '<div class="two"><label class="ol">24 часа' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label><label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label></div>');
   },
   calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
