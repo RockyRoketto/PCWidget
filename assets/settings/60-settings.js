@@ -45,15 +45,15 @@ function tilesHint(m) {
     '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между плитками:<br>во всю ширину</span></div></div>';
 }
 
-// Только у Стекла: цвет подложки и плотность.
+// Только у Стекла: акцентный цвет и плотность подложки.
 function glassBlock() {
   if (CFG.theme !== 'glass') return '';
-  var own = TINTS.indexOf(CFG.tint) < 0;
-  return label('Цвет стекла') + '<div class="tints">' + TINTS.map(function (c) {
-    return '<button class="tint' + (CFG.tint === c ? ' on' : '') + '" data-tint="' + c + '" style="background:' + c + '" aria-label="Цвет ' + c + '"></button>';
-  }).join('') + '<label class="tint custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + CFG.tint + '"' : '') +
-    '><input type="color" data-tintc value="' + CFG.tint + '" aria-label="Свой цвет"></label></div>' +
-    label('Плотность', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла">';
+  var own = ACCENTS.indexOf(CFG.accent) < 0;
+  return label('Акцентный цвет') + '<div class="tints">' + ACCENTS.map(function (c) {
+    return '<button class="tint' + (CFG.accent === c ? ' on' : '') + '" data-accent="' + c + '" style="background:' + c + '" aria-label="Цвет ' + c + '"></button>';
+  }).join('') + '<label class="tint custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + CFG.accent + '"' : '') +
+    '><input type="color" data-tintc value="' + CFG.accent + '" aria-label="Свой цвет"></label></div>' +
+    label('Плотность стекла', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла">';
 }
 
 var SET_BODY = {
@@ -123,9 +123,9 @@ function buildSettings() {
   }
   // Отметка выбранного цвета стекла; свой цвет красит последний кружок.
   function tintMarks() {
-    var own = TINTS.indexOf(CFG.tint) < 0, c = $('.tint.custom', body);
-    $$('.tint[data-tint]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.tint === CFG.tint); });
-    if (c) { c.classList.toggle('on', own); c.style.background = own ? CFG.tint : ''; $('input', c).value = CFG.tint; }
+    var own = ACCENTS.indexOf(CFG.accent) < 0, c = $('.tint.custom', body);
+    $$('.tint[data-accent]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.accent === CFG.accent); });
+    if (c) { c.classList.toggle('on', own); c.style.background = own ? CFG.accent : ''; $('input', c).value = CFG.accent; }
   }
 
   el.addEventListener('click', function (e) {
@@ -139,7 +139,7 @@ function buildSettings() {
     else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
     else if (d.sys) post('sys:' + d.sys);
     else if (d.k === 'mode') { setMode(d.v); changed(); if (setState.tab === 'tiles') render(true); else pick(b); }
-    else if (d.tint) { CFG.tint = d.tint; changed(); tintMarks(); }
+    else if (d.accent) { CFG.accent = d.accent; changed(); tintMarks(); }
     else if (d.k === 'theme') { CFG.theme = d.v; changed(); render(); }
     else if (d.k) { CFG[d.k] = d.k === 'mono' ? d.v === 'true' : /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
@@ -164,7 +164,7 @@ function buildSettings() {
     } else if (t.hasAttribute('data-glass')) {
       CFG.glass = Number(t.value); liveCfg(); applySetBody(); $('[data-val]', t.previousElementSibling).textContent = t.value + '%';
     } else if (t.hasAttribute('data-tintc')) {
-      CFG.tint = t.value; liveCfg(); applySetBody(); tintMarks();
+      CFG.accent = t.value; liveCfg(); applySetBody(); tintMarks();
     } else if (t.hasAttribute('data-city')) cityTyped(t);
   });
   render(true);

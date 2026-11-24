@@ -17,18 +17,22 @@ var THEMES = {
 var LOOKS = { graph: 'Графики', ring: 'Кольца', rows: 'Строки' };
 var MODES = { full: 'Полный', column: 'Колонка', strip: 'Полоска' };
 var SCALES = [90, 100, 115, 130];
-// Цвета подложки Стекла: быстрый выбор, плюс свой цвет.
-var TINTS = ['#13151b', '#101a2e', '#1d1430', '#0f2219', '#2a1218', '#0d2326'];
-function tintRgb(hex) { var n = parseInt(hex.slice(1), 16); return (n >> 16) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255); }
-// Подложка Стекла: цвет и плотность. Одинаково для виджета, подсказки и окна настроек.
-function setGlassVars(style, density, tint) {
+// Акцентный цвет Стекла (подписи, выбранное, кнопки, цифры в режиме «Один цвет»): быстрый выбор, плюс свой цвет.
+var ACCENTS = ['#e9b872', '#6fb1ff', '#c09bff', '#ff8fc4', '#5fe0a0', '#ff7a6b'];
+function accentOn(hex) { // цвет текста поверх акцента
+  var n = parseInt(hex.slice(1), 16);
+  return (((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 150) ? '#1a1408' : '#fff';
+}
+// Плотность подложки и акцент (только у Стекла: у остальных тем свой). Одинаково для виджета, подсказки и настроек.
+function setGlassVars(style, density, accent, theme) {
   style.setProperty('--glass', density / 100);
-  style.setProperty('--tint', tintRgb(tint));
+  if (theme === 'glass') { style.setProperty('--accent', accent); style.setProperty('--on-accent', accentOn(accent)); }
+  else { style.removeProperty('--accent'); style.removeProperty('--on-accent'); }
 }
 
 function defaults() {
   return {
-    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tint: TINTS[0],
+    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: ACCENTS[0],
     rows: defaultRows(), hide: { clock: 1, weather: 1 }, mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
     notify: false, city: '', clock24: true, clockSec: false, procN: 3, procTab: 'cpu'
@@ -56,7 +60,7 @@ function mergeCfg(saved) {
   c.clock24 = saved.clock24 !== false;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
   if (saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
-  if (typeof saved.tint === 'string' && /^#[0-9a-f]{6}$/i.test(saved.tint)) c.tint = saved.tint.toLowerCase();
+  if (typeof saved.accent === 'string' && /^#[0-9a-f]{6}$/i.test(saved.accent)) c.accent = saved.accent.toLowerCase();
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
