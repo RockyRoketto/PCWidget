@@ -17,6 +17,7 @@ function layout() {
   rootEl.innerHTML = '';
   view = [];
   applyBody();
+  syncWeather();
   if (settingsOpen) {
     rootEl.appendChild(buildSettings(function (light) { saveCfg(); if (!light) applyBody(); }, function () { settingsOpen = false; layout(); }));
     return;

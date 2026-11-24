@@ -46,6 +46,35 @@ function gpuSub(d) {
 }
 
 var TILE_BUILD = {
+  clock: function () {
+    var el = mk('<div class="tile wide" data-tile="clock"><div class="t-big clock-time"></div><div class="t-sub clock-date"></div></div>');
+    var tm = $('.clock-time', el), dt = $('.clock-date', el);
+    return {
+      el: el,
+      update: function () {
+        var d = new Date();
+        tm.textContent = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: CFG.clockSec ? '2-digit' : undefined, hour12: !CFG.clock24 });
+        dt.textContent = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+      }
+    };
+  },
+
+  weather: function () {
+    var el = mk('<div class="tile wide" data-tile="weather">' + head('weather', '<span class="t-val"></span>') +
+      '<div class="w-row"><span class="w-ico"></span><span class="t-big w-temp"></span></div><div class="t-sub"></div></div>');
+    var val = $('.t-val', el), ico = $('.w-ico', el), tp = $('.w-temp', el), sub = $('.t-sub', el);
+    return {
+      el: el,
+      update: function (s) {
+        var w = s.weather; el.hidden = !w; if (!w) return;
+        val.textContent = w.city;
+        ico.innerHTML = ICONS[w.icon] || '';
+        tp.textContent = Math.round(w.temp) + '°';
+        sub.textContent = (w.desc ? w.desc + ' · ' : '') + 'ощущается как ' + Math.round(w.feels) + '°';
+      }
+    };
+  },
+
   cpu: function () { return bigTile('cpu', 'cpu', cpuSub, 'cpuTemp'); },
   gpu: function () { return bigTile('gpu', 'gpu', gpuSub, 'gpuTemp'); },
 

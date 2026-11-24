@@ -245,6 +245,8 @@ func onPage(m string) {
 			app.cssW, app.cssH = w, h
 			applySize()
 		}
+	case strings.HasPrefix(m, "weather:"):
+		weather.setCity(m[8:])
 	case strings.HasPrefix(m, "glass:"):
 		setGlass(m == "glass:1")
 	case strings.HasPrefix(m, "corners:"):

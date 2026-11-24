@@ -18,6 +18,9 @@ type collector struct {
 // hub — помощник датчиков (нужен ещё меню: пункт установки драйвера).
 var hub *sensorHub
 
+// weather — сервис погоды; город ему сообщает страница (сообщение «weather:<город>»).
+var weather = startWeather()
+
 func newCollector() *collector {
 	hub = startSensors()
 	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), sensors: hub}
@@ -44,6 +47,7 @@ func (c *collector) collect() Stats {
 	s.Disks = readDisks(c.perf)
 	s.GPU = c.gpu.get()
 	s.Procs = c.procs.top()
+	s.Weather = weather.get()
 
 	if down, up, dDown, dUp, ok := c.net.read(); ok {
 		c.traffic.add(now, dDown, dUp)

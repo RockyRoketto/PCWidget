@@ -3,14 +3,15 @@ package main
 // Stats — один снимок показателей, который раз в секунду уходит в страницу как JSON.
 // Недоступное значение = nil (поле пропадает), страница такие поля не показывает.
 type Stats struct {
-	TS     int64      `json:"ts"`
-	CPU    *CPUStat   `json:"cpu,omitempty"`
-	GPU    *GPUStat   `json:"gpu,omitempty"`
-	Mem    *MemStat   `json:"mem,omitempty"`
-	Net    *NetStat   `json:"net,omitempty"`
-	Disks  []DiskStat `json:"disks,omitempty"`
-	Procs  *ProcStat  `json:"procs,omitempty"`
-	Uptime int64      `json:"uptime"` // секунды с запуска системы
+	TS      int64        `json:"ts"`
+	CPU     *CPUStat     `json:"cpu,omitempty"`
+	GPU     *GPUStat     `json:"gpu,omitempty"`
+	Mem     *MemStat     `json:"mem,omitempty"`
+	Net     *NetStat     `json:"net,omitempty"`
+	Disks   []DiskStat   `json:"disks,omitempty"`
+	Procs   *ProcStat    `json:"procs,omitempty"`
+	Weather *WeatherStat `json:"weather,omitempty"`
+	Uptime  int64        `json:"uptime"` // секунды с запуска системы
 }
 
 type CPUStat struct {

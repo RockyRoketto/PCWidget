@@ -7,16 +7,17 @@ function mk(html) { var d = document.createElement('div'); d.innerHTML = html.tr
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function num(v, d) { return v == null ? '' : v.toFixed(d || 0); }
 
-var TILE_IDS = ['cpu', 'gpu', 'mem', 'net', 'disks', 'procs', 'records', 'uptime'];
-var TILE_NAMES = { cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', procs: 'Топ процессов', records: 'Рекорды сессии', uptime: 'Аптайм' };
+var TILE_IDS = ['clock', 'weather', 'cpu', 'gpu', 'mem', 'net', 'disks', 'procs', 'records', 'uptime'];
+var OPT_OFF = { clock: 1, weather: 1 }; // по умолчанию выключены
+var TILE_NAMES = { clock: 'Часы', weather: 'Погода', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', procs: 'Топ процессов', records: 'Рекорды сессии', uptime: 'Аптайм' };
 var THEMES = { glass: 'Стекло', terminal: 'Ретро-терминал', minimal: 'Тёмный минимализм', neon: 'Неон' };
 
 function defaults() {
   return {
     theme: 'glass', mode: 'full', compact: 'column',
-    tiles: TILE_IDS.map(function (id) { return { id: id, on: true }; }),
+    tiles: TILE_IDS.map(function (id) { return { id: id, on: !OPT_OFF[id] }; }),
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
-    notify: false
+    notify: false, city: '', clock24: true, clockSec: false
   };
 }
 
@@ -36,16 +37,25 @@ function mergeCfg(saved) {
     saved.tiles.forEach(function (t) {
       if (t && TILE_IDS.indexOf(t.id) >= 0 && !seen[t.id]) { seen[t.id] = 1; out.push({ id: t.id, on: t.on !== false }); }
     });
-    TILE_IDS.forEach(function (id) { if (!seen[id]) out.push({ id: id, on: true }); });
+    // новые плитки: опциональные встают в начало (выключены), остальные в конец
+    TILE_IDS.forEach(function (id) { if (!seen[id]) { if (OPT_OFF[id]) out.unshift({ id: id, on: false }); else out.push({ id: id, on: true }); } });
     c.tiles = out;
   }
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v > 0 && v <= 200) c.thr[k] = v;
   });
   c.notify = saved.notify === true;
+  if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
+  c.clock24 = saved.clock24 !== false;
+  c.clockSec = saved.clockSec === true;
   return c;
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
+// Go ходит за погодой в интернет только когда плитка включена и город задан.
+function syncWeather() {
+  var on = CFG.tiles.some(function (t) { return t.id === 'weather' && t.on; });
+  post('weather:' + (on ? CFG.city : ''));
+}
 
 // ---- форматирование ----
 function rateParts(bps) { // байт/с -> [число, единица]

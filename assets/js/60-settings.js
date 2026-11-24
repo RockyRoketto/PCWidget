@@ -18,6 +18,9 @@ function buildSettings(onChange, onDone) {
       [['cpuTemp', 'Температура CPU, °'], ['gpuTemp', 'Температура GPU, °'], ['mem', 'Память, %'], ['disk', 'Заполненность диска, %']].map(function (p) {
         return '<label><span>' + p[1] + '</span><input type="number" min="1" max="200" data-thr="' + p[0] + '" value="' + CFG.thr[p[0]] + '"></label>';
       }).join('') + '</div>' +
+    '<h5>Часы и погода</h5><div class="thr"><label style="grid-column:span 2"><span>Город для погоды (название)</span><input type="text" maxlength="60" data-city value="' + esc(CFG.city) + '"></label></div>' +
+    '<div class="orow"><span>24-часовой формат</span>' + toggleHTML(CFG.clock24, 'data-opt="clock24"') + '</div>' +
+    '<div class="orow"><span>Секунды в часах</span>' + toggleHTML(CFG.clockSec, 'data-opt="clockSec"') + '</div>' +
     '<div class="orow"><span>Уведомления Windows при тревоге</span>' + toggleHTML(CFG.notify, 'data-opt="notify"') + '</div>' +
     '<div class="orow"><span>Поверх всех окон</span>' + toggleHTML(TOPMOST, 'data-opt="topmost"') + '</div>' +
   '</div>');
@@ -50,7 +53,7 @@ function buildSettings(onChange, onDone) {
   list.addEventListener('change', function (e) {
     var row = e.target.closest('.trow'); if (!row) return;
     CFG.tiles.forEach(function (t) { if (t.id === row.getAttribute('data-id')) t.on = e.target.checked; });
-    onChange();
+    onChange(); syncWeather();
   });
   list.addEventListener('pointerdown', function (e) {
     var grip = e.target.closest('.grip'); if (!grip) return;
@@ -73,10 +76,13 @@ function buildSettings(onChange, onDone) {
   // пороги и переключатели
   el.addEventListener('change', function (e) {
     var t = e.target, thr = t.getAttribute('data-thr'), opt = t.getAttribute('data-opt');
+    if (t.hasAttribute('data-city')) { CFG.city = t.value.trim(); onChange(true); syncWeather(); return; }
     if (thr) {
       var v = Number(t.value);
       if (isFinite(v) && v > 0 && v <= 200) { CFG.thr[thr] = v; Alarm.reset(); onChange(true); } else t.value = CFG.thr[thr];
     } else if (opt === 'notify') { CFG.notify = t.checked; onChange(true); }
+    else if (opt === 'clock24') { CFG.clock24 = t.checked; onChange(true); }
+    else if (opt === 'clockSec') { CFG.clockSec = t.checked; onChange(true); }
     else if (opt === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); }
   });
   el.querySelector('[data-act=done]').addEventListener('click', onDone);
