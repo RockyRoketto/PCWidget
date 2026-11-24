@@ -20,6 +20,10 @@ func TestParseForecast(t *testing.T) {
 	if err != nil || w.Temp != 12.4 || w.Feels != 10.1 || w.Icon != "rain" || w.Desc != "дождь" {
 		t.Fatalf("%+v %v", w, err)
 	}
+	w, err = parseForecast("Х", []byte(`{"current":{"temperature_2m":1,"apparent_temperature":0,"weather_code":0},"daily":{"time":["2026-11-24","2026-11-25"],"weather_code":[0,71],"temperature_2m_max":[3,1],"temperature_2m_min":[-2,-4]}}`))
+	if err != nil || len(w.Days) != 2 || w.Days[1].Icon != "snow" || w.Days[1].Min != -4 || w.Days[0].Max != 3 {
+		t.Fatalf("прогноз: %+v %v", w, err)
+	}
 	if _, err := parseForecast("Х", []byte(`{}`)); err == nil {
 		t.Fatal("нет current — ошибка")
 	}

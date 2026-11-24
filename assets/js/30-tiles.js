@@ -56,14 +56,24 @@ var TILE_BUILD = {
   calendar: function () { return faceTile(calendarFace(), CFG.calView === 'month'); },
 
   weather: function () {
-    var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><span class="wi"></span><span class="num">0°</span></div><div class="cap">&nbsp;</div></div>');
+    var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><div class="wl"><span class="num">0°</span><div class="cap wd1"></div><div class="cap wd2"></div></div><span class="wi"></span></div><div class="wdays"></div></div>');
+    var days = '';
+    function t(v) { return Math.round(v) + '°'; }
     return {
       el: el,
       update: function (s) {
         var w = s.weather; el.hidden = !w; if (!w) return;
         $('.wi', el).innerHTML = ICONS[w.icon] || '';
-        $('.num', el).textContent = Math.round(w.temp) + '°';
-        $('.cap', el).textContent = 'ощущается ' + Math.round(w.feels) + '°, ' + w.city;
+        $('.num', el).textContent = t(w.temp);
+        $('.wd1', el).textContent = (w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) + ', ' : '') + 'ощущается ' + t(w.feels);
+        $('.wd2', el).textContent = w.city;
+        var key = JSON.stringify(w.days || []);
+        if (key === days) return;
+        days = key;
+        $('.wdays', el).innerHTML = (w.days || []).map(function (d, i) {
+          var p = d.date.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
+          return '<div class="wday' + (i ? '' : ' now') + '"><span class="dn">' + (i ? ruDate(dt, { weekday: 'short' }) : 'сегодня') + '</span><span class="di">' + (ICONS[d.icon] || '') + '</span><b>' + t(d.max) + '</b><span class="dl">' + t(d.min) + '</span></div>';
+        }).join('');
       }
     };
   },

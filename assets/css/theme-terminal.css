@@ -23,7 +23,7 @@ body.theme-terminal {
 .theme-terminal .big .temp { font-size: 22px; }
 .theme-terminal .look-ring .big .load { font-size: 18px; }
 .theme-terminal .look-rows .mem .memv, .theme-terminal .look-rows .big .load, .theme-terminal .look-rows .big .temp { font-size: 18px; }
-.theme-terminal .tile .clk, .theme-terminal .wx .num { font-size: 27px; }
+.theme-terminal .tile .clk, .theme-terminal .wx .num { font-size: 34px; }
 .theme-terminal .rate .num { font-size: 19px; }
 .theme-terminal .th, .theme-terminal .foot, .theme-terminal .cap { font-size: 11px; }
 .theme-terminal .rec { font-size: 12px; gap: 8px; }

@@ -21,6 +21,15 @@ type WeatherStat struct {
 	Feels float64 `json:"feels"`
 	Desc  string  `json:"desc"`
 	Icon  string  `json:"icon"` // sun, cloud, fog, rain, snow, storm
+	Days  []WeatherDay `json:"days,omitempty"` // прогноз на неделю, первый день = сегодня
+}
+
+// WeatherDay — прогноз на один день.
+type WeatherDay struct {
+	Date string  `json:"date"` // 2006-01-02
+	Min  float64 `json:"min"`
+	Max  float64 `json:"max"`
+	Icon string  `json:"icon"`
 }
 
 const (
@@ -80,6 +89,12 @@ func parseForecast(city string, b []byte) (*WeatherStat, error) {
 			Feels float64 `json:"apparent_temperature"`
 			Code  int     `json:"weather_code"`
 		} `json:"current"`
+		Daily *struct {
+			Time []string  `json:"time"`
+			Code []int     `json:"weather_code"`
+			Max  []float64 `json:"temperature_2m_max"`
+			Min  []float64 `json:"temperature_2m_min"`
+		} `json:"daily"`
 	}
 	if err := json.Unmarshal(b, &r); err != nil {
 		return nil, err
@@ -88,7 +103,15 @@ func parseForecast(city string, b []byte) (*WeatherStat, error) {
 		return nil, errors.New("нет данных о погоде")
 	}
 	d, ic := wmoInfo(r.Current.Code)
-	return &WeatherStat{City: city, Temp: r.Current.Temp, Feels: r.Current.Feels, Desc: d, Icon: ic}, nil
+	st := &WeatherStat{City: city, Temp: r.Current.Temp, Feels: r.Current.Feels, Desc: d, Icon: ic}
+	if dl := r.Daily; dl != nil {
+		n := min(len(dl.Time), len(dl.Code), len(dl.Max), len(dl.Min), 7)
+		for i := 0; i < n; i++ {
+			_, icon := wmoInfo(dl.Code[i])
+			st.Days = append(st.Days, WeatherDay{Date: dl.Time[i], Min: dl.Min[i], Max: dl.Max[i], Icon: icon})
+		}
+	}
+	return st, nil
 }
 
 // ---- сервис: запросы в интернет идут только пока город задан (плитка включена) ----
@@ -226,6 +249,7 @@ func fetchWeather(city string) (*WeatherStat, error) {
 		return nil, err
 	}
 	f, err := httpGet("https://api.open-meteo.com/v1/forecast?timezone=auto&current=temperature_2m,apparent_temperature,weather_code" +
+		"&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7" +
 		"&latitude=" + strconv.FormatFloat(lat, 'f', 4, 64) + "&longitude=" + strconv.FormatFloat(lon, 'f', 4, 64))
 	if err != nil {
 		return nil, err
