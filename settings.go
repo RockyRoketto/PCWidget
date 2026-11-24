@@ -13,6 +13,9 @@ type Settings struct {
 	Y       int    `json:"y"`
 	Theme   string `json:"theme"`
 	Topmost bool   `json:"topmost"`
+	// Autostart: nil = ещё не выбирали (по умолчанию включён). AutostartKey — с чем создана задача.
+	Autostart    *bool  `json:"autostart,omitempty"`
+	AutostartKey string `json:"autostartKey,omitempty"`
 	// UI — настройки интерфейса (плитки, порядок, пороги, режим). Их ведёт страница, Go хранит как есть.
 	UI json.RawMessage `json:"ui,omitempty"`
 }

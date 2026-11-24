@@ -18,12 +18,13 @@ const (
 	nifInfo   = 0x10
 	niifWarn  = 0x02
 
-	cmdToggle   = 1
-	cmdTopmost  = 2
-	cmdSettings = 3
-	cmdExit     = 9
-	cmdTheme    = 10 // 10..13
-	cmdMode     = 20 // 20..22
+	cmdToggle    = 1
+	cmdTopmost   = 2
+	cmdSettings  = 3
+	cmdAutostart = 4
+	cmdExit      = 9
+	cmdTheme     = 10 // 10..13
+	cmdMode      = 20 // 20..22
 )
 
 // Порядок совпадает с ключами в странице (assets/js/00-core.js).
@@ -60,9 +61,19 @@ func trayData() notifyIconData {
 	return n
 }
 
+// appIcon — иконка из ресурсов exe (группа «APP», winres/winres.json); нет её — системная.
+func appIcon() uintptr {
+	hInst, _, _ := pGetModuleHandle.Call(0)
+	if ico, _, _ := pLoadIcon.Call(hInst, uintptr(unsafe.Pointer(utf16("APP")))); ico != 0 {
+		return ico
+	}
+	ico, _, _ := pLoadIcon.Call(0, idiApplication)
+	return ico
+}
+
 func trayAdd() {
 	n := trayData()
-	ico, _, _ := pLoadIcon.Call(0, idiApplication)
+	ico := appIcon()
 	n.uFlags = nifMsg | nifIcon | nifTip
 	n.uCallbackMessage = wmTray
 	n.hIcon = ico
@@ -119,6 +130,11 @@ func showMenu() {
 	pAppendMenu.Call(m, mfPopup, submenu(cmdTheme, themeText, themeKeys, app.brief.Theme), uintptr(unsafe.Pointer(utf16("Тема"))))
 	pAppendMenu.Call(m, mfString, cmdSettings, uintptr(unsafe.Pointer(utf16("Настройки…"))))
 	pAppendMenu.Call(m, topFlags, cmdTopmost, uintptr(unsafe.Pointer(utf16("Поверх всех окон"))))
+	autoFlags := uintptr(mfString)
+	if app.settings.autostartEnabled() {
+		autoFlags |= mfChecked
+	}
+	pAppendMenu.Call(m, autoFlags, cmdAutostart, uintptr(unsafe.Pointer(utf16("Запускать при старте Windows"))))
 	pAppendMenu.Call(m, mfSeparator, 0, 0)
 	pAppendMenu.Call(m, mfString, cmdExit, uintptr(unsafe.Pointer(utf16("Выход"))))
 
@@ -138,6 +154,8 @@ func showMenu() {
 		} else {
 			sendCmd("topmost:0")
 		}
+	case id == cmdAutostart:
+		setAutostart(!app.settings.autostartEnabled())
 	case id == cmdSettings:
 		if !app.visible {
 			toggleVisible()

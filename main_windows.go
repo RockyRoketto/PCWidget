@@ -25,6 +25,7 @@ func main() {
 	if !createUI(loadSettings(), page) {
 		fatal("Не удалось создать окно. Нужен WebView2 Runtime (на Windows 11 он есть всегда):\nhttps://developer.microsoft.com/microsoft-edge/webview2/")
 	}
+	go syncAutostart()
 	col := newCollector()
 	go statsLoop(col)
 	runLoop()

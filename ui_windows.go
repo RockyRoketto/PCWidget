@@ -66,7 +66,7 @@ func createUI(s Settings, page string) bool {
 	readBrief()
 	hInst, _, _ := pGetModuleHandle.Call(0)
 	cur, _, _ := pLoadCursor.Call(0, idcArrow)
-	ico, _, _ := pLoadIcon.Call(0, idiApplication)
+	ico := appIcon()
 
 	wc := struct {
 		cbSize                 uint32
