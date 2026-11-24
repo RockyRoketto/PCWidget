@@ -30,16 +30,13 @@ func setGlassFor(h uintptr, on, square bool) {
 	pDwmSetWindowAttribute.Call(h, 12, uintptr(unsafe.Pointer(&yes)), 4) // DWMWA_EXCLUDED_FROM_PEEK
 	pDwmSetWindowAttribute.Call(h, 11, uintptr(unsafe.Pointer(&yes)), 4) // DWMWA_DISALLOW_PEEK
 
+	// Тень рисуется DWM только окнам с расширенной рамкой, а системный backdrop без неё не работает.
+	// Поэтому размытие везде делается accent-acrylic, рамка не расширяется: тени нет.
 	if windowsBuild() >= 22621 {
-		// Рамка расширена всегда: именно она даёт единственную системную тень.
-		m := [4]int32{-1, -1, -1, -1}
+		m := [4]int32{}
 		bt := int32(1) // DWMSBT_NONE
-		if on {
-			bt = 3 // DWMSBT_TRANSIENTWINDOW (acrylic)
-		}
 		pDwmExtendFrame.Call(h, uintptr(unsafe.Pointer(&m)))
 		pDwmSetWindowAttribute.Call(h, 38, uintptr(unsafe.Pointer(&bt)), 4)
-		return
 	}
 	ap := accentPolicy{state: 0}
 	if on {
