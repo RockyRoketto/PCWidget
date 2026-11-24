@@ -48,6 +48,7 @@ func (c *collector) collect() Stats {
 	s.GPU = c.gpu.get()
 	s.Procs = c.procs.top()
 	s.Weather = weather.get()
+	s.WeatherState = weather.state()
 
 	if down, up, dDown, dUp, ok := c.net.read(); ok {
 		c.traffic.add(now, dDown, dUp)

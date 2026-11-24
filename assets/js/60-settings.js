@@ -18,7 +18,7 @@ function buildSettings(onChange, onDone) {
       [['cpuTemp', 'Температура CPU, °'], ['gpuTemp', 'Температура GPU, °'], ['mem', 'Память, %'], ['disk', 'Заполненность диска, %']].map(function (p) {
         return '<label><span>' + p[1] + '</span><input type="number" min="1" max="200" data-thr="' + p[0] + '" value="' + CFG.thr[p[0]] + '"></label>';
       }).join('') + '</div>' +
-    '<h5>Часы и погода</h5><div class="thr"><label style="grid-column:span 2"><span>Город для погоды (название)</span><input type="text" maxlength="60" data-city value="' + esc(CFG.city) + '"></label></div>' +
+    '<h5>Часы и погода</h5><div class="thr"><label style="grid-column:span 2"><span>Город для погоды (название)</span><input type="text" maxlength="60" data-city value="' + esc(CFG.city) + '"></label></div><div class="city-hint" data-hint></div>' +
     '<div class="orow"><span>24-часовой формат</span>' + toggleHTML(CFG.clock24, 'data-opt="clock24"') + '</div>' +
     '<div class="orow"><span>Секунды в часах</span>' + toggleHTML(CFG.clockSec, 'data-opt="clockSec"') + '</div>' +
     '<div class="orow"><span>Уведомления Windows при тревоге</span>' + toggleHTML(CFG.notify, 'data-opt="notify"') + '</div>' +
@@ -73,10 +73,41 @@ function buildSettings(onChange, onDone) {
     grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up);
   });
 
+  // город: применяется через 0.7 с после последней буквы, под полем сразу видно, нашёлся ли он
+  var cityEl = el.querySelector('[data-city]'), hintEl = el.querySelector('[data-hint]'), cityTimer = 0, cityBusy = false;
+  function applyCity(v) {
+    clearTimeout(cityTimer);
+    v = v.trim(); cityBusy = false;
+    if (v === CFG.city) { showCityHint(); return; }
+    CFG.city = v; onChange(true); syncWeather();
+    cityBusy = false;
+    if (S) S.weatherState = v ? 'loading' : ''; // старое состояние относилось к прежнему названию
+    showCityHint();
+  }
+  cityEl.addEventListener('input', function () {
+    clearTimeout(cityTimer); cityBusy = true;
+    hintEl.className = 'city-hint'; hintEl.textContent = 'Проверяю…';
+    cityTimer = setTimeout(function () { applyCity(cityEl.value); }, 700);
+  });
+  function showCityHint() {
+    if (cityBusy) return;
+    var weatherOn = CFG.tiles.some(function (t) { return t.id === 'weather' && t.on; });
+    var st = S && S.weatherState, w = S && S.weather, txt = '', cls = '';
+    if (!CFG.city) txt = 'Введите название города, например «Москва»';
+    else if (!weatherOn) txt = 'Город сохранён. Включи плитку «Погода» в списке выше';
+    else if (st === 'ok' && w) { txt = '✓ Найден: ' + w.city + ', ' + Math.round(w.temp) + '°'; cls = 'ok'; }
+    else if (st === 'notfound') { txt = '✗ Такой город не найден, попробуй другое написание'; cls = 'bad'; }
+    else if (st === 'error') { txt = '✗ Нет связи с сервисом погоды, повторю позже'; cls = 'bad'; }
+    else txt = 'Ищу город…';
+    hintEl.className = 'city-hint ' + cls; hintEl.textContent = txt;
+  }
+  window.__cityHint = showCityHint;
+  showCityHint();
+
   // пороги и переключатели
   el.addEventListener('change', function (e) {
     var t = e.target, thr = t.getAttribute('data-thr'), opt = t.getAttribute('data-opt');
-    if (t.hasAttribute('data-city')) { CFG.city = t.value.trim(); onChange(true); syncWeather(); return; }
+    if (t.hasAttribute('data-city')) { applyCity(t.value); return; }
     if (thr) {
       var v = Number(t.value);
       if (isFinite(v) && v > 0 && v <= 200) { CFG.thr[thr] = v; Alarm.reset(); onChange(true); } else t.value = CFG.thr[thr];

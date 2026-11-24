@@ -42,6 +42,7 @@ function refresh(now) {
   var fired = evalAlarms(S, now);
   if (CFG.notify && fired.length) post('notify:' + fired.join('; '));
   view.forEach(function (b) { b.update(S); });
+  if (settingsOpen && window.__cityHint) window.__cityHint();
 }
 
 // ---- вызовы из Go ----

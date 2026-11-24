@@ -104,7 +104,10 @@ body.mode-c-strip #root { width: max-content; padding: 4px 6px; }
 .seg button { flex: 1; padding: 5px 6px; background: var(--bar-bg); border: 1px solid transparent; border-radius: 6px; font-size: 11px; white-space: nowrap; }
 .seg button.on { border-color: var(--accent); color: var(--accent); }
 .tlist { display: flex; flex-direction: column; gap: 3px; }
-.trow, .orow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; background: var(--tile-bg); border: 1px solid var(--tile-border); border-radius: 6px; }
+.trow, .city-hint { min-height: 14px; margin: 2px 2px 4px; font-size: 11px; color: var(--dim); }
+.city-hint.ok { color: var(--accent); }
+.city-hint.bad { color: var(--alarm); }
+.orow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; background: var(--tile-bg); border: 1px solid var(--tile-border); border-radius: 6px; }
 .trow.drag { opacity: .6; border-color: var(--accent); }
 .trow .tn, .orow span { flex: 1; }
 .grip { width: 14px; height: 14px; color: var(--dim); cursor: grab; touch-action: none; }

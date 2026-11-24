@@ -51,6 +51,8 @@ func wmoInfo(code int) (desc, icon string) {
 	return "", "cloud"
 }
 
+var errCityNotFound = errors.New("город не найден")
+
 // parseGeocode достаёт координаты первого найденного города.
 func parseGeocode(b []byte) (name string, lat, lon float64, err error) {
 	var r struct {
@@ -64,7 +66,7 @@ func parseGeocode(b []byte) (name string, lat, lon float64, err error) {
 		return
 	}
 	if len(r.Results) == 0 {
-		return "", 0, 0, errors.New("город не найден")
+		return "", 0, 0, errCityNotFound
 	}
 	g := r.Results[0]
 	return g.Name, g.Latitude, g.Longitude, nil
@@ -103,11 +105,14 @@ type weatherSvc struct {
 	cur      *WeatherStat
 	curQuery string    // для какого названия получены данные
 	at       time.Time // когда получены
+	errQuery string    // для какого названия последний запрос не удался
+	errKind  string    // "notfound" или "error"
+	wake     chan struct{}
 	next     time.Time // не раньше этого момента пробовать снова
 }
 
 func startWeather() *weatherSvc {
-	w := &weatherSvc{}
+	w := &weatherSvc{wake: make(chan struct{}, 1)}
 	if b, err := os.ReadFile(weatherCachePath()); err == nil {
 		var c weatherCache
 		if json.Unmarshal(b, &c) == nil && c.Stat != nil {
@@ -126,7 +131,26 @@ func (w *weatherSvc) setCity(city string) {
 	if city != w.query {
 		w.query = city
 		w.next = time.Time{}
+		select {
+		case w.wake <- struct{}{}:
+		default:
+		}
 	}
+}
+
+// state для страницы: "" (выключено), loading, ok, notfound, error.
+func (w *weatherSvc) state() string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	switch {
+	case w.query == "":
+		return ""
+	case w.cur != nil && strings.EqualFold(w.curQuery, w.query):
+		return "ok"
+	case w.errKind != "" && strings.EqualFold(w.errQuery, w.query):
+		return w.errKind
+	}
+	return "loading"
 }
 
 func (w *weatherSvc) get() *WeatherStat {
@@ -147,7 +171,12 @@ func (w *weatherSvc) needFetch(now time.Time) bool {
 }
 
 func (w *weatherSvc) loop() {
-	for range time.Tick(5 * time.Second) {
+	tick := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-tick.C:
+		case <-w.wake:
+		}
 		w.mu.Lock()
 		q, need := w.query, w.needFetch(time.Now())
 		w.mu.Unlock()
@@ -159,7 +188,12 @@ func (w *weatherSvc) loop() {
 		if err != nil {
 			logf("weather: %v", err)
 			w.next = time.Now().Add(weatherRetry)
+			w.errQuery, w.errKind = q, "error"
+			if errors.Is(err, errCityNotFound) {
+				w.errKind = "notfound"
+			}
 		} else {
+			w.errKind = ""
 			w.cur, w.curQuery, w.at = st, q, time.Now()
 			w.next = time.Time{}
 			saveWeatherCache(weatherCache{Query: q, At: w.at, Stat: st})
