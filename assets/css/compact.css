@@ -1,0 +1,22 @@
+/* Компактный режим: колонка и полоска. */
+/* ===== компакт ===== */
+.col { width: 164px; padding: 6px 8px; }
+.cr { position: relative; display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; height: 38px; margin: 1px 0; padding: 0 4px; border-radius: 7px; border: 1px solid transparent; }
+.cr.sep { margin-top: 5px; }
+.cr.sep::before { content: ""; position: absolute; left: 4px; right: 4px; top: -4px; border-top: 1px solid var(--edge); }
+.cr .i { width: 19px; height: 19px; color: var(--h); }
+.cr .num { font-size: 18px; }
+.cr .s { font-size: 16px; font-weight: 650; white-space: nowrap; }
+.cr .s.u { font-size: 12px; font-weight: 400; color: var(--dim); }
+.mb { position: absolute; left: 33px; right: 4px; bottom: 1px; height: 2px; background: var(--track); border-radius: 9px; overflow: hidden; }
+.mb i { display: block; height: 100%; background: var(--h); transition: width .5s; }
+.strip { display: inline-flex; padding: 5px 6px; }
+.sb { position: relative; display: flex; align-items: center; gap: 7px; padding: 4px 10px 6px; border: 1px solid transparent; border-radius: 7px; white-space: nowrap; }
+.sb .i { width: 17px; height: 17px; color: var(--h); }
+.sb .num { font-size: 16px; }
+.sb .s { font-size: 15px; font-weight: 650; }
+.sb .s:empty { display: none; }
+.sb .num small { font-size: 11px; color: var(--dim); margin-left: 3px; opacity: 1; }
+.sb .mb { left: 10px; right: 10px; bottom: 0; }
+.sb .vv { min-width: 38px; text-align: right; }
+.sb .vr { min-width: 64px; text-align: right; }

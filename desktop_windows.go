@@ -145,7 +145,7 @@ func anyAppWindowVisible() bool {
 // updateDesktopLevel: стол показан (программ нет) — поднять виджет над слоем значков,
 // иначе вернуть на уровень рабочего стола.
 func updateDesktopLevel() {
-	if app.settings.Topmost || !app.visible {
+	if app.settings.Topmost || !app.visible || raised || menu.open {
 		return
 	}
 	fg, _, _ := pGetForeground.Call()
@@ -177,7 +177,7 @@ func updateDesktopLevel() {
 
 // onWindowPosChanging подменяет Z-порядок на уровень рабочего стола.
 func onWindowPosChanging(lp uintptr) {
-	if app.settings.Topmost || forceRaise {
+	if app.settings.Topmost || forceRaise || raised {
 		return
 	}
 	wp := (*windowPos)(unsafe.Pointer(lp))

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	initCSSW = 330
+	initCSSW = 344
 	initCSSH = 200
 	winClass = "PCWidgetWindow"
 )
@@ -193,6 +193,7 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)
 	case wmMouseActivate:
+		closeMenu()
 		if !app.settings.Topmost && !app.editing {
 			return maNoActivate // клик не должен поднимать виджет над программами
 		}
@@ -203,6 +204,7 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 			app.cr.Resize()
 		}
 		setGlass(app.glassOn)
+		panel.moved = true
 		savePos()
 		return 0
 	case wmTray:
@@ -226,15 +228,26 @@ func onPage(m string) {
 	switch {
 	case m == "ready":
 		app.ready = true
-		b, _ := json.Marshal(map[string]any{"ui": app.settings.UI, "topmost": app.settings.Topmost})
+		b, _ := json.Marshal(map[string]any{"ui": app.settings.UI, "topmost": app.settings.Topmost, "sys": json.RawMessage(sysInfo())})
 		app.cr.Eval("window.__init(" + string(b) + ")")
 	case m == "drag":
+		closeMenu()
 		hideTip()
 		pReleaseCapture.Call()
 		pPostMessage.Call(app.hwnd, wmNCLButtonDown, htCaption, 0)
 	case m == "menu":
 		hideTip()
-		showMenu()
+		runOnUI(showMenu)
+	case strings.HasPrefix(m, "menuhtml:"):
+		showMenuHTML(m[9:])
+	case strings.HasPrefix(m, "panel:"):
+		if w, err := strconv.Atoi(m[6:]); err == nil && w >= 0 && w < 2000 {
+			onPanel(w)
+		}
+	case m == "raise:1" || m == "raise:0":
+		setRaised(m == "raise:1")
+	case strings.HasPrefix(m, "sys:"):
+		runOnUI(func() { onSys(m[4:]) })
 	case strings.HasPrefix(m, "cfg:"):
 		onCfg(m[4:])
 	case strings.HasPrefix(m, "topmost:"):
@@ -251,6 +264,7 @@ func onPage(m string) {
 		if ok {
 			app.cssW, app.cssH = w, h
 			applySize()
+			afterPanelClose()
 		}
 	case m == "edit:1" || m == "edit:0":
 		setEditing(m == "edit:1")
@@ -299,13 +313,7 @@ func sendCmd(c string) {
 // Пока поле в фокусе, разрешаем активацию и берём фокус; потом возвращаем как было.
 func setEditing(on bool) {
 	app.editing = on
-	st, _, _ := pGetWindowLong.Call(app.hwnd, ^uintptr(19)) // GWL_EXSTYLE = -20
-	if on {
-		st &^= wsExNoActivate
-	} else {
-		st |= wsExNoActivate
-	}
-	pSetWindowLong.Call(app.hwnd, ^uintptr(19), st)
+	setExStyle(app.hwnd, wsExNoActivate, !on)
 	if on {
 		forceForeground(app.hwnd)
 		if app.cr != nil {
@@ -352,12 +360,20 @@ func applySize() {
 	w := (app.cssW*int(dpi) + 48) / 96
 	h := (app.cssH*int(dpi) + 48) / 96
 	logf("applySize css=%dx%d dpi=%d -> %dx%d", app.cssW, app.cssH, dpi, w, h)
-	pSetWindowPos.Call(app.hwnd, 0, 0, 0, uintptr(w), uintptr(h), swpNoMove|swpNoZOrder|swpNoActivate)
+	r := winRect()
+	if panel.right { // панель слева от виджета: правый край на месте
+		pSetWindowPos.Call(app.hwnd, 0, uintptr(int(r.R)-w), uintptr(r.T), uintptr(w), uintptr(h), swpNoZOrder|swpNoActivate)
+	} else {
+		pSetWindowPos.Call(app.hwnd, 0, 0, 0, uintptr(w), uintptr(h), swpNoMove|swpNoZOrder|swpNoActivate)
+	}
 
-	// Выросшее окно не должно вылезать за экран.
-	var r rect
-	pGetWindowRect.Call(app.hwnd, uintptr(unsafe.Pointer(&r)))
-	if x, y := clampToScreen(int(r.L), int(r.T), w, h, virtualScreen()); x != int(r.L) || y != int(r.T) {
+	// Выросшее окно не должно вылезать за экран, а с панелью и под панель задач.
+	bounds := virtualScreen()
+	if panel.open {
+		bounds = workArea()
+	}
+	r = winRect()
+	if x, y := clampToScreen(int(r.L), int(r.T), w, h, bounds); x != int(r.L) || y != int(r.T) {
 		pSetWindowPos.Call(app.hwnd, 0, uintptr(x), uintptr(y), 0, 0, swpNoSize|swpNoZOrder|swpNoActivate)
 	}
 }

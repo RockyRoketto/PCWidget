@@ -1,0 +1,124 @@
+/* Плитки полного режима и три вида: графики, кольца, строки. */
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tile { position: relative; min-width: 0; container-type: inline-size; padding: 9px 12px; background: var(--tile); border: 1px solid var(--edge); border-radius: var(--r); overflow: hidden; }
+.tile.w2 { grid-column: span 2; }
+.th { display: flex; align-items: center; gap: 7px; min-height: 18px; color: var(--dim); font-size: 12px; white-space: nowrap; }
+.th .i { color: var(--h, var(--dim)); }
+.th .sp { flex: 1; }
+.th b { color: var(--text); font-weight: 600; }
+.num { font-weight: var(--nw); line-height: 1.1; letter-spacing: -.015em; color: var(--h); }
+.num small { font-size: max(11.5px, .5em); font-weight: 500; margin-left: 1px; opacity: .85; letter-spacing: 0; }
+.big { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-top: 3px; }
+.big .load { font-size: 33px; }
+.big .temp { font-size: 25px; }
+.foot { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; color: var(--dim); white-space: nowrap; }
+.foot b { color: var(--text); font-weight: 600; }
+.graph { display: block; width: calc(100% + 24px); height: 30px; margin: 3px -12px 5px; }
+.graph path { vector-effect: non-scaling-stroke; }
+.graph .l { fill: none; stroke: var(--h); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.graph .a { fill: var(--h); opacity: .17; stroke: none; }
+.bar { height: var(--barh); background: var(--track); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--h); border-radius: inherit; transition: width .5s; }
+.bar.lv-warm i { background: var(--warm); }
+.bar.lv-hot i { background: var(--hot); }
+.badge { display: none; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--hot); }
+.badge .i { width: 13px; height: 13px; color: inherit !important; }
+.ring, .lbar { display: none; }
+@container (min-width: 220px) {
+  .duo { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; align-items: center; }
+  .duo .big { gap: 18px; justify-content: flex-start; }
+  .duo .graph { height: 38px; width: 100%; margin: 2px 0; }
+  .duo .foot { grid-column: span 2; }
+}
+/* часы, погода */
+.clk { font-size: 31px; color: var(--text); margin-top: -1px; }
+.cap { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wx { display: flex; align-items: center; gap: 9px; }
+.wx .wi { width: 30px; height: 30px; color: var(--accent); flex: none; }
+.wx .num { font-size: 31px; color: var(--text); }
+/* память */
+.memv { font-size: 20px; }
+.mem .bar { margin: 7px 0 2px; }
+.mem .sub { display: none; }
+@container (max-width: 219px) {
+  .mem .gb { display: none; }
+  .mem .sub { display: block; margin-top: 6px; }
+  .mem .memv { font-size: 24px; }
+}
+/* сеть */
+.rates { display: flex; gap: 18px; margin-top: 3px; }
+.rate { display: flex; align-items: baseline; gap: 5px; min-width: 0; flex: 1; }
+.rate .i { width: 14px; height: 14px; align-self: center; color: var(--h); }
+.rate .num { font-size: 23px; }
+.rate small { font-size: 12px; color: var(--dim); }
+.net .graph .u { fill: none; stroke: var(--h); stroke-width: 1.5; stroke-dasharray: 3 2.5; }
+@container (max-width: 219px) {
+  .rates { flex-direction: column; gap: 0; }
+  .rate .num { font-size: 19px; }
+  .net .foot > :last-child, .th .pgl { display: none; }
+}
+/* диски */
+.dr { display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 8px; align-items: center; margin-top: 7px; }
+.dr .ltr { font-weight: 700; font-size: 15px; grid-row: span 2; }
+.dr .foot { margin-top: 3px; }
+.io { display: inline-flex; gap: 10px; }
+.io > span { display: inline-flex; gap: 4px; }
+.io .on { color: var(--text); }
+@container (max-width: 219px) {
+  .dr .io { display: none; }
+}
+/* процессы */
+.tabs { display: inline-flex; background: var(--ctl); border-radius: calc(var(--r)*.7); padding: 2px; }
+.tabs button { padding: 1px 9px; font-size: 12px; color: var(--dim); border-radius: calc(var(--r)*.55); line-height: 1.5; }
+.tabs button.on { background: var(--track); color: var(--text); font-weight: 600; }
+.pl { display: grid; gap: 3px; margin-top: 8px; }
+.pi { position: relative; display: flex; justify-content: space-between; gap: 10px; padding: 3px 8px; border-radius: calc(var(--r)*.5); overflow: hidden; line-height: 1.35; }
+.pi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); background: var(--h); opacity: .22; transition: width .5s; border-radius: inherit; }
+.pi span, .pi b { position: relative; }
+.pi span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pi b { font-weight: 650; white-space: nowrap; }
+/* нижние */
+.rec { display: flex; gap: 14px; font-size: 15px; font-weight: 650; margin-top: 1px; white-space: nowrap; }
+.rec small { font-size: 12px; font-weight: 400; color: var(--dim); margin-right: 4px; }
+/* ===== вид «Кольца» ===== */
+.look-ring .duo { display: grid; grid-template-columns: 74px 1fr; gap: 0 10px; align-items: center; margin-top: 5px; }
+.look-ring .duo .graph, .look-ring .duo .foot { display: none; }
+.look-ring .ring { display: block; width: 74px; height: 74px; grid-row: 1; grid-column: 1; }
+.ring circle { fill: none; stroke-width: 3.6; }
+.ring .bg { stroke: var(--track); }
+.ring .fg { stroke: var(--h); stroke-linecap: round; transition: stroke-dasharray .5s; }
+.look-ring .big { display: contents; }
+.look-ring .big .load { grid-row: 1; grid-column: 1; justify-self: center; font-size: 22px; }
+.look-ring .big .load small { font-size: 11px; }
+.look-ring .big .temp { grid-row: 1; grid-column: 2; align-self: start; font-size: 25px; margin-top: 4px; }
+.look-ring .side { display: grid; grid-row: 1; grid-column: 2; align-self: end; font-size: 12px; color: var(--dim); line-height: 1.35; white-space: nowrap; }
+.side { display: none; }
+.side b { color: var(--text); font-weight: 600; }
+@container (min-width: 220px) {
+  .look-ring .duo { grid-template-columns: 74px auto 1fr; }
+  .look-ring .big .temp { align-self: center; margin: 0; }
+  .look-ring .side { grid-column: 3; align-self: center; justify-self: end; text-align: right; }
+}
+/* ===== вид «Строки» ===== */
+.look-rows .grid { gap: 0 8px; }
+.look-rows .tile { background: none; border-color: transparent; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; }
+.look-rows .bigt { display: grid; grid-template-columns: 84px 1fr; align-items: center; }
+.look-rows .bigt .th { padding-right: 8px; }
+.look-rows .bigt .duo { display: grid; grid-template-columns: 1fr 58px 48px; gap: 10px; align-items: center; }
+.look-rows .bigt .big { display: contents; }
+.look-rows .bigt .graph, .look-rows .bigt .foot, .look-rows .net .graph, .look-rows .net .foot { display: none; }
+.look-rows .bigt .lbar { display: block; order: -1; }
+.look-rows .bigt .load { font-size: 22px; text-align: right; }
+.look-rows .bigt .temp { font-size: 22px; text-align: right; }
+.look-rows .bigt .badge span:last-child { display: none; }
+.look-rows .mem { display: grid; grid-template-columns: 23px 61px 1fr 58px 48px; align-items: center; }
+.look-rows .mem .th { display: contents; }
+.look-rows .mem .th > .i { grid-area: 1/1; }
+.look-rows .mem .th > b { grid-area: 1/2; font-size: 12px; }
+.look-rows .mem .sp, .look-rows .mem .badge, .look-rows .mem .gl, .look-rows .mem .sub { display: none; }
+.look-rows .mem .bar { grid-area: 1/3; margin: 0 10px 0 0; }
+.look-rows .mem .memv { grid-area: 1/4; font-size: 22px; text-align: right; }
+.look-rows .mem .gb { grid-area: 1/5; text-align: right; font-size: 12px; color: var(--dim); }
+.look-rows .rate .num { font-size: 20px; }
+.look-rows .net .rates { margin-top: 1px; }
+.look-rows .alarm { border-radius: var(--r); }

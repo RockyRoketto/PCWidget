@@ -40,7 +40,7 @@ func setGlassFor(h uintptr, on, square bool) {
 	}
 	ap := accentPolicy{state: 0}
 	if on {
-		ap = accentPolicy{state: 4, flags: 2, gradientColor: 0x661A1616} // ACRYLICBLURBEHIND, AABBGGRR
+		ap = accentPolicy{state: 4, flags: 2, gradientColor: 0x101B1513} // ACRYLICBLURBEHIND, AABBGGRR; плотность рисует страница (--glass)
 	}
 	d := compAttrData{attr: 19, data: uintptr(unsafe.Pointer(&ap)), size: unsafe.Sizeof(ap)}
 	pSetWindowCompAttribute.Call(h, uintptr(unsafe.Pointer(&d)))

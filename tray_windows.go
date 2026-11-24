@@ -33,9 +33,9 @@ const (
 // Порядок совпадает с ключами в странице (assets/js/00-core.js).
 var (
 	themeKeys = []string{"glass", "terminal", "minimal", "neon"}
-	themeText = []string{"Стекло", "Ретро-терминал", "Тёмный минимализм", "Неон"}
+	themeText = []string{"Стекло", "Терминал", "Минимализм", "Неон"}
 	modeKeys  = []string{"full", "column", "strip"}
-	modeText  = []string{"Полный", "Компакт: колонка", "Компакт: полоска"}
+	modeText  = []string{"Полный", "Колонка", "Полоска"}
 )
 
 type notifyIconData struct {
@@ -111,8 +111,8 @@ func submenu(baseID int, texts, keys []string, current string) uintptr {
 	return sm
 }
 
-// showMenu показывает контекстное меню у курсора (из трея и по ПКМ на виджете).
-func showMenu() {
+// showNativeMenu — системное меню у курсора, запасное: пока страницы не готовы (основное в menu_windows.go).
+func showNativeMenu() {
 	m, _, _ := pCreatePopupMenu.Call()
 	defer pDestroyMenu.Call(m) // подменю уничтожаются вместе с родителем
 
@@ -158,14 +158,7 @@ func showMenu() {
 	case id == cmdToggle:
 		toggleVisible()
 	case id == cmdTopmost:
-		on := !app.settings.Topmost
-		setTopmost(on)
-		app.settings.save()
-		if on {
-			sendCmd("topmost:1")
-		} else {
-			sendCmd("topmost:0")
-		}
+		toggleTopmost()
 	case id == cmdPawn:
 		installPawnIO(hub)
 	case id == cmdInstall:

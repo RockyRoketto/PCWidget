@@ -112,6 +112,8 @@ type msg struct {
 	pt      point
 }
 
+func lazyDLL(name string) *windows.LazyDLL { return windows.NewLazySystemDLL(name) }
+
 func utf16(s string) *uint16 {
 	p, _ := windows.UTF16PtrFromString(s)
 	return p

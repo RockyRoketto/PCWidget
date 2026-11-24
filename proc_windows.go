@@ -34,7 +34,7 @@ type procMeter struct {
 	at   time.Time
 }
 
-// top собирает 3 процесса по CPU, RAM и диску. Процессы с одним именем суммируются.
+// top собирает 5 процессов по CPU, RAM и диску. Процессы с одним именем суммируются.
 func (m *procMeter) top() *ProcStat {
 	snap, err := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
 	if err != nil {
@@ -92,7 +92,7 @@ func (m *procMeter) top() *ProcStat {
 		for _, v := range m {
 			s = append(s, *v)
 		}
-		return topN(s, 3)
+		return topN(s, 5)
 	}
 	return &ProcStat{CPU: flat(cpuM), RAM: flat(ramM), Disk: flat(ioM)}
 }

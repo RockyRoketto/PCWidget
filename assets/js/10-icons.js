@@ -24,7 +24,38 @@ var ICONS = (function () {
     rain: w('<path d="M6 11.5h8.5a3 3 0 0 0 .4-6 4.6 4.6 0 0 0-8.9-1A3.6 3.6 0 0 0 6 11.5zM7 14.5l-1 2.5M11 14.5l-1 2.5M15 14.5l-1 2.5"/>'),
     snow: w('<path d="M6 11.5h8.5a3 3 0 0 0 .4-6 4.6 4.6 0 0 0-8.9-1A3.6 3.6 0 0 0 6 11.5zM7 15h.01M11 16.5h.01M15 15h.01" stroke-width="2.4"/>'),
     storm: w('<path d="M6 11h8.5a3 3 0 0 0 .4-6 4.6 4.6 0 0 0-8.9-1A3.6 3.6 0 0 0 6 11zM10.5 12l-2.5 3h3l-2 3"/>'),
-    gear: w('<circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'),
+    gear: w('<path d="M3 6h7M14 6h3M3 14h3M10 14h7"/><circle cx="12" cy="6" r="2"/><circle cx="8" cy="14" r="2"/>'),
+    pen: w('<path d="M3.5 16.5l.8-3.6L13 4.2a1.6 1.6 0 0 1 2.3 0l.5.5a1.6 1.6 0 0 1 0 2.3L7.1 15.7z"/>'),
+    hide: w('<path d="M5 5l10 10M15 5L5 15"/>'),
+    wide: w('<path d="M3 10h14M6 7l-3 3 3 3M14 7l3 3-3 3"/>'),
+    narrow: w('<path d="M2 10h5M18 10h-5M5 7l3 3-3 3M15 7l-3 3 3 3"/>'),
+    pin: w('<path d="M7 3h6M8 3v5l-2.5 3.5h9L12 8V3M10 11.5V17"/>'),
+    power: w('<path d="M10 3v6M6 5.2a6 6 0 1 0 8 0"/>'),
+    eye: w('<path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.3"/>'),
+    look: w('<circle cx="10" cy="10" r="7"/><path d="M10 3a7 7 0 0 1 0 14z" fill="currentColor"/>'),
+    tiles: w('<rect x="3" y="3" width="6" height="6" rx="1.2"/><rect x="11" y="3" width="6" height="6" rx="1.2"/><rect x="3" y="11" width="14" height="6" rx="1.2"/>'),
+    bell: w('<path d="M5 13.5V9a5 5 0 0 1 10 0v4.5l1.5 1.5h-13zM8.5 17.3h3"/>'),
+    sys: w('<rect x="2.5" y="4" width="15" height="10" rx="1.5"/><path d="M7 17h6M10 14v3"/>'),
+    chev: w('<path d="M5 8l5 5 5-5"/>'),
+    warn: w('<path d="M10 3.5l7 12.5H3zM10 8.5v3.5M10 14.2v.1"/>'),
+    plus: w('<path d="M10 4v12M4 10h12"/>'),
+    check: w('<path d="M4 10.5l4 4 8-9"/>'),
+    mini: w('<path d="M4 8h4V4M16 12h-4v4M8 8L3.5 3.5M12 12l4.5 4.5"/>'),
+    install: w('<path d="M10 3v9M6.5 8.5 10 12l3.5-3.5M4 16.5h12"/>'),
     grip: w('<path d="M7 5h.01M13 5h.01M7 10h.01M13 10h.01M7 15h.01M13 15h.01" stroke-width="2.4"/>')
+  };
+})();
+ICONS.half = '<svg class="ico" viewBox="0 0 18 12" fill="currentColor"><rect width="8" height="12" rx="2"/><rect x="10" width="8" height="12" rx="2" opacity=".3"/></svg>';
+ICONS.whole = '<svg class="ico" viewBox="0 0 18 12" fill="currentColor"><rect width="18" height="12" rx="2"/></svg>';
+function I(name) { return '<span class="i">' + ICONS[name] + '</span>'; }
+
+// Картинки режимов для настроек и меню: подложка и блоки на ней [x, y, ширина, высота].
+var PICS = (function () {
+  var r = function (b, o) { return '<rect x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] + '" rx="' + (o ? 3 : 1) + '"' + (o ? ' opacity=".25"' : '') + '/>'; };
+  var pic = function (back, parts) { return '<svg viewBox="0 0 40 34" fill="currentColor">' + r(back, 1) + parts.map(function (b) { return r(b); }).join('') + '</svg>'; };
+  return {
+    full: pic([8, 1, 24, 32], [[11, 4, 8, 9], [21, 4, 8, 9], [11, 15, 18, 6], [11, 23, 18, 7]]),
+    column: pic([13, 1, 14, 32], [[16, 5, 8, 3], [16, 11, 8, 3], [16, 17, 8, 3], [16, 23, 8, 3]]),
+    strip: pic([1, 12, 38, 11], [[5, 16, 6, 3], [13, 16, 6, 3], [21, 16, 6, 3], [29, 16, 6, 3]])
   };
 })();

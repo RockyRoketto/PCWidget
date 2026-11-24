@@ -12,7 +12,7 @@ import (
 )
 
 // Окно подсказки: отдельное маленькое окно рядом с виджетом (со своим WebView2 и теми же стилями).
-// Появляется с той стороны, где есть место на экране.
+// Появляется с той стороны, где есть место на экране. Оно же показывает меню (menu_windows.go).
 
 const tipClass = "PCWidgetTip"
 
@@ -49,7 +49,13 @@ func tipProc(hwnd, m, wp, lp uintptr) uintptr {
 		}
 		return 0
 	case wmMouseActivate:
-		return maNoActivate
+		if !menu.open {
+			return maNoActivate
+		}
+	case wmActivate:
+		if loword(wp) == 0 {
+			closeMenu() // клик мимо меню
+		}
 	}
 	r, _, _ := pDefWindowProc.Call(hwnd, m, wp, lp)
 	return r
@@ -108,7 +114,7 @@ func createTip(hInst uintptr) {
 
 // showTipRequest принимает от страницы {html, y, h, theme}, отдаёт html окну подсказки.
 func showTipRequest(raw string) {
-	if tip.cr == nil || !app.visible {
+	if tip.cr == nil || !app.visible || menu.open {
 		return
 	}
 	var r struct {
@@ -127,7 +133,7 @@ func showTipRequest(raw string) {
 }
 
 func hideTip() {
-	if tip.hwnd == 0 {
+	if tip.hwnd == 0 || menu.open {
 		return
 	}
 	tip.want = false
@@ -141,10 +147,18 @@ func onTipPage(m string) {
 		if tip.want && tip.req != "" {
 			tip.cr.Eval("window.__tip(" + tip.req + ")")
 		}
+	case strings.HasPrefix(m, "cmd:"):
+		runOnUI(func() { onMenuCmd(m[4:]) }) // не внутри обработчика WebView: пункты показывают окна
+	case m == "close":
+		closeMenu()
 	case strings.HasPrefix(m, "size:"):
 		if w, h, ok := parseSize(m[5:]); ok {
 			tip.w, tip.h = w, h
-			placeTip()
+			if menu.open {
+				placeMenu()
+			} else {
+				placeTip()
+			}
 		}
 	}
 }
