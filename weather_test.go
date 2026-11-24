@@ -47,7 +47,7 @@ func TestNeedFetch(t *testing.T) {
 	if !w.needFetch(now) {
 		t.Fatal("город задан, данных нет: нужен запрос")
 	}
-	w.cur, w.curQuery, w.at = &WeatherStat{}, "москва", now
+	w.cur, w.curQuery, w.at = &WeatherStat{Days: []WeatherDay{{}}},"москва", now
 	if w.needFetch(now) || w.get() == nil {
 		t.Fatal("свежие данные (регистр не важен): запрос не нужен")
 	}

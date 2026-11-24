@@ -190,7 +190,8 @@ func (w *weatherSvc) needFetch(now time.Time) bool {
 	if w.query == "" || now.Before(w.next) {
 		return false
 	}
-	return w.cur == nil || !strings.EqualFold(w.curQuery, w.query) || now.Sub(w.at) >= weatherEvery
+	// кэш от старой версии без прогноза обновляем сразу
+	return w.cur == nil || len(w.cur.Days) == 0 || !strings.EqualFold(w.curQuery, w.query) || now.Sub(w.at) >= weatherEvery
 }
 
 func (w *weatherSvc) loop() {
