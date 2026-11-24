@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 	"unsafe"
 
 	"github.com/wailsapp/go-webview2/pkg/edge"
@@ -167,7 +168,26 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		r := (*rect)(unsafe.Pointer(lp))
 		dpi := int(loword(wp))
 		logf("dpiChanged dpi=%d", dpi)
-		pSetWindowPos.Call(hwnd, 0, uintptr(r.L), uintptr(r.T), uintptr(app.cssW*dpi/96), uintptr(app.cssH*dpi/96), swpNoZOrder|swpNoActivate)
+		pSetWindowPos.Call(hwnd, 0, uintptr(r.L), uintptr(r.T), uintptr((app.cssW*dpi+48)/96), uintptr((app.cssH*dpi+48)/96), swpNoZOrder|swpNoActivate)
+		// WebView обновляет масштаб с задержкой: повторяем размер и стекло, когда он уже новый.
+		go func() {
+			time.Sleep(200 * time.Millisecond)
+			runOnUI(func() {
+				applySize()
+				if app.cr != nil {
+					app.cr.Resize()
+				}
+				setGlass(app.glassOn)
+			})
+		}()
+		return 0
+	case wmDisplayChange:
+		// Набор мониторов изменился (при автозапуске второй монитор может появиться позже):
+		// возвращаем окно на сохранённое место, а не на то, куда его загнали при старте.
+		if app.settings.HasPos {
+			x, y := clampToScreen(app.settings.X, app.settings.Y, app.cssW, app.cssH, virtualScreen())
+			pSetWindowPos.Call(hwnd, 0, uintptr(x), uintptr(y), 0, 0, swpNoSize|swpNoZOrder|swpNoActivate)
+		}
 		return 0
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)
@@ -280,8 +300,8 @@ func applySize() {
 	if dpi == 0 {
 		dpi = 96
 	}
-	w := app.cssW * int(dpi) / 96
-	h := app.cssH * int(dpi) / 96
+	w := (app.cssW*int(dpi) + 48) / 96
+	h := (app.cssH*int(dpi) + 48) / 96
 	logf("applySize css=%dx%d dpi=%d -> %dx%d", app.cssW, app.cssH, dpi, w, h)
 	pSetWindowPos.Call(app.hwnd, 0, 0, 0, uintptr(w), uintptr(h), swpNoMove|swpNoZOrder|swpNoActivate)
 

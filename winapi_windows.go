@@ -68,6 +68,7 @@ const (
 	wmNCLButtonDown = 0x00A1
 	wmExitSizeMove  = 0x0232
 	wmDpiChanged    = 0x02E0
+	wmDisplayChange = 0x007E
 	wmLButtonUp     = 0x0202
 	wmRButtonUp     = 0x0205
 	wmApp           = 0x8000
