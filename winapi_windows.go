@@ -29,6 +29,7 @@ var (
 	pReleaseCapture         = user32.NewProc("ReleaseCapture")
 	pGetCursorPos           = user32.NewProc("GetCursorPos")
 	pSetForegroundWindow    = user32.NewProc("SetForegroundWindow")
+	pSetWindowLong          = user32.NewProc("SetWindowLongW")
 	pCreatePopupMenu        = user32.NewProc("CreatePopupMenu")
 	pAppendMenu             = user32.NewProc("AppendMenuW")
 	pTrackPopupMenu         = user32.NewProc("TrackPopupMenu")

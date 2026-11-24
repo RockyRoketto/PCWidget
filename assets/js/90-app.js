@@ -76,6 +76,10 @@ document.addEventListener('mousedown', function (e) {
   var n = e.target.closest('[data-nodrag],[data-drag]'); // ближайший решает: заголовок настроек тянется, кнопки в нём нет
   if (!n || n.hasAttribute('data-drag')) post('drag');
 });
+// Поля ввода: окну виджета нужна активация, иначе клавиатура не доходит.
+document.addEventListener('focusin', function (e) { if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') post('edit:1'); });
+document.addEventListener('focusout', function (e) { if (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') post('edit:0'); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });
 document.addEventListener('contextmenu', function (e) { e.preventDefault(); post('menu'); });
 
 // Размер окна задаёт страница (CSS px), Go пересчитывает с учётом DPI.

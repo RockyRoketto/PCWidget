@@ -29,6 +29,7 @@ type ui struct {
 	cssH     int
 	ready    bool
 	visible  bool
+	editing  bool // в странице поле ввода в фокусе: окну нужна клавиатура
 	settings Settings
 	taskbarC uint32 // сообщение TaskbarCreated
 	brief    uiBrief
@@ -192,10 +193,16 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)
 	case wmMouseActivate:
-		if !app.settings.Topmost {
+		if !app.settings.Topmost && !app.editing {
 			return maNoActivate // клик не должен поднимать виджет над программами
 		}
 	case wmExitSizeMove:
+		// Во время перетаскивания через мониторы с разным масштабом размер мог сбиться: ставим заново.
+		applySize()
+		if app.cr != nil {
+			app.cr.Resize()
+		}
+		setGlass(app.glassOn)
 		savePos()
 		return 0
 	case wmTray:
@@ -245,6 +252,8 @@ func onPage(m string) {
 			app.cssW, app.cssH = w, h
 			applySize()
 		}
+	case m == "edit:1" || m == "edit:0":
+		setEditing(m == "edit:1")
 	case strings.HasPrefix(m, "weather:"):
 		weather.setCity(m[8:])
 	case strings.HasPrefix(m, "glass:"):
@@ -283,6 +292,25 @@ func onCfg(raw string) {
 func sendCmd(c string) {
 	if app.cr != nil && app.ready {
 		app.cr.Eval(`window.__cmd("` + c + `")`)
+	}
+}
+
+// setEditing: окно не активируется (WS_EX_NOACTIVATE), поэтому клавиатура в поля ввода не попадает.
+// Пока поле в фокусе, разрешаем активацию и берём фокус; потом возвращаем как было.
+func setEditing(on bool) {
+	app.editing = on
+	st, _, _ := pGetWindowLong.Call(app.hwnd, ^uintptr(19)) // GWL_EXSTYLE = -20
+	if on {
+		st &^= wsExNoActivate
+	} else {
+		st |= wsExNoActivate
+	}
+	pSetWindowLong.Call(app.hwnd, ^uintptr(19), st)
+	if on {
+		pSetForegroundWindow.Call(app.hwnd)
+		if app.cr != nil {
+			app.cr.Focus()
+		}
 	}
 }
 
