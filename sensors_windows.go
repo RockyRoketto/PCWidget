@@ -225,16 +225,24 @@ func cleanOldHelpers(parent, keep string) {
 
 // installPawnIO ставит драйвер через winget (после подтверждения в окне) и перезапускает помощника.
 func installPawnIO(h *sensorHub) {
-	r := msgBox("Для температуры и мощности процессора нужен драйвер PawnIO (подписанный драйвер режима ядра, "+
-		"open source). Он ставится через winget и работает в системе постоянно; убрать его можно в «Приложениях и возможностях».\n\n"+
-		"Установить?", windows.MB_YESNO|windows.MB_ICONQUESTION)
-	if r != idYes {
+	if !askPawnIO() {
 		return
 	}
 	go func() {
-		err := runHidden("winget.exe", "install", "-e", "--id", "namazso.PawnIO", "--silent",
-			"--accept-package-agreements", "--accept-source-agreements")
-		logf("pawnio install: %v", err)
+		logf("pawnio install: %v", runPawnIOInstall())
 		h.restart()
 	}()
+}
+
+// askPawnIO спрашивает согласие на установку драйвера (он режима ядра, поэтому только с явным «Да»).
+func askPawnIO() bool {
+	return msgBox("Для температуры и мощности процессора нужен драйвер PawnIO (подписанный драйвер режима ядра, "+
+		"open source). Он ставится через winget и работает в системе постоянно; убрать его можно в «Приложениях и возможностях».\n\n"+
+		"Установить?", windows.MB_YESNO|windows.MB_ICONQUESTION) == idYes
+}
+
+// runPawnIOInstall ставит драйвер и ждёт окончания.
+func runPawnIOInstall() error {
+	return runHidden("winget.exe", "install", "-e", "--id", "namazso.PawnIO", "--silent",
+		"--accept-package-agreements", "--accept-source-agreements")
 }

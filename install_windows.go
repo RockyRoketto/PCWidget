@@ -99,6 +99,13 @@ func runInstall() {
 		}
 	}
 	writeUninstallEntry(dst)
+	// Всё нужное ставится сразу: драйвер для температуры CPU (с согласием владельца), чтобы не искать его в меню.
+	if !pawnInstalled() && askPawnIO() {
+		if err := runPawnIOInstall(); err != nil {
+			msgBox("Драйвер PawnIO поставить не удалось (нужен winget и интернет). "+
+				"Позже это можно сделать из меню виджета.", windows.MB_OK|windows.MB_ICONWARNING)
+		}
+	}
 	// Задачу создаёт сама установленная копия при старте (syncAutostart, с учётом настройки в меню).
 	c := exec.Command(dst)
 	c.Dir = dir
