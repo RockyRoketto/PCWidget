@@ -72,7 +72,7 @@ var TILE_BUILD = {
         days = key;
         $('.wdays', el).innerHTML = (w.days || []).map(function (d, i) {
           var p = d.date.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
-          return '<div class="wday' + (i ? '' : ' now') + '"><span class="dn">' + (i ? ruDate(dt, { weekday: 'short' }) : 'сегодня') + '</span><span class="di">' + (ICONS[d.icon] || '') + '</span><b>' + t(d.max) + '</b><span class="dl">' + t(d.min) + '</span></div>';
+          return '<div class="wday' + (i ? '' : ' now') + '"><span class="dn">' + ruDate(dt, { weekday: 'short' }) + '</span><span class="di">' + (ICONS[d.icon] || '') + '</span><b>' + t(d.max) + '</b><span class="dl">' + t(d.min) + '</span></div>';
         }).join('');
       }
     };
