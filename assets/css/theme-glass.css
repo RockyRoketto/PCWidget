@@ -2,5 +2,5 @@
 body.theme-glass {
   --accent: #e9b872; --alarm: #ff5a4f;
   --root-bg: rgba(22, 22, 26, .38); --tile-bg: rgba(255, 255, 255, .07); --tile-border: rgba(255, 255, 255, .09);
-  --radius: 12px; --bar-bg: rgba(255, 255, 255, .13);
+  --radius: 8px; --bar-bg: rgba(255, 255, 255, .13);
 }

@@ -74,7 +74,7 @@ func createTip(hInst uintptr) {
 		iconSm             uintptr
 	}{}
 	wc.cbSize = uint32(unsafe.Sizeof(wc))
-	wc.style = csDropShadow
+	wc.style = 0
 	wc.proc = tipProcCB
 	wc.inst, wc.cursor = hInst, cur
 	wc.class = utf16(tipClass)
@@ -119,7 +119,7 @@ func showTipRequest(raw string) {
 		return
 	}
 	tip.want, tip.rowY = true, r.Y
-	setGlassFor(tip.hwnd, r.Theme == "glass")
+	setGlassFor(tip.hwnd, r.Theme == "glass", r.Theme == "terminal")
 	tip.req = raw
 	if tip.ready {
 		tip.cr.Eval("window.__tip(" + raw + ")")

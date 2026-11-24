@@ -2,7 +2,7 @@
 body.theme-neon {
   --text: #f4f7ff; --dim: rgba(190, 200, 255, .6); --accent: #19f0ff; --alarm: #ff3b6b;
   --root-bg: #090913; --tile-bg: rgba(24, 22, 52, .75); --tile-border: rgba(25, 240, 255, .28); --line: rgba(25, 240, 255, .2);
-  --radius: 14px; --bar-bg: rgba(255, 255, 255, .08);
+  --radius: 8px; --bar-bg: rgba(255, 255, 255, .08);
 }
 body.theme-neon .tile { box-shadow: 0 0 12px -4px rgba(25, 240, 255, .5), inset 0 0 14px -8px rgba(255, 43, 214, .6); }
 body.theme-neon .bar i { background: linear-gradient(90deg, #19f0ff, #ff2bd6); box-shadow: 0 0 8px rgba(25, 240, 255, .8); }

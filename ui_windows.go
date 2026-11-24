@@ -22,6 +22,8 @@ const (
 type ui struct {
 	hwnd     uintptr
 	cr       *edge.Chromium
+	square   bool // прямые углы окна (Ретро-терминал)
+	glassOn  bool
 	cssW     int
 	cssH     int
 	ready    bool
@@ -76,7 +78,7 @@ func createUI(s Settings, page string) bool {
 		iconSm                 uintptr
 	}{}
 	wc.cbSize = uint32(unsafe.Sizeof(wc))
-	wc.style = csHRedraw | csVRedraw | csDropShadow
+	wc.style = csHRedraw | csVRedraw
 	wc.proc = wndProcCB
 	wc.inst, wc.icon, wc.cursor, wc.iconSm = hInst, ico, cur, ico
 	wc.class = utf16(winClass)
@@ -225,6 +227,9 @@ func onPage(m string) {
 		}
 	case strings.HasPrefix(m, "glass:"):
 		setGlass(m == "glass:1")
+	case strings.HasPrefix(m, "corners:"):
+		app.square = m == "corners:square"
+		setGlass(app.glassOn)
 	}
 }
 

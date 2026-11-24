@@ -77,6 +77,7 @@ body.mode-c-strip #root { width: max-content; padding: 4px 6px; }
 .ccol .crow.sep { border-top: 1px solid var(--line); }
 .ccol .crow.alarm.sep { border-top-color: var(--alarm); }
 .ci { width: 20px; height: 20px; color: var(--dim); display: inline-block; }
+.strip .cv { text-align: right; }
 .cv { font-size: 15px; font-weight: var(--num-weight); white-space: nowrap; }
 .cs { color: var(--dim); font-size: 11px; text-align: right; white-space: nowrap; }
 /* ---- компакт: полоска ---- */

@@ -8,6 +8,7 @@ var settingsOpen = false;
 function applyBody() {
   var m = settingsOpen ? 'settings' : (CFG.mode === 'full' ? 'full' : 'c-' + CFG.compact);
   document.body.className = 'theme-' + CFG.theme + ' mode-' + m;
+  post('corners:' + (CFG.theme === 'terminal' ? 'square' : 'round'));
   post('glass:' + (CFG.theme === 'glass' ? 1 : 0)); // непрозрачным темам размытие не нужно
 }
 

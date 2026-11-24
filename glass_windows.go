@@ -15,10 +15,14 @@ type compAttrData struct {
 // setGlass включает или выключает размытие под окном.
 // Win11 22621+: системный backdrop; старее: accent acrylic. Не получилось — окно остаётся
 // просто полупрозрачным (тема рисует тёмную подложку сама).
-func setGlass(on bool) { setGlassFor(app.hwnd, on) }
+func setGlass(on bool) { app.glassOn = on; setGlassFor(app.hwnd, on, app.square) }
 
-func setGlassFor(h uintptr, on bool) {
+// square — прямые углы окна (Ретро-терминал); иначе системное скругление.
+func setGlassFor(h uintptr, on, square bool) {
 	round := int32(2) // DWMWCP_ROUND
+	if square {
+		round = 1 // DWMWCP_DONOTROUND
+	}
 	pDwmSetWindowAttribute.Call(h, 33, uintptr(unsafe.Pointer(&round)), 4)
 	dark := int32(1) // DWMWA_USE_IMMERSIVE_DARK_MODE
 	pDwmSetWindowAttribute.Call(h, 20, uintptr(unsafe.Pointer(&dark)), 4)
@@ -27,10 +31,10 @@ func setGlassFor(h uintptr, on bool) {
 	pDwmSetWindowAttribute.Call(h, 11, uintptr(unsafe.Pointer(&yes)), 4) // DWMWA_DISALLOW_PEEK
 
 	if windowsBuild() >= 22621 {
-		m := [4]int32{}
+		// Рамка расширена всегда: именно она даёт единственную системную тень.
+		m := [4]int32{-1, -1, -1, -1}
 		bt := int32(1) // DWMSBT_NONE
 		if on {
-			m = [4]int32{-1, -1, -1, -1}
 			bt = 3 // DWMSBT_TRANSIENTWINDOW (acrylic)
 		}
 		pDwmExtendFrame.Call(h, uintptr(unsafe.Pointer(&m)))

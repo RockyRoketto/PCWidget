@@ -55,6 +55,9 @@ function buildCompact(strip) {
         it.el.hidden = !d;
         if (!d) return;
         it.v.textContent = d.v; it.sm.textContent = d.sm;
+        // Ширина значений только растёт: полоска не дёргается, когда «9%» сменяется на «100%».
+        it.vw = Math.max(it.vw || 0, it.v.offsetWidth); it.v.style.minWidth = it.vw + 'px';
+        it.sw = Math.max(it.sw || 0, it.sm.offsetWidth); it.sm.style.minWidth = it.sw + 'px';
         it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
       });
     }
