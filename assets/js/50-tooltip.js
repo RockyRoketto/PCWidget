@@ -60,7 +60,7 @@ var TIP_DELAY = 700; // мс до появления подсказки; при 
 var Tip = { row: null, timer: null, last: '' };
 
 // Что нужно окну подсказки и меню, чтобы выглядеть как виджет.
-function tipPayload(html) { return { html: html, theme: CFG.theme, cls: bodyClass(), glass: CFG.glass, accent: CFG.theme === 'glass' ? CFG.accent : '', onAccent: accentOn(CFG.accent), scale: CFG.scale }; }
+function tipPayload(html) { return { html: html, theme: CFG.theme, cls: bodyClass(), glass: CFG.glass, accent: CFG.theme === 'glass' ? CFG.accent : '', onAccent: CFG.accent ? accentOn(CFG.accent) : '', scale: CFG.scale }; }
 
 function showTip() {
   var row = Tip.row; if (!row || !row.isConnected) return hideTip();

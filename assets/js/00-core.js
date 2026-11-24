@@ -26,13 +26,13 @@ function accentOn(hex) { // цвет текста поверх акцента
 // Плотность подложки и акцент (только у Стекла: у остальных тем свой). Одинаково для виджета, подсказки и настроек.
 function setGlassVars(style, density, accent, theme) {
   style.setProperty('--glass', density / 100);
-  if (theme === 'glass') { style.setProperty('--accent', accent); style.setProperty('--on-accent', accentOn(accent)); }
+  if (theme === 'glass' && accent) { style.setProperty('--accent', accent); style.setProperty('--on-accent', accentOn(accent)); }
   else { style.removeProperty('--accent'); style.removeProperty('--on-accent'); }
 }
 
 function defaults() {
   return {
-    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: ACCENTS[0],
+    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: '',
     rows: defaultRows(), hide: { clock: 1, weather: 1 }, mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
     notify: false, city: '', clock24: true, clockSec: false, procN: 3, procTab: 'cpu'
@@ -60,7 +60,7 @@ function mergeCfg(saved) {
   c.clock24 = saved.clock24 !== false;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
   if (saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
-  if (typeof saved.accent === 'string' && /^#[0-9a-f]{6}$/i.test(saved.accent)) c.accent = saved.accent.toLowerCase();
+  if (typeof saved.accent === 'string' && /^(#[0-9a-f]{6})?$/i.test(saved.accent)) c.accent = saved.accent.toLowerCase();
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
@@ -68,7 +68,7 @@ function mergeCfg(saved) {
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
 // Классы и переменные страницы: общие для виджета, подсказки и меню.
-function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : ''); }
+function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : '') + (CFG.theme === 'glass' && CFG.accent ? ' acc' : ''); }
 // Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
 function weatherOn() { return ['full', 'column', 'strip'].some(function (m) { return isOn(m, 'weather'); }); }
 function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }
