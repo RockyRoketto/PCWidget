@@ -29,7 +29,6 @@ type ui struct {
 	cssH     int
 	ready    bool
 	visible  bool
-	editing  bool // в странице поле ввода в фокусе: окну нужна клавиатура
 	settings Settings
 	taskbarC uint32 // сообщение TaskbarCreated
 	brief    uiBrief
@@ -87,6 +86,9 @@ func createUI(s Settings, page string) bool {
 	pRegisterClassEx.Call(uintptr(unsafe.Pointer(&wc)))
 
 	x, y := startPosition(s)
+	if !s.HasPos { // первый запуск: правый верхний угол
+		app.settings.Anchor = &anchor{Right: true, X: x + initCSSW, Y: y}
+	}
 	exStyle := uintptr(wsExToolWindow | wsExNoActivate)
 	h, _, _ := pCreateWindowEx.Call(exStyle, uintptr(unsafe.Pointer(wc.class)), uintptr(unsafe.Pointer(utf16("PC Widget"))),
 		wsPopup, uintptr(x), uintptr(y), initCSSW, initCSSH, 0, 0, hInst, 0)
@@ -169,7 +171,7 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		r := (*rect)(unsafe.Pointer(lp))
 		dpi := int(loword(wp))
 		logf("dpiChanged dpi=%d", dpi)
-		pSetWindowPos.Call(hwnd, 0, uintptr(r.L), uintptr(r.T), uintptr((app.cssW*dpi+48)/96), uintptr((app.cssH*dpi+48)/96), swpNoZOrder|swpNoActivate)
+		pSetWindowPos.Call(hwnd, 0, uintptr(r.L), uintptr(r.T), uintptr(scalePx(app.cssW, dpi)), uintptr(scalePx(app.cssH, dpi)), swpNoZOrder|swpNoActivate)
 		// WebView обновляет масштаб с задержкой: повторяем размер и стекло, когда он уже новый.
 		go func() {
 			time.Sleep(200 * time.Millisecond)
@@ -185,26 +187,25 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 	case wmDisplayChange:
 		// Набор мониторов изменился (при автозапуске второй монитор может появиться позже):
 		// возвращаем окно на сохранённое место, а не на то, куда его загнали при старте.
-		if app.settings.HasPos {
-			x, y := clampToScreen(app.settings.X, app.settings.Y, app.cssW, app.cssH, virtualScreen())
-			pSetWindowPos.Call(hwnd, 0, uintptr(x), uintptr(y), 0, 0, swpNoSize|swpNoZOrder|swpNoActivate)
-		}
+		applySize()
 		return 0
+	case wmEnterSizeMove:
+		dragging = true
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)
 	case wmMouseActivate:
 		closeMenu()
-		if !app.settings.Topmost && !app.editing {
+		if !app.settings.Topmost {
 			return maNoActivate // клик не должен поднимать виджет над программами
 		}
 	case wmExitSizeMove:
 		// Во время перетаскивания через мониторы с разным масштабом размер мог сбиться: ставим заново.
 		applySize()
+		dragging = false
 		if app.cr != nil {
 			app.cr.Resize()
 		}
 		setGlass(app.glassOn)
-		panel.moved = true
 		savePos()
 		return 0
 	case wmTray:
@@ -228,8 +229,7 @@ func onPage(m string) {
 	switch {
 	case m == "ready":
 		app.ready = true
-		b, _ := json.Marshal(map[string]any{"ui": app.settings.UI, "topmost": app.settings.Topmost, "sys": json.RawMessage(sysInfo())})
-		app.cr.Eval("window.__init(" + string(b) + ")")
+		app.cr.Eval("window.__init(" + initData() + ")")
 	case m == "drag":
 		closeMenu()
 		hideTip()
@@ -240,19 +240,9 @@ func onPage(m string) {
 		runOnUI(showMenu)
 	case strings.HasPrefix(m, "menuhtml:"):
 		showMenuHTML(m[9:])
-	case strings.HasPrefix(m, "panel:"):
-		if w, err := strconv.Atoi(m[6:]); err == nil && w >= 0 && w < 2000 {
-			onPanel(w)
-		}
-	case m == "raise:1" || m == "raise:0":
-		setRaised(m == "raise:1")
-	case strings.HasPrefix(m, "sys:"):
-		runOnUI(func() { onSys(m[4:]) })
 	case strings.HasPrefix(m, "cfg:"):
 		onCfg(m[4:])
-	case strings.HasPrefix(m, "topmost:"):
-		setTopmost(m == "topmost:1")
-		app.settings.save()
+		evalCfg(set.cr, set.ready, m[4:])
 	case strings.HasPrefix(m, "tip:"):
 		showTipRequest(m[4:])
 	case m == "tipoff":
@@ -264,10 +254,11 @@ func onPage(m string) {
 		if ok {
 			app.cssW, app.cssH = w, h
 			applySize()
-			afterPanelClose()
+			if app.settings.Anchor == nil { // настройки старой версии: угол выбираем по месту окна
+				savePos()
+				applySize()
+			}
 		}
-	case m == "edit:1" || m == "edit:0":
-		setEditing(m == "edit:1")
 	case strings.HasPrefix(m, "weather:"):
 		weather.setCity(m[8:])
 	case strings.HasPrefix(m, "glass:"):
@@ -283,12 +274,16 @@ type uiBrief struct {
 	Theme   string `json:"theme"`
 	Mode    string `json:"mode"`
 	Compact string `json:"compact"`
+	Scale   int    `json:"scale"`
 }
 
 func readBrief() {
-	app.brief = uiBrief{Theme: "glass", Mode: "full", Compact: "column"}
+	app.brief = uiBrief{Theme: "glass", Mode: "full", Compact: "column", Scale: 100}
 	if len(app.settings.UI) > 0 {
 		_ = json.Unmarshal(app.settings.UI, &app.brief)
+	}
+	if app.brief.Scale < 50 || app.brief.Scale > 300 {
+		app.brief.Scale = 100
 	}
 }
 
@@ -300,25 +295,21 @@ func onCfg(raw string) {
 	app.settings.UI = json.RawMessage(raw)
 	readBrief()
 	app.settings.save()
-}
-
-// sendCmd передаёт странице команду из меню («theme:neon», «mode:strip», «settings»).
-func sendCmd(c string) {
-	if app.cr != nil && app.ready {
-		app.cr.Eval(`window.__cmd("` + c + `")`)
+	if set.open {
+		styleSettings(false)
 	}
 }
 
-// setEditing: окно не активируется (WS_EX_NOACTIVATE), поэтому клавиатура в поля ввода не попадает.
-// Пока поле в фокусе, разрешаем активацию и берём фокус; потом возвращаем как было.
-func setEditing(on bool) {
-	app.editing = on
-	setExStyle(app.hwnd, wsExNoActivate, !on)
-	if on {
-		forceForeground(app.hwnd)
-		if app.cr != nil {
-			app.cr.Focus()
-		}
+// initData — с чего начинает страница (виджет и окно настроек).
+func initData() string {
+	b, _ := json.Marshal(map[string]any{"ui": app.settings.UI, "topmost": app.settings.Topmost, "sys": json.RawMessage(sysInfo()), "tab": set.tab})
+	return string(b)
+}
+
+// sendCmd передаёт странице команду («theme:neon», «mode:strip», «editing:1»).
+func sendCmd(c string) {
+	if app.cr != nil && app.ready {
+		app.cr.Eval(`window.__cmd("` + c + `")`)
 	}
 }
 
@@ -351,56 +342,6 @@ func parseSize(s string) (w, h int, ok bool) {
 	return w, h, e1 == nil && e2 == nil && w > 0 && h > 0 && w < 4000 && h < 4000
 }
 
-// applySize переводит CSS-пиксели страницы в физические с учётом DPI окна.
-func applySize() {
-	dpi, _, _ := pGetDpiForWindow.Call(app.hwnd)
-	if dpi == 0 {
-		dpi = 96
-	}
-	w := (app.cssW*int(dpi) + 48) / 96
-	h := (app.cssH*int(dpi) + 48) / 96
-	logf("applySize css=%dx%d dpi=%d -> %dx%d", app.cssW, app.cssH, dpi, w, h)
-	r := winRect()
-	if panel.right { // панель слева от виджета: правый край на месте
-		pSetWindowPos.Call(app.hwnd, 0, uintptr(int(r.R)-w), uintptr(r.T), uintptr(w), uintptr(h), swpNoZOrder|swpNoActivate)
-	} else {
-		pSetWindowPos.Call(app.hwnd, 0, 0, 0, uintptr(w), uintptr(h), swpNoMove|swpNoZOrder|swpNoActivate)
-	}
-
-	// Выросшее окно не должно вылезать за экран, а с панелью и под панель задач.
-	bounds := virtualScreen()
-	if panel.open {
-		bounds = workArea()
-	}
-	r = winRect()
-	if x, y := clampToScreen(int(r.L), int(r.T), w, h, bounds); x != int(r.L) || y != int(r.T) {
-		pSetWindowPos.Call(app.hwnd, 0, uintptr(x), uintptr(y), 0, 0, swpNoSize|swpNoZOrder|swpNoActivate)
-	}
-}
-
-func startPosition(s Settings) (int, int) {
-	var wa rect
-	pSystemParametersInfo.Call(spiGetWorkArea, 0, uintptr(unsafe.Pointer(&wa)), 0)
-	x, y := int(wa.R)-initCSSW-20, int(wa.T)+20
-	if s.HasPos {
-		x, y = s.X, s.Y
-	}
-	return clampToScreen(x, y, initCSSW, initCSSH, virtualScreen())
-}
-
-func virtualScreen() rect {
-	g := func(i uintptr) int32 { r, _, _ := pGetSystemMetrics.Call(i); return int32(r) }
-	l, t := g(smXVirtual), g(smYVirtual)
-	return rect{L: l, T: t, R: l + g(smCXVirtual), B: t + g(smCYVirtual)}
-}
-
-func savePos() {
-	var r rect
-	pGetWindowRect.Call(app.hwnd, uintptr(unsafe.Pointer(&r)))
-	app.settings.HasPos, app.settings.X, app.settings.Y = true, int(r.L), int(r.T)
-	app.settings.save()
-}
-
 func setTopmost(on bool) {
 	app.settings.Topmost = on
 	if on {
@@ -413,6 +354,7 @@ func setTopmost(on bool) {
 
 func toggleVisible() {
 	if app.visible {
+		closeSettings()
 		pShowWindow.Call(app.hwnd, swHide)
 		if app.cr != nil {
 			app.cr.Hide()
@@ -431,6 +373,9 @@ func pushStats(js string) {
 	runOnUI(func() {
 		if app.cr != nil && app.ready && app.visible {
 			app.cr.Eval("window.__stats(" + js + ")")
+		}
+		if set.open {
+			set.cr.Eval("window.__stats(" + js + ")")
 		}
 	})
 }

@@ -18,22 +18,53 @@ func TestPopupPos(t *testing.T) {
 	}
 }
 
-func TestPanelLeft(t *testing.T) {
+func TestAnchor(t *testing.T) {
 	work := rect{L: 0, T: 0, R: 1920, B: 1040}
 	cases := []struct {
-		l, r int32
-		want bool
+		win  rect
+		want anchor
 	}{
-		{1556, 1900, true}, // у правого края
-		{20, 364, false},   // у левого
-		{800, 1144, false}, // посередине: справа место есть
+		{rect{1556, 40, 1900, 700}, anchor{Right: true, X: 1900, Y: 40}},
+		{rect{20, 40, 364, 700}, anchor{X: 20, Y: 40}},
+		{rect{1556, 360, 1900, 1020}, anchor{Right: true, Bottom: true, X: 1900, Y: 1020}},
 	}
 	for _, c := range cases {
-		if got := panelLeft(rect{L: c.l, R: c.r}, work, 344); got != c.want {
-			t.Errorf("panelLeft(%d..%d) = %v", c.l, c.r, got)
+		a := anchorFor(c.win, work)
+		if a != c.want {
+			t.Errorf("anchorFor(%v) = %v", c.win, a)
+		}
+		// то же окно встаёт на то же место
+		if x, y := a.pos(int(c.win.R-c.win.L), int(c.win.B-c.win.T), work); x != int(c.win.L) || y != int(c.win.T) {
+			t.Errorf("pos(%v) = %d,%d", c.win, x, y)
 		}
 	}
-	if panelLeft(rect{L: 100, R: 444}, rect{L: 0, R: 500, B: 800}, 344) {
-		t.Error("нет места ни с одной стороны: остаётся справа")
+	// выросло и не влезло: сдвинуто внутрь экрана; уменьшилось: снова на старом месте
+	a := anchor{X: 20, Y: 600}
+	if _, y := a.pos(344, 700, work); y != 340 {
+		t.Errorf("рост: y = %d", y)
+	}
+	if _, y := a.pos(600, 40, work); y != 600 {
+		t.Errorf("возврат: y = %d", y)
+	}
+}
+
+func TestSettingsRect(t *testing.T) {
+	work := rect{L: 0, T: 0, R: 1920, B: 1040}
+	s := setSpot{w: 380, h: 600, minH: 420, fullW: 344, stripH: 46, gap: 12}
+	for _, a := range []anchor{
+		{X: 20, Y: 20}, {Right: true, X: 1900, Y: 20}, {X: 20, Y: 1020, Bottom: true},
+		{Right: true, Bottom: true, X: 1900, Y: 1020}, {X: 700, Y: 400}, {Right: true, Bottom: true, X: 1300, Y: 640},
+	} {
+		x, y, h := settingsRect(a, s, work)
+		set := rect{int32(x), int32(y), int32(x + s.w), int32(y + h)}
+		if set.L < work.L || set.T < work.T || set.R > work.R || set.B > work.B || h < s.minH {
+			t.Errorf("%v: вылезло за экран: %v", a, set)
+		}
+		for _, sz := range [][2]int{{344, 680}, {164, 300}, {700, 46}} { // полный, колонка, полоска
+			wx, wy := a.pos(sz[0], sz[1], work)
+			if w := (rect{int32(wx), int32(wy), int32(wx + sz[0]), int32(wy + sz[1])}); overlaps(w, set) {
+				t.Errorf("%v: виджет %v накрыл настройки %v", a, w, set)
+			}
+		}
 	}
 }

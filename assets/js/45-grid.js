@@ -1,92 +1,111 @@
 'use strict';
-// Полный режим: сетка плиток, ручка с кнопками сверху, правка плиток на месте.
+// Полный режим: сетка плиток. Правка на месте (все режимы): перетаскивание и крестик.
+// Включается, пока в окне настроек открыта вкладка «Плитки».
 
 var editing = false;   // включена правка плиток
-var gridView = [];     // [{ t: настройка плитки, b: построенная плитка }]
-var LOOK_WIDE = { cpu: 1, gpu: 1, mem: 1, net: 1, disks: 1 }; // в виде «Строки» всегда во всю ширину
+var gridView = [];     // [{ row: [id, id], items: [{ id, b }] }]
 
-function isWide(t) { return t.w || ONLY_WIDE[t.id] || (CFG.look === 'rows' && LOOK_WIDE[t.id]); }
+function editButton() { return mk('<button class="ed" data-nodrag data-e="x" title="Скрыть">' + ICONS.hide + '</button>'); }
+function emptyNote() { return mk('<div class="empty">Пусто. Правая кнопка мыши: «Изменить плитки»</div>'); }
 
-// Ширины плиток: узкая без пары растягивается. Вернёт список ширин (1 или 2) для видимых плиток.
-function packSpans(wide) {
-  var out = [];
-  for (var i = 0; i < wide.length;) {
-    if (!wide[i] && i + 1 < wide.length && !wide[i + 1]) { out.push(1, 1); i += 2; } else { out.push(2); i++; }
-  }
-  return out;
-}
+// Ширины: две видимые плитки ряда стоят рядом, одна растягивается.
 var packSig = '';
 function repack() {
-  var vis = gridView.filter(function (x) { return !x.b.el.hidden; }), sp = packSpans(vis.map(function (x) { return isWide(x.t); }));
-  var sig = vis.map(function (x, i) { return x.t.id + sp[i]; }).join();
+  var sig = gridView.map(function (r) {
+    return r.items.filter(function (x) { return !x.b.el.hidden; }).map(function (x) { return x.id; }).join('+');
+  }).join();
   if (sig === packSig) return;
   packSig = sig;
-  vis.forEach(function (x, i) { x.b.el.classList.toggle('w2', sp[i] === 2); });
+  gridView.forEach(function (r) {
+    var vis = r.items.filter(function (x) { return !x.b.el.hidden; }), split = isSplit(vis.map(function (x) { return x.id; }));
+    vis.forEach(function (x) { x.b.el.classList.toggle('w2', !split); });
+  });
 }
 
 function buildFull() {
-  var btn = function (a, ic, title) { return '<button data-a="' + a + '" title="' + title + '"' + (a === 'pin' && TOPMOST ? ' class="on"' : '') + '>' + ICONS[ic] + '</button>'; };
-  var el = mk('<div class="full look-' + CFG.look + (editing ? ' editing' : '') + '">' +
-    '<div class="handle"><div class="hbar" data-nodrag>' + btn('mini', 'mini', 'Компактный режим') + btn('edit', 'pen', 'Изменить плитки') + btn('pin', 'pin', 'Поверх всех окон') + btn('settings', 'gear', 'Настройки') + '</div></div>' +
-    '<div class="editbar"><span>Тяни плитки, меняй ширину, скрывай</span><button class="btn" data-nodrag data-a="edit">Готово</button></div>' +
-    '<div class="grid"></div><div class="tray" data-nodrag></div></div>');
-  fillGrid(el);
+  var el = mk('<div class="full look-' + CFG.look + (editing ? ' editing' : '') + '"><div class="grid"></div></div>'), grid = $('.grid', el);
+  gridView = []; packSig = '';
+  CFG.rows.forEach(function (row) {
+    var items = shownIn(row).map(function (id) {
+      var b = TILE_BUILD[id]();
+      b.el.setAttribute('data-id', id);
+      if (editing) { b.el.setAttribute('data-nodrag', ''); b.el.appendChild(editButton()); }
+      grid.appendChild(b.el);
+      return { id: id, b: b };
+    });
+    if (items.length) gridView.push({ items: items });
+  });
+  if (!gridView.length) el.appendChild(emptyNote());
+  repack();
+  editEvents(el, '.tile', function (id) { setOn('full', id, false); }, dropAt, function (id, d) { moveTile(id, d.to, d.how); });
+  return {
+    el: el,
+    update: function (s) { gridView.forEach(function (r) { r.items.forEach(function (x) { x.b.update(s); }); }); repack(); }
+  };
+}
+
+// Правка: крестик скрывает, перетаскивание показывает, куда встанет плитка, и переносит её, когда отпустили.
+// До этого ничего не двигается.
+function editEvents(el, sel, hide, calc, move, strip) {
+  if (!editing) return;
   el.addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    var tl = b.closest('.tile'), t = tl && tileBy(tl.getAttribute('data-id')), d = b.dataset;
-    if (d.e === 'w') t.w = !t.w;
-    else if (d.e === 'x') t.on = false;
-    else if (d.add) tileBy(d.add).on = true;
-    else { if (d.a) action(d.a); return; }
+    if (!e.target.closest('.ed')) return;
+    hide(e.target.closest(sel).getAttribute('data-id'));
     saveCfg(); layout();
   });
   el.addEventListener('pointerdown', function (e) {
-    var tl = editing && !e.target.closest('button') && e.target.closest('.tile');
-    if (tl) dragTile(el, tl, e);
+    var n = e.button === 0 && !e.target.closest('.ed') && e.target.closest(sel);
+    if (n) dragTile(el, n, e, sel, calc, move, strip);
   });
-  return {
-    el: el,
-    update: function (s) { gridView.forEach(function (x) { x.b.update(s); }); repack(); }
-  };
 }
 
-function fillGrid(el) {
-  var grid = $('.grid', el);
-  grid.innerHTML = ''; gridView = []; packSig = '';
-  CFG.tiles.forEach(function (t) {
-    if (!t.on) return;
-    var b = TILE_BUILD[t.id](), canW = !ONLY_WIDE[t.id] && !(CFG.look === 'rows' && LOOK_WIDE[t.id]);
-    b.el.setAttribute('data-id', t.id);
-    if (editing) {
-      b.el.setAttribute('data-nodrag', '');
-      b.el.appendChild(mk('<div class="ed">' + (canW ? '<button data-e="w" title="Ширина">' + ICONS[t.w ? 'narrow' : 'wide'] + '</button>' : '') + '<button data-e="x" title="Скрыть">' + ICONS.hide + '</button></div>'));
-    }
-    gridView.push({ t: t, b: b }); grid.appendChild(b.el);
-  });
-  $('.tray', el).innerHTML = CFG.tiles.filter(function (t) { return !t.on; }).map(function (t) {
-    return '<button class="chip" data-add="' + t.id + '">' + I('plus') + TILE_NAMES[t.id] + '</button>';
-  }).join('');
-  if (S) gridView.forEach(function (x) { x.b.update(S); });
-  repack();
-}
-
-// Перетаскивание: плитка меняется местами с той, над которой курсор (у широких после её середины).
-function dragTile(el, tl, e) {
-  var id = tl.getAttribute('data-id');
-  var mark = function () { var n = $('.tile[data-id=' + id + ']', el); if (n) n.classList.add('drag'); };
-  e.preventDefault(); mark();
+function dragTile(el, n, e, sel, calc, move, strip) {
+  var id = n.getAttribute('data-id'), x0 = e.clientX, y0 = e.clientY, on = false, drop = null, z = CFG.scale / 100;
+  var mode = curMode(), mark, ghost, base = el.getBoundingClientRect(), rects;
+  e.preventDefault();
   try { el.setPointerCapture(e.pointerId); } catch (err) { /* синтетические события без захвата */ }
-  var move = function (ev) {
-    var o = document.elementFromPoint(ev.clientX, ev.clientY), to = o && o.closest ? o.closest('.tile') : null, toId = to && to.getAttribute('data-id');
-    if (!toId || toId === id) return;
-    var ids = CFG.tiles.map(function (t) { return t.id; }), fwd = ids.indexOf(toId) > ids.indexOf(id);
-    var r = to.getBoundingClientRect(), mid = r.top + r.height / 2;
-    if (to.classList.contains('w2') && (fwd ? ev.clientY < mid : ev.clientY > mid)) return;
-    moveTile(id, toId, fwd); fillGrid(el); mark();
-  };
-  var up = function () {
-    el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up);
-    saveCfg(); layout();
-  };
-  el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  function start() {
+    on = true;
+    n.classList.add('drag'); el.classList.add('dragging');
+    mark = mk('<div class="mark"></div>'); ghost = mk('<div class="dghost">' + I(CSPEC[id] && mode !== 'full' ? CSPEC[id].icon : id) + '</div>');
+    el.appendChild(mark); el.appendChild(ghost);
+    rects = $$(sel, el).filter(function (t) { return !t.hidden; }).map(function (t) {
+      var r = t.getBoundingClientRect();
+      return { id: t.getAttribute('data-id'), l: r.left, t: r.top, r: r.right, b: r.bottom, half: mode === 'full' && !t.classList.contains('w2') };
+    });
+  }
+  function box(l, t, r, b) {
+    mark.hidden = false;
+    mark.style.cssText = 'left:' + (l - base.left) / z + 'px;top:' + (t - base.top) / z + 'px;width:' + (r - l) / z + 'px;height:' + (b - t) / z + 'px';
+  }
+  function show() {
+    mark.hidden = true;
+    if (!drop) return;
+    var r = rects.filter(function (o) { return o.id === drop.to; })[0], g = 4 * z, mid = (r.l + r.r) / 2;
+    var line = drop.how === 'before' || drop.how === 'after';
+    mark.classList.toggle('line', line);
+    if (strip) { var x = drop.how === 'before' ? r.l : r.r; box(x - 1.5 * z, r.t, x + 1.5 * z, r.b); }
+    else if (line) {
+      var y = drop.how === 'before' ? r.t - (mode === 'full' ? g : 0) : r.b + (mode === 'full' ? g : 0);
+      var all = mode === 'full' ? [Math.min.apply(null, rects.map(function (o) { return o.l; })), Math.max.apply(null, rects.map(function (o) { return o.r; }))] : [r.l, r.r];
+      box(all[0], y - 1.5 * z, all[1], y + 1.5 * z);
+    } else box(drop.how === 'right' ? mid : r.l, r.t, drop.how === 'left' ? mid : r.r, r.b);
+  }
+  function onMove(ev) {
+    if (!on) {
+      if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) < 5) return;
+      start();
+    }
+    ghost.style.transform = 'translate(' + (ev.clientX - base.left) / z + 'px,' + (ev.clientY - base.top) / z + 'px) translate(-50%,-50%)';
+    drop = calc(rects, ev.clientX, ev.clientY, id);
+    show();
+  }
+  function end(ev) {
+    el.removeEventListener('pointermove', onMove); el.removeEventListener('pointerup', end); el.removeEventListener('pointercancel', end);
+    if (!on) return;
+    mark.remove(); ghost.remove(); n.classList.remove('drag'); el.classList.remove('dragging');
+    if (ev.type !== 'pointerup' || !drop || !el.isConnected) return;
+    move(id, drop); saveCfg(); layout();
+  }
+  el.addEventListener('pointermove', onMove); el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
 }

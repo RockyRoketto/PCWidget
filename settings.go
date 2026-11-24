@@ -8,11 +8,13 @@ import (
 
 // Settings хранится одним JSON в %APPDATA%\pcwidget\settings.json.
 type Settings struct {
-	HasPos  bool   `json:"hasPos"`
-	X       int    `json:"x"`
-	Y       int    `json:"y"`
-	Theme   string `json:"theme"`
-	Topmost bool   `json:"topmost"`
+	HasPos bool `json:"hasPos"`
+	X      int  `json:"x"`
+	Y      int  `json:"y"`
+	// Anchor — за какой угол держится окно (place.go). X, Y: место для первого кадра.
+	Anchor  *anchor `json:"anchor,omitempty"`
+	Theme   string  `json:"theme"`
+	Topmost bool    `json:"topmost"`
 	// Autostart: nil = ещё не выбирали (по умолчанию включён). AutostartKey — с чем создана задача.
 	Autostart    *bool  `json:"autostart,omitempty"`
 	AutostartKey string `json:"autostartKey,omitempty"`

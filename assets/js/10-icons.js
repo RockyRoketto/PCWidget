@@ -15,7 +15,7 @@ var ICONS = (function () {
     net: w('<path d="M7 3v13M3.5 12.5 7 16l3.5-3.5M13 17V4M9.5 7.5 13 4l3.5 3.5"/>'),
     procs: w('<path d="M3 5h14M3 10h14M3 15h9"/>'),
     records: w('<path d="M2.5 15 7 9l3.5 3.5L17 4.5M13 4.5h4v4"/>'),
-    uptime: w('<circle cx="10" cy="10" r="7"/><path d="M10 5.5V10l3 2"/>'),
+    uptime: w('<path d="M10 3v6M6 5.2a6 6 0 1 0 8 0"/>'),
     clock: w('<circle cx="10" cy="10" r="7"/><path d="M10 5.5V10l3 2"/>'),
     weather: w('<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'),
     sun: w('<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'),
@@ -27,8 +27,6 @@ var ICONS = (function () {
     gear: w('<path d="M3 6h7M14 6h3M3 14h3M10 14h7"/><circle cx="12" cy="6" r="2"/><circle cx="8" cy="14" r="2"/>'),
     pen: w('<path d="M3.5 16.5l.8-3.6L13 4.2a1.6 1.6 0 0 1 2.3 0l.5.5a1.6 1.6 0 0 1 0 2.3L7.1 15.7z"/>'),
     hide: w('<path d="M5 5l10 10M15 5L5 15"/>'),
-    wide: w('<path d="M3 10h14M6 7l-3 3 3 3M14 7l3 3-3 3"/>'),
-    narrow: w('<path d="M2 10h5M18 10h-5M5 7l3 3-3 3M15 7l-3 3 3 3"/>'),
     pin: w('<path d="M7 3h6M8 3v5l-2.5 3.5h9L12 8V3M10 11.5V17"/>'),
     power: w('<path d="M10 3v6M6 5.2a6 6 0 1 0 8 0"/>'),
     eye: w('<path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.3"/>'),
@@ -40,13 +38,11 @@ var ICONS = (function () {
     warn: w('<path d="M10 3.5l7 12.5H3zM10 8.5v3.5M10 14.2v.1"/>'),
     plus: w('<path d="M10 4v12M4 10h12"/>'),
     check: w('<path d="M4 10.5l4 4 8-9"/>'),
-    mini: w('<path d="M4 8h4V4M16 12h-4v4M8 8L3.5 3.5M12 12l4.5 4.5"/>'),
     install: w('<path d="M10 3v9M6.5 8.5 10 12l3.5-3.5M4 16.5h12"/>'),
+    ping: w('<path d="M2.8 8.6a10.2 10.2 0 0 1 14.4 0M5.6 11.6a6.2 6.2 0 0 1 8.8 0"/><circle cx="10" cy="15" r="1.2"/>'),
     grip: w('<path d="M7 5h.01M13 5h.01M7 10h.01M13 10h.01M7 15h.01M13 15h.01" stroke-width="2.4"/>')
   };
 })();
-ICONS.half = '<svg class="ico" viewBox="0 0 18 12" fill="currentColor"><rect width="8" height="12" rx="2"/><rect x="10" width="8" height="12" rx="2" opacity=".3"/></svg>';
-ICONS.whole = '<svg class="ico" viewBox="0 0 18 12" fill="currentColor"><rect width="18" height="12" rx="2"/></svg>';
 function I(name) { return '<span class="i">' + ICONS[name] + '</span>'; }
 
 // Картинки режимов для настроек и меню: подложка и блоки на ней [x, y, ширина, высота].

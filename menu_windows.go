@@ -41,6 +41,9 @@ func sendSys() {
 	if app.cr != nil && app.ready {
 		app.cr.Eval("window.__sys(" + sysInfo() + ")")
 	}
+	if set.open {
+		set.cr.Eval("window.__sys(" + sysInfo() + ")")
+	}
 }
 
 // showMenu показывает меню у курсора.
@@ -122,7 +125,11 @@ func onMenuCmd(c string) {
 		if !app.visible {
 			toggleVisible()
 		}
-		sendCmd(c)
+		if c == "edit" {
+			openSettings("tiles")
+		} else {
+			openSettings("")
+		}
 	case "exit":
 		app.settings.save()
 		pDestroyWindow.Call(app.hwnd)
@@ -152,11 +159,12 @@ func toggleTopmost() {
 	on := !app.settings.Topmost
 	setTopmost(on)
 	app.settings.save()
-	if on {
-		sendCmd("topmost:1")
-	} else {
-		sendCmd("topmost:0")
+	if raised && !on { // открыты настройки: пока остаёмся поверх, вниз уйдём, когда их закроют
+		forceRaise = true
+		pSetWindowPos.Call(app.hwnd, hwndTopmost, 0, 0, 0, 0, swpNoMove|swpNoSize|swpNoActivate)
+		forceRaise = false
 	}
+	sendSys()
 }
 
 // setExStyle включает или выключает бит расширенного стиля окна.

@@ -8,11 +8,6 @@ function mk(html) { var d = document.createElement('div'); d.innerHTML = html.tr
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
-var TILE_IDS = ['clock', 'weather', 'cpu', 'gpu', 'mem', 'net', 'disks', 'procs', 'records', 'uptime'];
-var OPT_OFF = { clock: 1, weather: 1 };                    // по умолчанию выключены
-var WIDE = { mem: 1, net: 1, disks: 1, procs: 1 };         // по умолчанию во всю ширину
-var ONLY_WIDE = { procs: 1 };                              // узкими не бывают
-var TILE_NAMES = { clock: 'Часы', weather: 'Погода', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён' };
 // имя, подложка и три цвета для образца в настройках и меню
 var THEMES = {
   glass: ['Стекло', '#3a4256', ['#6fb1ff', '#c09bff', '#ff8fc4']],
@@ -27,13 +22,13 @@ var SCALES = [90, 100, 115, 130];
 function defaults() {
   return {
     theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76,
-    tiles: TILE_IDS.map(function (id) { return { id: id, on: !OPT_OFF[id], w: !!WIDE[id] }; }),
+    rows: defaultRows(), hide: { clock: 1, weather: 1 }, mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
     notify: false, city: '', clock24: true, clockSec: false, procN: 3, procTab: 'cpu'
   };
 }
 
-var CFG = defaults();
+var CFG = null;        // задаётся в конце 05-layout.js, потом из __init
 var S = null;          // последний снимок от Go
 var TOPMOST = false;
 var SYS = { installed: false, autostart: false, driver: false, sensors: false }; // состояние системы от Go
@@ -46,20 +41,7 @@ function mergeCfg(saved) {
   if (LOOKS[saved.look]) c.look = saved.look;
   if (saved.mode === 'full' || saved.mode === 'compact') c.mode = saved.mode;
   if (saved.compact === 'column' || saved.compact === 'strip') c.compact = saved.compact;
-  if (Array.isArray(saved.tiles)) {
-    var seen = {}, out = [];
-    saved.tiles.forEach(function (t) {
-      if (!t || TILE_IDS.indexOf(t.id) < 0 || seen[t.id]) return;
-      seen[t.id] = 1;
-      out.push({ id: t.id, on: t.on !== false, w: typeof t.w === 'boolean' ? t.w : !!WIDE[t.id] });
-    });
-    // новые плитки: опциональные встают в начало (выключены), остальные в конец
-    TILE_IDS.forEach(function (id) {
-      if (seen[id]) return;
-      if (OPT_OFF[id]) out.unshift({ id: id, on: false, w: !!WIDE[id] }); else out.push({ id: id, on: true, w: !!WIDE[id] });
-    });
-    c.tiles = out;
-  }
+  mergeLayout(c, saved);
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
@@ -73,17 +55,11 @@ function mergeCfg(saved) {
   return c;
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
-function curMode() { return CFG.mode === 'full' ? 'full' : CFG.compact; }
-function setMode(m) { if (m === 'full') CFG.mode = 'full'; else if (MODES[m]) { CFG.mode = 'compact'; CFG.compact = m; } }
-function tileBy(id) { return CFG.tiles.filter(function (t) { return t.id === id; })[0]; }
-function moveTile(id, to, after) {
-  var t = tileBy(id), a = CFG.tiles;
-  a.splice(a.indexOf(t), 1); a.splice(a.indexOf(tileBy(to)) + (after ? 1 : 0), 0, t);
-}
 // Классы и переменные страницы: общие для виджета, подсказки и меню.
 function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : ''); }
-// Go ходит за погодой в интернет только когда плитка включена и город задан.
-function syncWeather() { post('weather:' + (tileBy('weather').on ? CFG.city : '')); }
+// Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
+function weatherOn() { return ['full', 'column', 'strip'].some(function (m) { return isOn(m, 'weather'); }); }
+function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }
 
 // ---- форматирование ----
 function rateParts(bps) { // байт/с -> [число, единица]
@@ -104,6 +80,8 @@ function uptimeText(sec) {
 // Состояние по порогу: горячо за 5 до порога, тепло за 15.
 function level(v, thr) { return v == null ? '' : v >= thr - 5 ? 'hot' : v >= thr - 15 ? 'warm' : 'ok'; }
 function pingLevel(ms) { return ms >= 100 ? 'hot' : ms >= 50 ? 'warm' : 'ok'; }
+
+function clockText(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: CFG.clockSec ? '2-digit' : undefined, hour12: !CFG.clock24 }); }
 
 // ---- история для графиков и рекорды сессии ----
 var HN = 60;

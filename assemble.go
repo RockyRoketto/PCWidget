@@ -49,6 +49,28 @@ func buildTipPage() (string, error) {
 	return strings.Replace(string(idx), "/*{{CSS}}*/", css, 1), nil
 }
 
+// buildSettingsPage собирает страницу окна настроек: общие скрипты виджета и свои из assets/settings/.
+func buildSettingsPage() (string, error) {
+	idx, err := assetsFS.ReadFile("assets/settings.html")
+	if err != nil {
+		return "", err
+	}
+	css, err := concatGlob("assets/css/*.css")
+	if err != nil {
+		return "", err
+	}
+	js := ""
+	for _, g := range []string{"assets/js/00-core.js", "assets/js/05-layout.js", "assets/js/10-icons.js", "assets/settings/*.js"} {
+		part, err := concatGlob(g)
+		if err != nil {
+			return "", err
+		}
+		js += part
+	}
+	page := strings.Replace(string(idx), "/*{{CSS}}*/", css, 1)
+	return strings.Replace(page, "/*{{JS}}*/", js, 1), nil
+}
+
 func concatGlob(pattern string) (string, error) {
 	names, err := fs.Glob(assetsFS, pattern)
 	if err != nil {

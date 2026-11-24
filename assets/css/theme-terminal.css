@@ -7,12 +7,12 @@ body.theme-terminal {
   --r: 0px; --barh: 8px; --nw: 500; --font: "Cascadia Mono", Consolas, "Courier New", monospace;
   font-size: 12px;
 }
-.theme-terminal #root::after {
+.theme-terminal #root::after, .theme-terminal #set::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5;
   background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px);
 }
-.theme-terminal button, .theme-terminal .seg, .theme-terminal .tabs, .theme-terminal .bar, .theme-terminal .bar i,
-.theme-terminal .sw i, .theme-terminal .sw i::after, .theme-terminal .hbar, .theme-terminal .cr, .theme-terminal .sb { border-radius: 0 !important; }
+.theme-terminal button, .theme-terminal .mark, .theme-terminal .dghost, .theme-terminal .seg, .theme-terminal .tabs, .theme-terminal .bar, .theme-terminal .bar i,
+.theme-terminal .sw i, .theme-terminal .sw i::after, .theme-terminal .cr, .theme-terminal .sb { border-radius: 0 !important; }
 .theme-terminal .dots button { border-radius: 50% !important; }
 .theme-terminal .bar { background: repeating-linear-gradient(90deg, var(--track) 0 6px, transparent 6px 8px); }
 .theme-terminal .bar i { background: repeating-linear-gradient(90deg, var(--h) 0 6px, transparent 6px 8px); transition: none; }

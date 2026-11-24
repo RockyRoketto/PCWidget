@@ -1,5 +1,5 @@
 'use strict';
-// Панель настроек рядом с виджетом. Всё применяется сразу, виджет виден и меняется на глазах.
+// Содержимое окна настроек. Всё применяется сразу, виджет рядом меняется на глазах, само окно не двигается.
 
 function toggle(key, on, label) {
   return '<span class="sw"><input type="checkbox" data-k="' + key + '" aria-label="' + label + '"' + (on ? ' checked' : '') + '><i></i></span>';
@@ -25,33 +25,47 @@ var TILE_OPTS = {
     return '<label class="ol">24-часовой формат' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label><label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label>';
   },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>'; },
-  procs: function () { return '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
+  procs: function () { return curMode() !== 'full' ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
 };
 var setState = { tab: 'look', open: '', sure: false };
 
+var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks' };
+function modeCards() {
+  return '<div class="cards c3">' + Object.keys(MODES).map(function (m) {
+    return '<button class="card' + (curMode() === m ? ' on' : '') + '" data-k="mode" data-v="' + m + '">' + PICS[m] + MODES[m] + '</button>'; }).join('') + '</div>';
+}
+// Как переставлять: сразу на виджете, правка включена, пока открыта эта вкладка.
+function tilesHint(m) {
+  if (m !== 'full') return '<p class="hint how">Перетаскивай ' + (m === 'strip' ? 'блоки' : 'строки') + ' прямо на виджете. Крестик убирает.</p>';
+  var pic = function (body) { return '<svg viewBox="0 0 56 34" fill="currentColor">' + body + '</svg>'; };
+  var b = function (x, y, w, h, o) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" opacity="' + (o || .3) + '"/>'; };
+  var acc = function (x, y, w, h) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" fill="var(--accent)"/>'; };
+  return '<p class="hint how">Перетаскивай плитки прямо на виджете. Крестик убирает.</p><div class="hows">' +
+    '<div>' + pic(b(2, 2, 52, 8) + b(2, 13, 25, 19) + acc(29, 13, 25, 19)) + '<span>На край плитки:<br>встанут рядом</span></div>' +
+    '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между плитками:<br>во всю ширину</span></div></div>';
+}
+
 var SET_BODY = {
   look: function () {
-    return label('Режим') + '<div class="cards c3">' + Object.keys(MODES).map(function (m) {
-        return '<button class="card' + (curMode() === m ? ' on' : '') + '" data-k="mode" data-v="' + m + '">' + PICS[m] + MODES[m] + '</button>'; }).join('') + '</div>' +
+    return label('Режим') + modeCards() +
       label('Тема') + '<div class="cards c2">' + Object.keys(THEMES).map(function (k) {
         var t = THEMES[k];
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '"><span class="sw4" style="background:' + t[1] + '">' +
           t[2].map(function (c, i) { return '<i style="background:' + c + ';width:' + [90, 60, 75][i] + '%"></i>'; }).join('') + '</span>' + t[0] + '</button>'; }).join('') + '</div>' +
-      label('Вид плиток') + segment('look', Object.keys(LOOKS).map(function (k) { return [k, LOOKS[k]]; }), CFG.look) +
+      label('Вид плиток в полном режиме') + segment('look', Object.keys(LOOKS).map(function (k) { return [k, LOOKS[k]]; }), CFG.look) +
       label('Цвет цифр') + segment('mono', [[false, 'Свой у каждого'], [true, 'Один']], CFG.mono) +
       label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale) +
-      (CFG.theme === 'glass' ? label('Плотность стекла', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла">' : '');
+      '<div data-if-glass' + (CFG.theme === 'glass' ? '' : ' class="dis"') + '>' + label('Плотность стекла', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла"' + (CFG.theme === 'glass' ? '' : ' disabled') + '></div>';
   },
   tiles: function () {
-    return '<div style="height:10px"></div><button class="btn ghost wide" data-k="editmode" data-v="1">Править прямо на виджете</button><div style="height:6px"></div>' +
-      CFG.tiles.map(function (t) {
-        var o = TILE_OPTS[t.id], id = t.id;
-        var w = function (v, ic, title) { return '<button data-w="' + v + '" class="' + (t.w === !!v ? 'on' : '') + '" title="' + title + '">' + ICONS[ic] + '</button>'; };
-        return '<div class="trow' + (t.on ? '' : ' off') + (o && setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + id + '"><div class="m"><span class="grip">' + ICONS.grip + '</span>' + I(id) +
-          '<span class="nm">' + TILE_NAMES[id] + '</span>' + (o ? '<button class="chev" data-open="' + id + '" title="Параметры">' + ICONS.chev + '</button>' : '') +
-          (ONLY_WIDE[id] ? '' : '<span class="w12">' + w(0, 'half', 'Половина ширины') + w(1, 'whole', 'Во всю ширину') + '</span>') +
-          toggle('tile:' + id, t.on, TILE_NAMES[id]) + '</div>' + (o ? '<div class="opts">' + o() + '</div>' : '') + '</div>';
-      }).join('');
+    var m = curMode();
+    return label('Плитки режима') + segment('mode', Object.keys(MODES).map(function (k) { return [k, MODES[k]]; }), m) + tilesHint(m) +
+      modeIds(m).map(function (id) {
+        var o = TILE_OPTS[id] && TILE_OPTS[id](), on = isOn(m, id), name = tileName(m, id);
+        return '<div class="trow' + (on ? '' : ' off') + (o && setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + (MINI_TINT[id] || id) + '"><div class="m">' + I(id === 'space' ? 'disk' : id) +
+          '<span class="nm">' + name + '</span>' + (o ? '<button class="chev" data-open="' + id + '" title="Параметры">' + ICONS.chev + '</button>' : '') +
+          toggle('tile:' + id, on, name) + '</div>' + (o ? '<div class="opts">' + o + '</div>' : '') + '</div>';
+      }).join('') + setRow('Расположение', 'Порядок и набор плиток этого режима', ghost('tiles', 'Как в начале'));
   },
   alarm: function () {
     return Object.keys(THR_ROWS).map(function (k) {
@@ -71,12 +85,13 @@ var SET_BODY = {
   }
 };
 
-function buildSettings(onDone) {
-  var el = mk('<div class="set"><div class="set-in"><div class="sh" data-drag><span>Настройки</span><button class="btn" data-nodrag data-done>Готово</button></div><div class="stabs" data-nodrag></div><div class="sbody" data-nodrag></div></div></div>');
+function buildSettings() {
+  var el = mk('<div class="set"><div class="sh"><span>Настройки</span><button class="x" data-nodrag data-done title="Закрыть" aria-label="Закрыть">' + ICONS.hide + '</button></div><div class="stabs" data-nodrag></div><div class="sbody" data-nodrag></div></div>');
   var tabs = $('.stabs', el), body = $('.sbody', el);
+  tabs.innerHTML = Object.keys(SET_TABS).map(function (k) { return '<button data-tab="' + k + '">' + I(SET_TABS[k][0]) + SET_TABS[k][1] + '</button>'; }).join('');
   function render(top) {
     var st = top ? 0 : body.scrollTop;
-    tabs.innerHTML = Object.keys(SET_TABS).map(function (k) { return '<button data-tab="' + k + '" class="' + (k === setState.tab ? 'on' : '') + '">' + I(SET_TABS[k][0]) + SET_TABS[k][1] + '</button>'; }).join('');
+    $$('button', tabs).forEach(function (b) { b.classList.toggle('on', b.dataset.tab === setState.tab); });
     body.innerHTML = SET_BODY[setState.tab]();
     body.scrollTop = st;
     update();
@@ -89,59 +104,52 @@ function buildSettings(onDone) {
     });
     cityHint($('[data-hint]', body));
   }
-  function changed() { saveCfg(); layout(); render(); }
+  function changed() { saveCfg(); applySetBody(); }
+  // Выбор в группе меняет только отметку: список не пересобирается и не мигает.
+  function pick(b) {
+    $$('button', b.parentNode).forEach(function (x) { x.classList.toggle('on', x === b); });
+    var lab = b.parentNode.previousElementSibling, val = lab && $('[data-val]', lab);
+    if (val) val.textContent = b.dataset.v + '%';
+  }
+  function glassState() {
+    var g = $('[data-if-glass]', body), off = CFG.theme !== 'glass';
+    if (g) { g.classList.toggle('dis', off); $('input', g).disabled = off; }
+  }
 
   el.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    var d = b.dataset, row = b.closest('.trow');
-    if (d.sys !== 'reset') setState.sure = false;
-    if (b.hasAttribute('data-done')) onDone();
-    else if (d.tab) { setState.tab = d.tab; render(true); }
-    else if (d.open) { setState.open = setState.open === d.open ? '' : d.open; render(); }
-    else if (d.w) { tileBy(row.getAttribute('data-id')).w = d.w === '1'; changed(); }
-    else if (d.sys === 'reset') { if (setState.sure) { setState.sure = false; CFG = defaults(); Alarm.reset(); syncWeather(); changed(); } else { setState.sure = true; render(); } }
+    var d = b.dataset;
+    if (d.sys !== 'reset' && setState.sure) { setState.sure = false; if (!d.tab) render(); }
+    if (b.hasAttribute('data-done')) post('close');
+    else if (d.tab) { setState.tab = d.tab; render(true); post('tab:' + d.tab); }
+    else if (d.open) { setState.open = setState.open === d.open ? '' : d.open; $$('.trow', body).forEach(function (r) { r.classList.toggle('open', r.dataset.id === setState.open); }); }
+    else if (d.sys === 'reset') { if (setState.sure) { setState.sure = false; CFG = defaults(); changed(); } else setState.sure = true; render(); }
+    else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
     else if (d.sys) post('sys:' + d.sys);
-    else if (d.k === 'editmode') action('edit');
-    else if (d.k === 'mode') { setMode(d.v); editing = false; changed(); }
-    else if (d.k) { CFG[d.k] = d.k === 'mono' ? d.v === 'true' : /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); }
+    else if (d.k === 'mode') { setMode(d.v); changed(); if (setState.tab === 'tiles') render(true); else pick(b); }
+    else if (d.k) { CFG[d.k] = d.k === 'mono' ? d.v === 'true' : /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); glassState(); }
   });
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
     if (t.hasAttribute('data-city')) applyCity(t.value);
     else if (t.dataset.thr || t.hasAttribute('data-glass')) saveCfg();
-    else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); layout(); render(); }
+    else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }
     else if (k === 'autostart') { SYS.autostart = t.checked; post('sys:autostart:' + (t.checked ? 1 : 0)); }
     else if (k && k.indexOf('tile:') === 0) {
-      var id = k.slice(5); tileBy(id).on = t.checked;
-      if (t.checked && TILE_OPTS[id]) setState.open = id; // погоде нужен город: сразу раскрываем
-      syncWeather(); changed();
+      var id = k.slice(5), row = t.closest('.trow');
+      setOn(curMode(), id, t.checked); row.classList.toggle('off', !t.checked); changed();
+      if (id === 'weather' && t.checked && !CFG.city) { setState.open = id; row.classList.add('open'); } // погоде нужен город: сразу раскрываем
+      update();
     } else if (k) { CFG[k] = t.checked; changed(); }
   });
   el.addEventListener('input', function (e) {
     var t = e.target, k = t.dataset.thr;
     if (k) {
-      CFG.thr[k] = Number(t.value); Alarm.reset();
+      CFG.thr[k] = Number(t.value); liveCfg();
       var z = t.closest('.thr'); $('.zone', z).style.setProperty('--t', zonePos(CFG.thr[k]) + '%'); $('.t b', z).textContent = t.value + THR_ROWS[k][2];
     } else if (t.hasAttribute('data-glass')) {
-      CFG.glass = Number(t.value); applyBody(); $$('[data-val]', body).pop().textContent = t.value + '%';
+      CFG.glass = Number(t.value); liveCfg(); applySetBody(); $$('[data-val]', body).pop().textContent = t.value + '%';
     } else if (t.hasAttribute('data-city')) cityTyped(t);
-  });
-  // перетаскивание строк за ручку
-  body.addEventListener('pointerdown', function (e) {
-    if (!e.target.closest('.grip')) return;
-    var id = e.target.closest('.trow').getAttribute('data-id'), list = body;
-    var mark = function () { var n = $('.trow[data-id=' + id + ']', list); if (n) n.classList.add('drag'); };
-    e.preventDefault(); mark();
-    try { body.setPointerCapture(e.pointerId); } catch (err) { /* синтетические события без захвата */ }
-    var move = function (ev) {
-      var o = document.elementFromPoint(ev.clientX, ev.clientY), to = o && o.closest ? o.closest('.trow') : null, toId = to && to.getAttribute('data-id');
-      if (!toId || toId === id) return;
-      var ids = CFG.tiles.map(function (t) { return t.id; }), fwd = ids.indexOf(toId) > ids.indexOf(id), r = to.getBoundingClientRect(), mid = r.top + r.height / 2;
-      if (fwd ? ev.clientY < mid : ev.clientY > mid) return;
-      moveTile(id, toId, fwd); render(); mark();
-    };
-    var up = function () { ['pointermove', 'pointerup', 'pointercancel'].forEach(function (n) { body.removeEventListener(n, n === 'pointermove' ? move : up); }); changed(); };
-    body.addEventListener('pointermove', move); body.addEventListener('pointerup', up); body.addEventListener('pointercancel', up);
   });
   render(true);
   return { el: el, update: update, render: render };

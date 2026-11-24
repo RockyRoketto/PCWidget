@@ -1,19 +1,15 @@
-/* Панель настроек. */
-/* ===== настройки ===== */
-/* Высоту задаёт виджет рядом (но не меньше 612px), содержимое прокручивается внутри. */
-.set { position: relative; width: 344px; min-height: 612px; align-self: stretch; border-left: 1px solid var(--edge); }
-#root.left > .set { border-left: 0; border-right: 1px solid var(--edge); }
-#root.stack > .set { border-left: 0; border-top: 1px solid var(--edge); }
-.set-in { position: absolute; inset: 0; display: flex; flex-direction: column; }
-#root.stack > .set { width: auto; }
-#root.stack .set-in { width: 344px; margin: 0 auto; }
-.sh { display: flex; align-items: center; gap: 8px; padding: 12px 12px 8px 16px; font-size: 15px; font-weight: 650; }
+/* Окно настроек. Размер окна постоянный, содержимое вкладки прокручивается внутри. */
+#set { height: 100vh; background: var(--bg); }
+.set { height: 100%; display: flex; flex-direction: column; }
+.sh { display: flex; align-items: center; gap: 8px; padding: 10px 10px 6px 18px; font-size: 15px; font-weight: 650; }
 .sh span { flex: 1; }
+.sh .x { width: 30px; height: 30px; padding: 7px; border-radius: 8px; color: var(--dim); }
+.sh .x:hover { background: var(--ctl); color: var(--text); }
 .stabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--edge); }
 .stabs button { display: grid; justify-items: center; gap: 3px; padding: 6px 0 8px; font-size: 12px; color: var(--dim); border-bottom: 2px solid transparent; }
 .stabs button.on { color: var(--text); border-bottom-color: var(--accent); }
 .stabs button.on .i { color: var(--accent); }
-.sbody { flex: 1; overflow-y: auto; padding: 2px 14px 14px; scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
+.sbody { flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; padding: 2px 8px 14px 18px; scrollbar-width: thin; scrollbar-color: var(--track) transparent; }
 .lab { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin: 13px 0 6px; }
 .lab b { color: var(--text); font-weight: 600; }
 .cards { display: grid; gap: 7px; }
@@ -44,14 +40,9 @@
 .trow .m > .i { color: var(--h, var(--dim)); }
 .trow .nm { flex: 1; text-align: left; }
 .trow.off .nm, .trow.off .m > .i { opacity: .5; }
-.grip { width: 14px; height: 22px; color: var(--dim); cursor: grab; touch-action: none; flex: none; }
-.trow.drag { opacity: .5; }
-.w12 { display: inline-flex; gap: 2px; color: var(--dim); }
-.w12 button { width: 26px; height: 22px; padding: 5px 4px; border-radius: 5px; opacity: .55; }
-.w12 button.on { opacity: 1; background: var(--ctl); color: var(--accent); }
 .chev { width: 20px; height: 20px; padding: 3px; color: var(--dim); transition: transform .2s; }
 .open .chev { transform: rotate(180deg); }
-.opts { display: none; padding: 2px 0 10px 30px; }
+.opts { display: none; padding: 2px 0 10px 24px; }
 .open .opts { display: grid; gap: 8px; }
 .ol { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; }
 .txt { width: 100%; padding: 6px 9px; border-radius: 7px; border: 1px solid var(--edge); background: var(--ctl); user-select: text; -webkit-user-select: text; }
@@ -69,3 +60,8 @@
 .hint.bad { color: var(--hot); }
 .hint { font-size: 12px; color: var(--dim); margin: 2px 0 0; }
 .rng { width: 100%; accent-color: var(--accent); margin: 0; }
+.dis { opacity: .4; }
+.how { margin: 10px 0 8px; }
+.hows { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+.hows > div { display: flex; align-items: center; gap: 9px; padding: 8px; border-radius: var(--r); background: var(--tile); border: 1px solid var(--edge); font-size: 11.5px; line-height: 1.3; color: var(--dim); }
+.hows svg { width: 52px; flex: none; }

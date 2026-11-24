@@ -21,11 +21,8 @@ button, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; background: none; padding: 0; }
 body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-/* Окно: виджет и, если открыты настройки, панель рядом (у полоски панель снизу). */
-#root { position: relative; display: flex; align-items: flex-start; width: max-content; min-height: 36px; background: var(--bg); }
-#root.stack { flex-direction: column; }
-#root.left > .set { order: -1; }
-.full { position: relative; width: 344px; padding: 14px 12px 12px; }
+#root { position: relative; width: max-content; min-height: 36px; background: var(--bg); }
+.full { position: relative; width: 344px; padding: 12px; }
 
 .ico { width: 100%; height: 100%; display: block; }
 .i { width: 16px; height: 16px; flex: none; display: inline-block; }

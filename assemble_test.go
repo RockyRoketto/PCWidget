@@ -10,6 +10,9 @@ func TestBuildPage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if sp, err := buildSettingsPage(); err != nil || strings.Contains(sp, "{{") || !strings.Contains(sp, "buildSettings") {
+		t.Errorf("страница настроек не собралась: %v", err)
+	}
 	if strings.Contains(p, "{{CSS}}") || strings.Contains(p, "{{JS}}") {
 		t.Error("метки не заменены")
 	}

@@ -51,7 +51,7 @@ var TILE_BUILD = {
       el: el,
       update: function () {
         var d = new Date();
-        $('.clk', el).textContent = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: CFG.clockSec ? '2-digit' : undefined, hour12: !CFG.clock24 });
+        $('.clk', el).textContent = clockText(d);
         $('.clk', el).style.fontSize = CFG.clockSec || !CFG.clock24 ? '25px' : '';
         $('.cap', el).textContent = d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'long' });
       }

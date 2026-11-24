@@ -1,25 +1,17 @@
-/* Ручка с кнопками сверху и правка плиток прямо на виджете. */
-.handle { position: absolute; left: 50%; top: 0; transform: translateX(-50%); z-index: 6; padding: 5px 22px 5px; }
-.handle::before { content: ""; display: block; width: 34px; height: 4px; border-radius: 9px; background: var(--dim); opacity: .5; }
-.hbar { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); display: none; gap: 2px; padding: 3px; border-radius: 10px; background: var(--pop); border: 1px solid var(--edge); box-shadow: 0 6px 18px rgba(0, 0, 0, .4); }
-.handle:hover .hbar, .handle:focus-within .hbar { display: flex; }
-.hbar button { width: 30px; height: 28px; padding: 6px 7px; border-radius: 7px; color: var(--text); }
-.hbar button.on { color: var(--accent); }
-.hbar button:hover { background: var(--ctl); color: var(--accent); }
-/* правка на виджете */
-.editbar { display: none; align-items: center; gap: 8px; margin: 2px 0 10px; font-size: 12px; color: var(--dim); }
-.editbar span { flex: 1; }
-.editing .editbar { display: flex; }
-.editing .handle { display: none; }
-.editing .tile { cursor: grab; border: 1px dashed color-mix(in srgb, var(--accent) 70%, transparent); touch-action: none; }
-.editing .tile > *:not(.ed) { pointer-events: none; }
-.editing .tile.drag { opacity: .45; cursor: grabbing; }
-.ed { display: none; position: absolute; right: 4px; top: 4px; gap: 3px; z-index: 3; }
-.editing .ed { display: flex; }
-.ed button { width: 24px; height: 24px; padding: 4px; border-radius: 6px; background: var(--pop); color: var(--text); }
-.ed button:hover { background: var(--accent); color: var(--on-accent); }
-.tray { display: none; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.editing .tray { display: flex; }
-.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 7px; border-radius: 99px; background: var(--ctl); font-size: 12px; }
-.chip .i { width: 13px; height: 13px; }
-.chip:hover { color: var(--accent); }
+/* Правка плиток прямо на виджете: рамка, крестик, отметка места. Размеры виджета не меняются. */
+.editing [data-id] { cursor: grab; touch-action: none; }
+.editing [data-id]::before { content: ""; position: absolute; inset: 0; z-index: 2; border: 1px dashed color-mix(in srgb, var(--accent) 75%, transparent); border-radius: inherit; pointer-events: none; }
+.editing [data-id] > *:not(.ed) { pointer-events: none; }
+.editing [data-id].drag { opacity: .35; }
+.dragging, .dragging [data-id] { cursor: grabbing; }
+.ed { display: none; position: absolute; right: 3px; top: 3px; width: 22px; height: 22px; padding: 4px; z-index: 3; border-radius: 6px; background: var(--pop); color: var(--text); }
+.editing [data-id]:hover .ed { display: block; }
+.dragging .ed { display: none !important; }
+.ed:hover { background: var(--accent); color: var(--on-accent); }
+.cr .ed { top: 7px; }
+.sb .ed { top: 50%; margin-top: -11px; }
+.mark { position: absolute; z-index: 4; pointer-events: none; border-radius: var(--r); background: color-mix(in srgb, var(--accent) 32%, transparent); border: 2px solid var(--accent); }
+.mark.line { border: 0; border-radius: 2px; background: var(--accent); }
+.dghost { position: absolute; left: 0; top: 0; z-index: 5; width: 34px; height: 34px; padding: 8px; pointer-events: none; border-radius: 9px; background: var(--accent); color: var(--on-accent); box-shadow: 0 4px 12px rgba(0, 0, 0, .4); }
+.dghost .i { display: block; width: 18px; height: 18px; }
+.empty { padding: 12px; font-size: 12px; color: var(--dim); text-align: center; }

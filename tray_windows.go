@@ -172,7 +172,7 @@ func showNativeMenu() {
 		if !app.visible {
 			toggleVisible()
 		}
-		sendCmd("settings")
+		openSettings("")
 	case id >= cmdTheme && id < cmdTheme+uintptr(len(themeKeys)):
 		sendCmd("theme:" + themeKeys[id-cmdTheme])
 	case id >= cmdMode && id < cmdMode+uintptr(len(modeKeys)):

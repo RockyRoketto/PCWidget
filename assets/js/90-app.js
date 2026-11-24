@@ -1,28 +1,26 @@
 'use strict';
-// Точка входа: раскладка, связь с Go (__init, __stats, __cmd, __sys), перетаскивание окна, размер.
+// Точка входа виджета: раскладка, связь с Go (__init, __stats, __cmd, __cfg, __sys), перетаскивание окна, размер.
 
 var rootEl = document.getElementById('root');
 var view = null;           // текущий вид { el, update(s) }
-var settings = null;       // панель настроек, если открыта
-var side = 'right';        // с какой стороны от виджета встаёт панель (решает Go по месту на экране)
 var dataReady = false;     // первые данные пришли целиком, заготовки убраны
 var LOAD_MAX = 4000, loadStart = 0;
+
+var sent = {};
+function postOnce(key, v) { if (sent[key] !== v) { sent[key] = v; post(key + ':' + v); } }
 
 function applyBody() {
   document.body.className = bodyClass();
   document.body.style.setProperty('--glass', CFG.glass / 100);
   rootEl.style.zoom = CFG.scale / 100;
-  var strip = curMode() === 'strip';
-  rootEl.className = (settings ? (strip ? 'stack ' : side + ' ') : '') + (dataReady ? '' : 'loading');
-  post('corners:' + (CFG.theme === 'terminal' ? 'square' : 'round'));
-  post('raise:' + (settings || editing ? 1 : 0)); // пока настраиваем, виджет поверх программ
-  post('glass:' + (CFG.theme === 'glass' ? 1 : 0)); // непрозрачным темам размытие не нужно
+  rootEl.classList.toggle('loading', !dataReady);
+  postOnce('corners', CFG.theme === 'terminal' ? 'square' : 'round');
+  postOnce('glass', CFG.theme === 'glass' ? 1 : 0); // непрозрачным темам размытие не нужно
 }
 
-// Перестраивает виджет; открытая панель настроек остаётся на месте.
+// Перестраивает виджет.
 function layout() {
   hideTip(true);
-  if (CFG.mode !== 'full') editing = false;
   var old = view && view.el;
   view = CFG.mode === 'full' ? buildFull() : buildCompact(CFG.compact === 'strip');
   if (old) rootEl.replaceChild(view.el, old); else rootEl.insertBefore(view.el, rootEl.firstChild);
@@ -34,37 +32,6 @@ function refresh(now) {
   var fired = evalAlarms(S, now);
   if (CFG.notify && fired.length) post('notify:' + fired.join('; '));
   view.update(S);
-  if (settings) settings.update();
-}
-
-function openSettings(tab) {
-  if (tab) setState.tab = tab;
-  if (settings) { settings.render(true); return; }
-  post('panel:' + Math.ceil(344 * CFG.scale / 100)); // Go ответит командой panel:left или panel:right
-}
-function showPanel(s) {
-  side = s === 'left' ? 'left' : 'right';
-  if (settings) return;
-  settings = buildSettings(closeSettings);
-  rootEl.appendChild(settings.el);
-  applyBody();
-}
-function closeSettings() {
-  if (!settings) return;
-  settings.el.remove(); settings = null;
-  applyBody();
-  post('panel:0');
-}
-
-// Действия кнопок виджета и меню.
-function action(a) {
-  if (a === 'mini') { setMode(CFG.compact); saveCfg(); layout(); if (settings) settings.render(); }
-  else if (a === 'edit') {
-    editing = CFG.mode === 'full' ? !editing : true;
-    if (CFG.mode !== 'full') { CFG.mode = 'full'; saveCfg(); }
-    layout(); if (settings) settings.render();
-  } else if (a === 'pin') { TOPMOST = !TOPMOST; post('topmost:' + (TOPMOST ? 1 : 0)); layout(); if (settings) settings.render(); }
-  else if (a === 'settings') { if (settings) closeSettings(); else openSettings(); }
 }
 
 // Заготовки вместо плиток держатся, пока не пришли все основные данные (GPU и датчики отвечают последними).
@@ -98,42 +65,31 @@ window.__stats = function (s) {
   refresh(now);
   if (Tip.row) showTip();
 };
-window.__sys = function (sys) { SYS = sys; TOPMOST = sys.topmost; if (settings && setState.tab === 'sys') settings.render(); };
-// Команды из меню трея и из меню правого клика.
+window.__sys = function (sys) { SYS = sys; TOPMOST = sys.topmost; };
+
+// Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
+var LIGHT = { glass: 1, thr: 1, notify: 1, city: 1, theme: 1, mono: 1, scale: 1 };
+function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
+window.__cfg = function (c) {
+  var old = CFG;
+  CFG = mergeCfg(c);
+  if (JSON.stringify(old.thr) !== JSON.stringify(CFG.thr)) Alarm.reset();
+  if (shape(old) !== shape(CFG)) { layout(); return; }
+  applyBody(); syncWeather();
+  if (S && dataReady) refresh(Date.now());
+};
+// Команды из меню и от окна настроек.
 window.__cmd = function (c) {
   var p = c.split(':'), k = p[0], v = p[1];
   if (k === 'theme' && THEMES[v]) { CFG.theme = v; saveCfg(); layout(); }
   else if (k === 'mode' && MODES[v]) { setMode(v); saveCfg(); layout(); }
-  else if (k === 'settings') { openSettings(v); return; }
-  else if (k === 'edit') { action('edit'); return; }
-  else if (k === 'panel') { showPanel(v); return; }
-  else if (k === 'panelside') { side = v; applyBody(); return; }
-  else if (k === 'topmost') { TOPMOST = v === '1'; layout(); }
-  if (settings) settings.render();
+  else if (k === 'editing') { editing = v === '1'; layout(); }
 };
 
 // ---- окно ----
 document.addEventListener('mousedown', function (e) {
-  if (e.button !== 0) return;
-  var n = e.target.closest('[data-nodrag],[data-drag]'); // ближайший решает: заголовок настроек тянется, кнопки в нём нет
-  if (!n || n.hasAttribute('data-drag')) post('drag');
+  if (e.button === 0 && !e.target.closest('[data-nodrag]')) post('drag');
 });
-// Поля ввода: окну виджета нужна активация, иначе клавиатура не доходит.
-// Выход из режима отложен: пока Go переносит фокус, поле на миг теряет его, и без паузы получалось мигание.
-var typing = false, typeTimer = 0;
-function isTextInput(n) { return n && n.tagName === 'INPUT' && n.type === 'text'; }
-document.addEventListener('focusin', function (e) {
-  if (!isTextInput(e.target)) return;
-  clearTimeout(typeTimer);
-  if (!typing) { typing = true; post('edit:1'); }
-});
-document.addEventListener('focusout', function () {
-  clearTimeout(typeTimer);
-  typeTimer = setTimeout(function () {
-    if (typing && !isTextInput(document.activeElement)) { typing = false; post('edit:0'); }
-  }, 300);
-});
-document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });
 document.addEventListener('contextmenu', function (e) { e.preventDefault(); post('menu'); });
 
 // Размер окна задаёт страница (CSS px), Go пересчитывает с учётом DPI.
