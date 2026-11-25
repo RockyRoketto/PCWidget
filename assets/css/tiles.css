@@ -148,29 +148,37 @@
   .look-ring .big .temp { align-self: center; margin: 0; }
   .look-ring .side { grid-column: 2; align-self: center; }
 }
-/* память и диски кольцами */
-.mring { display: none; position: relative; width: 74px; height: 74px; }
-.mring .mp { position: absolute; inset: 0; display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; font-size: 22px; }
-.mring .mp small { font-size: 11px; }
-.look-ring .mem { display: grid; grid-template-columns: 1fr auto; align-content: space-between; align-items: center; row-gap: 5px; }
-.look-ring .mem .th { grid-column: 1 / -1; }
-.look-ring .mem .bar, .look-ring .mem .memv, .look-ring .mem .gb { display: none; }
-.look-ring .mem .sub { display: block; margin: 0; }
-.look-ring .mem .mring { display: block; grid-area: 2 / 2; }
-.look-ring .mem .sub { grid-area: 2 / 1; }
-.look-ring .mem .ring { width: 74px; height: 74px; grid-area: auto; }
-.look-ring .dsk .rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); align-content: center; gap: 8px 6px; }
-.look-ring .dr { display: grid; justify-items: center; align-content: start; }
-.look-ring .dr .ring { width: 100%; max-width: 66px; height: auto; aspect-ratio: 1; grid-area: 1 / 1; }
+/* память и диски кольцами: высота как у CPU и GPU, чтобы ряды были одинаковыми */
+.mring { display: none; }
+.look-ring .mem .bar, .look-ring .mem .memv, .look-ring .mem .gb, .look-ring .mem .sub { display: none; }
+.look-ring .mring { display: flex; justify-content: space-between; gap: 8px; height: 74px; margin-top: 5px; }
+.mtxt { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 0; white-space: nowrap; }
+.mtxt .mu { font-size: 25px; }
+.mof { font-size: 12px; color: var(--dim); }
+.mof b { color: var(--dig, var(--text)); font-weight: 600; }
+.mr { position: relative; width: 74px; height: 74px; flex: none; }
+.mr .mp { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.mr .mp small { font-size: 11px; margin-top: 6px; }
+.look-ring .mr .ring { width: 100%; height: 100%; }
+.look-ring .dsk .rows { display: grid; flex: none; grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); align-content: start; min-height: 74px; gap: 6px; margin-top: 5px; }
+.look-ring .dr { display: grid; justify-items: center; align-items: center; height: 74px; }
+.look-ring .dr .ring { width: 100%; max-width: 74px; height: auto; aspect-ratio: 1; grid-area: 1 / 1; }
 .look-ring .dl1 { display: contents; }
-.look-ring .dl1 .ltr { grid-area: 1 / 1; align-self: center; z-index: 1; font-size: 18px; }
-.look-ring .dl1 .fr { grid-area: 2 / 1; margin: 0; font-size: 12px; color: var(--dim); white-space: nowrap; }
+.look-ring .dl1 > .ltr, .look-ring .dl1 > .fr { grid-area: 1 / 1; z-index: 1; margin: 0; line-height: 1.1; white-space: nowrap; }
+.look-ring .dl1 > .ltr { font-size: 17px; transform: translateY(-7px); }
+.look-ring .dl1 > .fr { font-size: 10.5px; color: var(--dim); transform: translateY(10px); }
+.look-ring .dl1 .fr b { font-size: 12px; }
 .look-ring .dr .bar, .look-ring .dr .io, .look-ring .frl { display: none; }
 .ring.lv-warm .fg { stroke: var(--warm); }
 .ring.lv-hot .fg { stroke: var(--hot); }
 @container (max-width: 219px) {
-  .look-ring .mem .mring { grid-area: 2 / 1 / auto / -1; justify-self: center; }
-  .look-ring .mem .sub { grid-area: 3 / 1 / auto / -1; justify-self: center; }
+  .look-ring .mring { height: 64px; }
+  .mr { width: 64px; height: 64px; }
+  .mr .mp { font-size: 19px; }
+  .mtxt { padding: 2px 0; }
+  .mtxt .mu { font-size: 22px; }
+  .look-ring .dsk .rows { min-height: 64px; }
+  .look-ring .dr { height: 64px; }
 }
 /* ===== вид «Строки» ===== */
 .look-rows .grid { gap: 0 8px; }

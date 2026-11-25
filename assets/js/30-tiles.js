@@ -98,13 +98,16 @@ var TILE_BUILD = {
   },
 
   mem: function () {
-    var el = mk('<div class="tile mem" data-m="mem" data-tip="mem">' + head('mem', badge() + '<span class="gb"></span><span class="num memv">0<small>%</small></span>') + bar() + '<div class="mring">' + ring() + '<span class="num mp">0<small>%</small></span></div><div class="cap sub">&nbsp;</div></div>');
+    var el = mk('<div class="tile mem" data-m="mem" data-tip="mem">' + head('mem', badge() + '<span class="gb"></span><span class="num memv">0<small>%</small></span>') + bar() + '<div class="mring"><div class="mtxt"><span class="num mu"></span><span class="mof"></span></div>' +
+      '<div class="mr">' + ring() + '<span class="num mp">0<small>%</small></span></div></div><div class="cap sub">&nbsp;</div></div>');
     return {
       el: el,
       update: function (s) {
         var m = s.mem; el.hidden = !m; if (!m) return;
         $('.gb', el).innerHTML = $('.sub', el).innerHTML = m.usedGB.toFixed(1) + '<span class="gl"> из ' + m.totalGB.toFixed(0) + '</span> ГБ';
         $('.memv', el).innerHTML = $('.mp', el).innerHTML = Math.round(m.pct) + '<small>%</small>';
+        $('.mu', el).innerHTML = m.usedGB.toFixed(1) + '<small> ГБ</small>';
+        $('.mof', el).innerHTML = 'из <b>' + m.totalGB.toFixed(0) + '</b> ГБ';
         var lv = Alarm.isOn('mem') ? 'hot' : '';
         setBar($('.bar', el), m.pct, lv); setRing($('.ring', el), m.pct, lv);
         setAlarm(el, Alarm.isOn('mem'), '');
