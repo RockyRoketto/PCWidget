@@ -33,6 +33,16 @@ var TILE_OPTS = {
     (curMode() === 'full' ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
   procs: function () { return curMode() !== 'full' ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
 };
+TILE_OPTS.claude = function () { return '<div data-cl>' + claudeOpts() + '</div>'; };
+// Лимиты пишет маленький мод внутри Claude Code; кнопка кладёт его в ~/.claude/skills или убирает.
+function claudeOpts() {
+  var c = S && S.claude, has = !!(c && c.limits), fresh = has && Date.now() / 1000 - c.limitsAt < 7 * 86400;
+  var hint = function (t, cls) { return '<div class="hint' + (cls || '') + '">' + t + '</div>'; }, err = SYS.claudeErr ? hint('Не вышло: ' + esc(SYS.claudeErr), ' bad') : '';
+  if (SYS.claude === 'on') return '<div class="ol">Лимиты подключены' + ghost('claudemod:0', 'Отключить') + '</div>' + (has ? '' : hint('Перезапусти Claude и отправь сообщение в чате Code')) + err;
+  if (SYS.claude !== 'off') return hint('Claude Code на этом ПК не найден');
+  if (fresh) return hint('Лимиты уже приходят, подключать не нужно', ' s-ok');
+  return '<div class="ol">Лимиты' + ghost('claudemod:1', 'Подключить') + '</div>' + hint('Виджет положит маленький мод в папку .claude/skills. Настройки Claude не меняются, токены не тратятся.') + err;
+}
 var setState = { tab: 'look', open: '', sure: false };
 
 var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks', claudew: 'claude' };
@@ -125,6 +135,8 @@ function buildSettings() {
       n.hidden = v == null; if (v != null) n.style.left = zonePos(v) + '%';
     });
     cityHint($('[data-hint]', body));
+    var cl = $('[data-cl]', body), html = cl && claudeOpts();
+    if (cl && cl.dataset.was !== html) { cl.dataset.was = html; cl.innerHTML = html; }
   }
   function changed() { saveCfg(); applySetBody(); }
   // Выбор в группе меняет только отметку: список не пересобирается и не мигает.
@@ -166,6 +178,7 @@ function buildSettings() {
       var id = k.slice(5), row = t.closest('.trow');
       setOn(curMode(), id, t.checked); row.classList.toggle('off', !t.checked); changed();
       if (id === 'weather' && t.checked && !CFG.city) { setState.open = id; row.classList.add('open'); } // погоде нужен город: сразу раскрываем
+      if (id === 'claude' && t.checked && SYS.claude === 'off' && !(S && S.claude && S.claude.limits)) { setState.open = id; row.classList.add('open'); }
       update();
     } else if (k) { CFG[k] = t.checked; changed(); }
   });

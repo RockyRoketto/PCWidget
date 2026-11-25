@@ -33,6 +33,7 @@ type claudeSvc struct {
 
 func startClaude() *claudeSvc {
 	c := &claudeSvc{wake: make(chan struct{}, 1), pos: map[string]int64{}}
+	go refreshClaudeMod(claudeDir())
 	go c.loop()
 	return c
 }
@@ -80,6 +81,24 @@ func (c *claudeSvc) loop() {
 		c.cur = st
 		c.mu.Unlock()
 	}
+}
+
+// claudeModErr — почему не вышло подключить или отключить лимиты (для строки в настройках).
+var claudeModErr string
+
+func setClaudeMod(on bool) {
+	var err error
+	if on {
+		err = installClaudeMod(claudeDir())
+	} else {
+		err = removeClaudeMod(claudeDir())
+	}
+	claudeModErr = ""
+	if err != nil {
+		logf("claude mod: %v", err)
+		claudeModErr = err.Error()
+	}
+	sendSys()
 }
 
 func claudeDir() string {

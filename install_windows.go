@@ -139,6 +139,7 @@ func runUninstall() {
 	}
 	killOthers()
 	deleteTask()
+	_ = removeClaudeMod(claudeDir())
 	_ = registry.DeleteKey(registry.LOCAL_MACHINE, uninstallKey)
 	msgBox("PC Widget удалён.", windows.MB_OK|windows.MB_ICONINFORMATION)
 	dir := installDir(os.Getenv("ProgramFiles"))

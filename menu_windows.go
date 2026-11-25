@@ -32,6 +32,7 @@ func sysInfo() string {
 		"installed": installed(), "autostart": app.settings.autostartEnabled(),
 		"driver": pawnInstalled(), "sensors": hub != nil && hub.available(),
 		"topmost": app.settings.Topmost, "visible": app.visible,
+		"claude": claudeModState(claudeDir()), "claudeErr": claudeModErr,
 	})
 	return string(b)
 }
@@ -152,6 +153,8 @@ func onSys(c string) {
 		moveToCorner()
 	case "autostart:1", "autostart:0":
 		setAutostart(c == "autostart:1")
+	case "claudemod:1", "claudemod:0":
+		setClaudeMod(c == "claudemod:1")
 	}
 }
 

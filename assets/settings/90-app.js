@@ -36,6 +36,7 @@ window.__cfg = function (c) {
 window.__sys = function (sys) {
   SYS = sys; TOPMOST = sys.topmost;
   if (settings && setState.tab === 'sys') settings.render();
+  else if (settings) settings.update();
 };
 
 // ---- окно ----

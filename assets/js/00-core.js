@@ -45,7 +45,7 @@ function defaults() {
 var CFG = null;        // задаётся в конце 05-layout.js, потом из __init
 var S = null;          // последний снимок от Go
 var TOPMOST = false;
-var SYS = { installed: false, autostart: false, driver: false, sensors: false }; // состояние системы от Go
+var SYS = { installed: false, autostart: false, driver: false, sensors: false, claude: 'none', claudeErr: '' }; // состояние системы от Go
 
 // Настройки из файла накладываются на значения по умолчанию, лишнее и битое отбрасывается.
 function mergeCfg(saved) {
