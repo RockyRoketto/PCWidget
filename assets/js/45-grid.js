@@ -8,18 +8,46 @@ var gridView = [];     // [{ row: [id, id], items: [{ id, b }] }]
 function editButton() { return mk('<button class="ed" data-nodrag data-e="x" title="Скрыть">' + ICONS.hide + '</button>'); }
 function emptyNote() { return mk('<div class="empty">Пусто. Правая кнопка мыши: «Изменить плитки»</div>'); }
 
-// Ширины: две видимые плитки ряда стоят рядом, одна растягивается.
+// Раскладка: две видимые плитки ряда стоят рядом, одна растягивается. Высота в модулях 52px:
+// плитки одного ряда (в Широкой — двух соседних рядов) тянутся до самой высокой, поэтому дыр нет.
 var packSig = '';
-function repack() {
-  var sig = gridView.map(function (r) {
-    return r.items.filter(function (x) { return !x.b.el.hidden; }).map(function (x) { return x.id; }).join('+');
-  }).join();
-  if (sig === packSig) return;
-  packSig = sig;
+function repack(root) {
+  var cols = CFG.mode === 'wide' ? 4 : 2, units = [];
   gridView.forEach(function (r) {
-    var vis = r.items.filter(function (x) { return !x.b.el.hidden; }), split = isSplit(vis.map(function (x) { return x.id; }));
-    vis.forEach(function (x) { x.b.el.classList.toggle('w2', !split); });
+    var vis = r.items.filter(function (x) { return !x.b.el.hidden; });
+    if (!vis.length) return;
+    units.push(vis);
   });
+  // строки сетки: в Панели ряд, в Широкой два ряда рядом (последний одинокий — на всю ширину)
+  // ряд из плиток в один модуль (пик, ПК включён) идёт отдельной строкой: рядом с высокими он бы растянулся
+  var lines = [], cur = [];
+  var thin = function (u) { return u.every(function (x) { return x.b.span && x.b.span() === 1; }); };
+  units.forEach(function (u) {
+    if (cols === 4 && thin(u)) { if (cur.length) lines.push(cur); lines.push([u]); cur = []; return; }
+    cur.push(u);
+    if (cur.length === cols / 2) { lines.push(cur); cur = []; }
+  });
+  if (cur.length) lines.push(cur);
+  var sig = [];
+  lines.forEach(function (ln, li) {
+    var per = cols / ln.length; // колонок на ряд
+    ln.forEach(function (u) { u.forEach(function (x) { x.b.el.classList.toggle('w2', per / u.length >= 2); }); });
+    var h = 1;
+    ln.forEach(function (u) { u.forEach(function (x) { h = Math.max(h, x.b.span ? x.b.span() : 2); }); });
+    ln.forEach(function (u) {
+      u.forEach(function (x) {
+        var c = per / u.length, st = x.b.el.style;
+        st.gridColumn = 'span ' + c; st.gridRow = 'span ' + h;
+        x.b.el.classList.toggle('first', li === 0);
+        sig.push(x.id + c + h);
+      });
+    });
+  });
+  sig = sig.join();
+  if (sig === packSig) return false;
+  packSig = sig;
+  if (root) placeFills(root);
+  return true;
 }
 
 // Переставляет уже построенные плитки по модели (при перетаскивании).
@@ -32,11 +60,11 @@ function reflowFull(grid) {
     items.forEach(function (x) { grid.appendChild(x.b.el); });
     if (items.length) gridView.push({ items: items });
   });
-  packSig = ''; repack();
+  packSig = ''; repack(grid);
 }
 
 function buildFull() {
-  var el = mk('<div class="full look-' + CFG.look + (editing ? ' editing' : '') + '"><div class="grid"></div></div>'), grid = $('.grid', el);
+  var el = mk('<div class="full m-' + CFG.mode + (editing ? ' editing' : '') + '"><div class="grid"></div></div>'), grid = $('.grid', el);
   gridView = []; packSig = '';
   CFG.rows.forEach(function (row) {
     var items = shownIn(row).map(function (id) {
@@ -50,11 +78,15 @@ function buildFull() {
   });
   if (!gridView.length) el.appendChild(emptyNote());
   repack();
-  editEvents(el, '.tile', function (id) { setOn('full', id, false); }, dropAt, function (id, d) { moveTile(id, d.to, d.how); }, function () { reflowFull(grid); });
+  editEvents(el, '.tile', function (id) { setOn(CFG.mode, id, false); }, dropAt, function (id, d) { moveTile(id, d.to, d.how); }, function () { reflowFull(grid); });
+  var each = function (f) { gridView.forEach(function (r) { r.items.forEach(f); }); };
   return {
     el: el,
-    update: function (s) { gridView.forEach(function (r) { r.items.forEach(function (x) { x.b.update(s); }); }); repack(); },
-    tick: function () { gridView.forEach(function (r) { r.items.forEach(function (x) { if (x.b.tick) x.b.tick(); }); }); }
+    update: function (s) {
+      each(function (x) { x.b.update(s); });
+      if (repack(el)) each(function (x) { x.b.update(s); }); // ширина поменялась: перерисовать под неё
+    },
+    tick: function () { each(function (x) { if (x.b.tick) x.b.tick(); }); }
   };
 }
 
@@ -86,7 +118,7 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
     ts.forEach(function (t) { t.style.transform = ''; });
     var out = ts.map(function (t) {
       var r = t.getBoundingClientRect();
-      return { id: t.getAttribute('data-id'), el: t, l: r.left, t: r.top, r: r.right, b: r.bottom, half: mode === 'full' && !t.classList.contains('w2') };
+      return { id: t.getAttribute('data-id'), el: t, l: r.left, t: r.top, r: r.right, b: r.bottom, half: !!GRID_MODES[mode] && !t.classList.contains('w2') };
     });
     ts.forEach(function (t, i) { t.style.transform = keep[i]; });
     return out;

@@ -1,0 +1,19 @@
+/* Тема «Лист»: одно стекло под всем виджетом (размытие делает DWM), без вложенных карточек.
+   Ячейки разделены волосками, индикатор цвета акцента: из Windows или свой. Плотность стекла — --glass. */
+body.theme-sheet { --R: 0; --r: 0; --r2: 0; --vw: 400; --vw2: 400; --tile: none; --tile2: none; --a: var(--accent); }
+body.theme-sheet.tone-dark {
+  --text: #fff; --dim: rgba(255, 255, 255, .66); --lab: rgba(255, 255, 255, .92); --sheet: rgba(18, 23, 32, var(--glass)); --track: rgba(255, 255, 255, .18); --hair: rgba(255, 255, 255, .12);
+  --ctl: rgba(255, 255, 255, .08); --pop: rgba(30, 35, 46, .97); --edge: rgba(255, 255, 255, .13); --ok: #7fe0a6; --warm: #ffc65c; --hot: #ff7b6b;
+}
+body.theme-sheet.tone-light {
+  --text: #14202b; --dim: rgba(20, 32, 43, .66); --lab: #14202b; --sheet: rgba(246, 249, 251, var(--glass)); --track: rgba(20, 32, 43, .14); --hair: rgba(20, 32, 43, .12);
+  --ctl: rgba(20, 32, 43, .06); --pop: rgba(248, 250, 252, .97); --edge: rgba(20, 32, 43, .14); --ok: #17804a; --warm: #a85f00; --hot: #c8281d;
+}
+/* волоски между рядами и группами */
+.theme-sheet .tile:not(.first)::after { content: ""; position: absolute; left: 12px; right: 12px; top: -4px; height: 1px; background: var(--hair); }
+.theme-sheet .two .cb + .cb::before { content: ""; position: absolute; left: -4px; top: 12px; bottom: 12px; width: 1px; background: var(--hair); }
+.theme-sheet .two .cb { overflow: visible; }
+.theme-sheet .mini.col .cr.sep::after { content: ""; position: absolute; left: 8px; right: 8px; top: -2px; height: 1px; background: var(--hair); }
+.theme-sheet .mini.strip .cr + .cr::after { content: ""; position: absolute; left: -4px; top: 8px; bottom: 8px; width: 1px; background: var(--hair); }
+.theme-sheet .mini .cr { overflow: visible; }
+.theme-sheet .cb.alarm, .theme-sheet .cr.alarm { border-radius: 8px; }

@@ -16,7 +16,7 @@ func TestBuildPage(t *testing.T) {
 	if strings.Contains(p, "{{CSS}}") || strings.Contains(p, "{{JS}}") {
 		t.Error("метки не заменены")
 	}
-	for _, want := range []string{"theme-glass", "__stats", "postMessage"} {
+	for _, want := range []string{"theme-sheet", "__stats", "postMessage"} {
 		if !strings.Contains(p, want) {
 			t.Errorf("в странице нет %q", want)
 		}

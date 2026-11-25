@@ -1,61 +1,68 @@
 'use strict';
-// Компактный режим: «колонка» (строки: иконка, значение, температура) и «полоска» (то же в одну строку).
-// get -> { v: значение, u: единица, t: температура, thr: её порог, pct: полоска загрузки, sm: подпись справа,
-//          lv: цвет значения, icon: другая иконка, letter: буква вместо иконки }
+// Компактные режимы: Колонка (строки), Полоска (то же в ряд), Квадрат (ячейки 2 в ряд).
+// Строка: название, середина (градусы или подпись), значение, тонкая шкала внизу — та же, что в плитках.
+// get -> { v: значение, u: единица, t: температура, thr: её порог, pct: шкала, sm: подпись, lv: цвет значения }
 
 function loadCell(key, thrKey) {
   return function (s) { var d = s[key]; return d && { v: Math.round(d.load), u: '%', t: d.temp, thr: CFG.thr[thrKey], pct: d.load }; };
 }
 function limitCell(kind) {
-  return function (s) { var l = limitBy(s, kind); return l && { v: Math.round(l.pct), u: '%', pct: clamp(l.pct, 0, 100), lv: limitLevel(l.pct), sm: resetText(l) }; };
+  return function (s) { var l = limitBy(s, kind); return l && { v: Math.round(l.pct), u: '%', pct: clamp(l.pct, 0, 100), lv: limitLevel(l.pct), sm: resetText(l), mark: CFG.thr.claude }; };
 }
 function limitAlarm(kind) { return function () { var l = S && limitBy(S, kind); return !!l && Alarm.isOn('claude') && l.pct >= CFG.thr.claude - Alarm.HYST; }; }
-function rateCell(bps) { var p = rateParts(bps); return { v: p[0], u: p[1], rate: true }; }
+function rateCell(bps) { var p = rateParts(bps); return { v: p[0], u: p[1] }; }
 function anyDiskAlarm() { return (S && S.disks || []).some(function (d) { return Alarm.isOn('disk:' + d.name); }); }
 function shortUptime(sec) {
   var d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
   return d ? d + ' д ' + h + ' ч' : h ? h + ' ч ' + m + ' м' : m + ' мин';
 }
 
-// g — группа: между разными группами в колонке тонкая линия. cls — ширина значения в полоске.
+// n — название, g — группа (между группами в колонке тонкая черта), face — лицо часов или календаря в колонке.
 var CSPEC = {
-  clock: { g: 'time', icon: 'clock', cls: 'vt', clock: true, face: function () { return CFG.clockView === 'digital' ? null : clockFace(); }, get: function () { var d = new Date(); return { v: clockText(d), sm: d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' }) }; } },
-  weather: { g: 'time', icon: 'weather', cls: 'vt', get: function (s) { var w = s.weather; return w && { v: Math.round(w.temp) + '°', icon: w.icon, sm: 'ощ. ' + Math.round(w.feels) + '°' }; } },
-  calendar: { g: 'time', icon: 'calendar', cls: 'vt', face: calendarFace, get: function () { return { v: new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '') }; } },
-  cpu: { g: 'load', m: 'cpu', icon: 'cpu', load: true, alarm: function () { return Alarm.isOn('cpuTemp'); }, get: loadCell('cpu', 'cpuTemp') },
-  gpu: { g: 'load', m: 'gpu', icon: 'gpu', load: true, alarm: function () { return Alarm.isOn('gpuTemp'); }, get: loadCell('gpu', 'gpuTemp') },
-  mem: { g: 'load', m: 'mem', icon: 'mem', load: true, alarm: function () { return Alarm.isOn('mem'); },
-    get: function (s) { return s.mem && { v: Math.round(s.mem.pct), u: '%', pct: s.mem.pct, sm: s.mem.usedGB.toFixed(0) + ' ГБ' }; } },
-  down: { g: 'net', m: 'net', icon: 'down', get: function (s) { return s.net && rateCell(s.net.down); } },
-  up: { g: 'net', m: 'net', icon: 'up', get: function (s) { return s.net && rateCell(s.net.up); } },
-  ping: { g: 'net', m: 'net', icon: 'ping', cls: 'vv', get: function (s) { return s.net && s.net.ping != null ? { v: Math.round(s.net.ping), u: 'мс', rate: true, lv: pingLevel(s.net.ping) } : null; } },
-  disk: { g: 'disk', m: 'disks', icon: 'disk', alarm: anyDiskAlarm,
+  clock: { g: 'time', n: function () { return ruDate(new Date(), { weekday: 'short', day: 'numeric' }); }, clock: true, face: function () { return CFG.clockView === 'digital' ? null : clockFace(); },
+    get: function () { return { v: clockText(new Date()) }; } },
+  weather: { g: 'time', n: function (s) { return s.weather ? ICONS[s.weather.icon] || '' : ''; }, icon: true,
+    get: function (s) { var w = s.weather; return w && { v: Math.round(w.temp) + '°', sm: 'ощ. ' + Math.round(w.feels) + '°' }; } },
+  calendar: { g: 'time', n: function () { return ''; }, face: calendarFace,
+    get: function () { var d = new Date(); return { v: ruDate(d, { day: 'numeric', month: 'short' }).replace('.', ''), sm: ruDate(d, { weekday: 'short' }) }; } },
+  cpu: { g: 'load', m: 'cpu', bar: 1, n: 'CPU', alarm: function () { return Alarm.isOn('cpuTemp'); }, get: loadCell('cpu', 'cpuTemp') },
+  gpu: { g: 'load', m: 'gpu', bar: 1, n: 'GPU', alarm: function () { return Alarm.isOn('gpuTemp'); }, get: loadCell('gpu', 'gpuTemp') },
+  mem: { g: 'load', m: 'mem', bar: 1, n: 'RAM', alarm: function () { return Alarm.isOn('mem'); },
+    get: function (s) { return s.mem && { v: Math.round(s.mem.pct), u: '%', pct: s.mem.pct, sm: Math.round(s.mem.usedGB) + ' ГБ', mark: CFG.thr.mem }; } },
+  down: { g: 'net', m: 'net', n: '↓', get: function (s) { return s.net && rateCell(s.net.down); } },
+  up: { g: 'net', m: 'net', n: '↑', get: function (s) { return s.net && rateCell(s.net.up); } },
+  ping: { g: 'net', m: 'net', n: 'Пинг', get: function (s) { return s.net && s.net.ping != null ? { v: Math.round(s.net.ping), u: 'мс', lv: pingLevel(s.net.ping) } : null; } },
+  disk: { g: 'disk', m: 'disks', n: 'Диск', alarm: anyDiskAlarm,
     get: function (s) {
       var list = (s.disks || []).filter(function (d) { return d.read != null; });
       return list.length ? rateCell(Math.max.apply(null, list.map(function (d) { return Math.max(d.read, d.write); }))) : null;
     } },
-  space: { g: 'disk', m: 'disks', icon: 'disk', load: true, alarm: anyDiskAlarm, // самый заполненный диск
-    get: function (s) {
-      var d = (s.disks || []).slice().sort(function (a, b) { return b.usedPct - a.usedPct; })[0];
-      return d && { v: Math.round(d.usedPct), u: '%', pct: d.usedPct, sm: d.freeGB.toFixed(0) + ' ГБ', letter: d.name.replace(':', '') };
-    } },
-  claude: { g: 'claude', m: 'claude', icon: 'claude', load: true, alarm: limitAlarm('five_hour'), get: limitCell('five_hour') },
-  claudew: { g: 'claude', m: 'claude', icon: 'claudew', load: true, alarm: limitAlarm('seven_day'), get: limitCell('seven_day') },
-  uptime: { g: 'time2', icon: 'uptime', cls: 'vt', get: function (s) { return s.uptime != null ? { v: shortUptime(s.uptime), small: true } : null; } }
+  space: { g: 'disk', m: 'disks', bar: 1, alarm: anyDiskAlarm, n: function (s) { var d = fullest(s); return d ? esc(d.name.replace(':', '')) : ''; },
+    get: function (s) { var d = fullest(s); return d && { v: Math.round(d.usedPct), u: '%', pct: d.usedPct, sm: gbParts(d.freeGB).join(' '), mark: CFG.thr.disk }; } },
+  claude: { g: 'claude', m: 'claude', bar: 1, n: 'Claude', alarm: limitAlarm('five_hour'), get: limitCell('five_hour') },
+  claudew: { g: 'claude', m: 'claude', bar: 1, n: 'Неделя', alarm: limitAlarm('seven_day'), get: limitCell('seven_day') },
+  uptime: { g: 'time2', n: 'ПК', get: function (s) { return s.uptime != null ? { v: shortUptime(s.uptime) } : null; } }
 };
+function fullest(s) { return (s.disks || []).slice().sort(function (a, b) { return b.usedPct - a.usedPct; })[0]; }
 
-function buildCompact(strip) {
-  var mode = strip ? 'strip' : 'column', list = CFG.mini[mode].filter(function (t) { return t.on; });
-  var root = mk('<div class="' + (strip ? 'strip' : 'col') + (editing ? ' editing' : '') + '"></div>');
+var COMPACT_CLS = { column: 'col', strip: 'strip', square: 'sqr' };
+function buildCompact(mode) {
+  var list = CFG.mini[mode].filter(function (t) { return t.on; }), strip = mode === 'strip';
+  var root = mk('<div class="mini ' + COMPACT_CLS[mode] + (editing ? ' editing' : '') + '"></div>');
   var items = list.map(function (t, i) {
-    var sp = CSPEC[t.id], face = !strip && sp.face ? sp.face() : null, prev = i > 0 && CSPEC[list[i - 1].id];
-    var el = mk('<div class="' + (strip ? 'sb' : 'cr') + '" data-id="' + t.id + '"' + (sp.m ? ' data-m="' + sp.m + '"' : '') + '>' + I(sp.icon) +
-      '<span class="num ' + (sp.cls || (sp.load ? 'vv' : 'vr')) + '">0</span><span class="s"></span>' + (sp.load ? '<span class="mb"><i></i></span>' : '') + '</div>');
-    if (!strip && prev && prev.g !== sp.g) el.classList.add('sep');
+    var sp = CSPEC[t.id], face = mode === 'column' && sp.face ? sp.face() : null, prev = i > 0 && CSPEC[list[i - 1].id];
+    var el = mk('<div class="cr" data-id="' + t.id + '"' + (sp.m ? ' data-m="' + sp.m + '"' : '') + '><b class="n"></b><span class="s"></span><span class="num v"></span></div>');
+    var vz = null;
+    if (sp.bar) {
+      vz = makeViz(mode === 'square' && CFG.theme === 'fill' ? 'level' : 'run');
+      vz.el.classList.add('lo');
+      if (vz.bg) el.insertBefore(vz.el, el.firstChild); else el.appendChild(vz.el);
+    }
+    if (mode === 'column' && prev && prev.g !== sp.g) el.classList.add('sep');
     if (editing) { el.setAttribute('data-nodrag', ''); el.appendChild(editButton()); }
     root.appendChild(el);
-    if (face) { el.classList.add('facerow'); $$('.i, .num, .s', el).forEach(function (n) { n.remove(); }); el.appendChild(face.el); }
-    return { sp: sp, face: face, el: el, ic: $('.i', el), v: $('.num', el), s: $('.s', el), mb: $('.mb i', el) };
+    if (face) { el.classList.add('facerow'); $$('.n, .s, .v', el).forEach(function (n) { n.remove(); }); el.appendChild(face.el); }
+    return { sp: sp, face: face, el: el, vz: vz, n: $('.n', el), v: $('.v', el), s: $('.s', el) };
   });
   if (!items.length) root.appendChild(emptyNote());
   editEvents(root, '[data-id]', function (id) { setOn(mode, id, false); },
@@ -67,24 +74,25 @@ function buildCompact(strip) {
         var e = $('[data-id="' + t.id + '"]', root);
         if (!e) return;
         root.appendChild(e);
-        if (!strip) e.classList.toggle('sep', !!prev && prev.g !== CSPEC[t.id].g);
+        if (mode === 'column') e.classList.toggle('sep', !!prev && prev.g !== CSPEC[t.id].g);
         prev = CSPEC[t.id];
       });
     });
+  function put(n, html) { if (n.__h !== html) { n.__h = html; n.innerHTML = html; } }
   function draw(it, s) {
     if (it.face) return it.face.tick();
-    var d = it.sp.get(s), inline = strip || !d || !d.rate; // в колонке единица скорости стоит справа
+    var d = it.sp.get(s);
     it.el.hidden = !d; if (!d) return;
-    it.v.innerHTML = d.v + (inline && d.u ? '<small>' + d.u + '</small>' : '');
-    it.v.classList.toggle('sml', !!d.small);
-    ['ok', 'warm', 'hot'].forEach(function (l) { it.v.classList.toggle('s-' + l, d.lv === l); });
-    var ic = d.letter ? '<b class="let">' + esc(d.letter) + '</b>' : d.icon ? ICONS[d.icon] : '';
-    if (ic && it.ico !== ic) { it.ico = ic; it.ic.innerHTML = ic; }
-    var temp = d.t != null;
-    it.el.classList.toggle('hast', temp);
-    it.s.className = 's ' + (temp ? 's-' + level(d.t, d.thr) : 'u');
-    it.s.textContent = temp ? Math.round(d.t) + '°' : strip ? '' : d.rate ? d.u : d.sm || '';
-    if (it.mb) it.mb.style.width = clamp(d.pct, 0, 100) + '%';
+    var name = typeof it.sp.n === 'function' ? it.sp.n(s) : it.sp.n;
+    put(it.n, name);
+    it.n.classList.toggle('ico', !!it.sp.icon);
+    put(it.v, d.v + (d.u ? '<small>' + d.u + '</small>' : ''));
+    var temp = d.t != null, lv = temp ? level(d.t, d.thr) : d.lv || '';
+    it.v.className = 'num v' + (!temp && d.lv ? ' ' + d.lv : '');
+    put(it.s, temp ? Math.round(d.t) + '°' : mode === 'strip' ? '' : d.sm || '');
+    it.s.className = 's' + (temp ? ' num t ' + lv : '');
+    setLv(it.el, lv);
+    if (it.vz) it.vz.set({ pct: d.pct || 0, mark: d.mark });
     it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
   }
   return {
@@ -92,11 +100,12 @@ function buildCompact(strip) {
     tick: function () { if (S) items.forEach(function (it) { if (it.face || it.sp.clock) draw(it, S); }); },
     update: function (s) {
       items.forEach(function (it) { draw(it, s); });
-      // Ширина значений только растёт: полоска не дёргается, когда «9%» сменяется на «100%».
+      // Ширина значений в полоске только растёт: она не дёргается, когда «9%» сменяется на «100%».
       if (strip) items.forEach(function (it) {
         it.vw = Math.max(it.vw || 0, it.v.offsetWidth); it.v.style.minWidth = it.vw + 'px';
         it.sw = Math.max(it.sw || 0, it.s.offsetWidth); it.s.style.minWidth = it.sw + 'px';
       });
+      placeFills(root);
     }
   };
 }

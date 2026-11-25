@@ -1,0 +1,34 @@
+/* Тема «Заливка»: отдельные карточки, один градиент (--pal) на весь виджет.
+   Каждая карточка открывает свой кусок градиента по форме нагрузки: рельеф истории, уровень снизу, полоса слева.
+   Куда приходится кусок, считает placeFills (--W --H --X --Y). Окно прозрачно, карточки рисует страница. */
+body.theme-fill { --R: 0; --r: 16px; --r2: 11px; --vw: 600; --vw2: 600; --sheet: transparent; --aur: var(--pal); }
+body.theme-fill.tone-dark {
+  --text: #f7f9ff; --dim: rgba(232, 238, 255, .74); --lab: #f7f9ff; --tile: rgba(20, 24, 38, calc(.62 + .36 * var(--glass))); --tile2: var(--tile);
+  --track: rgba(255, 255, 255, .1); --hair: rgba(255, 255, 255, .1); --ctl: rgba(255, 255, 255, .08); --pop: #181c2a; --edge: rgba(255, 255, 255, .12);
+  --a: #fff; --ok: #8be3b5; --warm: #fff; --hot: #fff; --op: .92; --lo: .3; --crest: rgba(255, 255, 255, .34);
+}
+body.theme-fill.tone-light {
+  --text: #141c33; --dim: rgba(20, 28, 51, .7); --lab: #141c33; --tile: rgba(252, 253, 255, calc(.62 + .36 * var(--glass))); --tile2: var(--tile);
+  --track: rgba(20, 28, 51, .08); --hair: rgba(20, 28, 51, .1); --ctl: rgba(20, 28, 51, .06); --pop: #fbfcff; --edge: rgba(20, 28, 51, .13);
+  --a: #2d4a8c; --ok: #17804a; --warm: #8a4b00; --hot: #a3160c; --op: .62; --lo: .22; --crest: rgba(255, 255, 255, .9);
+}
+.theme-fill .full, .theme-fill .mini { padding: 2px; }
+.theme-fill .fill i { position: absolute; display: block; background: var(--aur); background-size: var(--W, 100%) var(--H, 100%); background-position: var(--X, 0) var(--Y, 0); }
+.theme-fill .is-warm .fill i, .theme-fill .is-hot .fill i, .theme-fill .alarm .fill i, .theme-fill .is-warm.fill i, .theme-fill .is-hot > .fill i { background-size: 100% 100%; background-position: 0 0; }
+.theme-fill .cb > .fill { top: 30px; }
+/* рельеф: у края полупрозрачно, книзу плотнее; гребень тонкой линией */
+.theme-fill .fill i.area { inset: 0; opacity: var(--op); -webkit-mask: linear-gradient(to top, #000 8%, rgba(0, 0, 0, var(--lo))); mask: linear-gradient(to top, #000 8%, rgba(0, 0, 0, var(--lo))); }
+.theme-fill .fill svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.theme-fill .fill path { fill: none; stroke: var(--crest); stroke-width: 1.25; }
+/* уровень: край растушёван, чтобы не резал цифры */
+.theme-fill .fill i.lvl { left: 0; right: 0; bottom: 0; opacity: var(--op); transition: height .5s; -webkit-mask: linear-gradient(transparent, rgba(0, 0, 0, .6) 22px, #000 80%); mask: linear-gradient(transparent, rgba(0, 0, 0, .6) 22px, #000 80%); }
+/* полоса в строке: слева тает, у края плотнее, край мягкий */
+.theme-fill .fill i.run { left: 0; top: 0; bottom: 0; opacity: var(--op); transition: width .5s; -webkit-mask: linear-gradient(to right, rgba(0, 0, 0, .34), #000 calc(100% - 14px), transparent); mask: linear-gradient(to right, rgba(0, 0, 0, .34), #000 calc(100% - 14px), transparent); }
+.theme-fill .cb:not(.has-vz) > .md, .theme-fill .cb.has-vz > .md { margin-block: 2px auto; }
+.theme-fill .cb:not(.has-vz):not(.lines) > .md { margin-block: auto; }
+.theme-fill .ln { padding: 0 8px; margin: 0 -4px; border-radius: 7px; background: var(--track); overflow: hidden; }
+.theme-fill .ln > *:not(.fill) { position: relative; z-index: 1; }
+.theme-fill .ln > .w small, .theme-fill .ln > .m { color: inherit; opacity: .8; }
+.theme-fill .mini.sqr .fill i.lvl { -webkit-mask: linear-gradient(transparent, #000 18px); mask: linear-gradient(transparent, #000 18px); }
+.theme-fill .alarm { animation: none; }
+.theme-fill .face-cb, .theme-fill .cb:not(.has-vz):not(.lines) { background: var(--tile); }

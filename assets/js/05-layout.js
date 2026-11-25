@@ -5,10 +5,10 @@
 
 var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'disks', 'claude', 'procs', 'records', 'uptime'];
 var OPT_OFF = { clock: 1, weather: 1, calendar: 1, claude: 1 };  // по умолчанию выключены
-var LOOK_WIDE = { cpu: 1, gpu: 1, mem: 1, net: 1, disks: 1 }; // в виде «Строки» всегда во всю ширину
 var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', claude: 'Claude', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён' };
 var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'down', 'up', 'ping', 'disk', 'space', 'claude', 'claudew', 'uptime'];
 var MINI_OFF = { clock: 1, weather: 1, calendar: 1, ping: 1, space: 1, claude: 1, claudew: 1, uptime: 1 };
+var SQUARE_ON = { cpu: 1, gpu: 1, mem: 1, down: 1 }; // квадрат 2x2
 var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', down: 'Сеть: приём', up: 'Сеть: отдача', ping: 'Пинг', disk: 'Диски: скорость', space: 'Диск: занято места', claude: 'Claude: 5 часов', claudew: 'Claude: неделя', uptime: 'ПК включён' };
 
 var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks', claudew: 'claude' }; // строка колонки -> плитка
@@ -16,7 +16,7 @@ function colorKey(id) { return MINI_TINT[id] || id; }
 
 function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['disks'], ['claude'], ['procs'], ['records', 'uptime']]; }
 function defaultHide() { var h = {}; Object.keys(OPT_OFF).forEach(function (id) { h[id] = 1; }); return h; }
-function defaultMini() { return MINI_IDS.map(function (id) { return { id: id, on: !MINI_OFF[id] }; }); }
+function defaultMini(m) { return MINI_IDS.map(function (id) { return { id: id, on: m === 'square' ? !!SQUARE_ON[id] : !MINI_OFF[id] }; }); }
 
 // Ряды из файла: лишнее и повторы отбрасываются, недостающие плитки встают своим рядом.
 function cleanRows(rows) {
@@ -44,12 +44,12 @@ function rowsFromTiles(tiles) {
   });
   return rows;
 }
-function cleanMini(list) {
+function cleanMini(list, m) {
   var seen = {}, out = [];
   (Array.isArray(list) ? list : []).forEach(function (t) {
     if (t && MINI_IDS.indexOf(t.id) >= 0 && !seen[t.id]) { seen[t.id] = 1; out.push({ id: t.id, on: t.on === true }); }
   });
-  if (!out.length) return defaultMini();
+  if (!out.length) return defaultMini(m);
   MINI_IDS.forEach(function (id) { if (!seen[id]) out.push({ id: id, on: false }); });
   return out;
 }
@@ -65,29 +65,29 @@ function mergeLayout(c, saved) {
     c.hide = defaultHide();
     saved.tiles.forEach(function (t) { if (t && TILE_IDS.indexOf(t.id) >= 0) { if (t.on === false) c.hide[t.id] = 1; else delete c.hide[t.id]; } });
   }
-  if (saved.mini) ['column', 'strip'].forEach(function (m) { c.mini[m] = cleanMini(saved.mini[m]); });
+  if (saved.mini) ['column', 'strip', 'square'].forEach(function (m) { if (saved.mini[m]) c.mini[m] = cleanMini(saved.mini[m], m); });
 }
 
 // ---- текущий режим ----
-function curMode() { return CFG.mode === 'full' ? 'full' : CFG.compact; }
-function setMode(m) { if (m === 'full') CFG.mode = 'full'; else if (m === 'column' || m === 'strip') { CFG.mode = 'compact'; CFG.compact = m; } }
+// Панель и Широкая собраны из одних плиток (общие ряды и скрытые), у компактных режимов свои списки.
+function curMode() { return CFG.mode; }
+function setMode(m) { if (MODES[m]) CFG.mode = m; }
 function miniBy(list, id) { return list.filter(function (t) { return t.id === id; })[0]; }
-function modeIds(m) { return m === 'full' ? TILE_IDS : MINI_IDS; }
-function tileName(m, id) { return (m === 'full' ? TILE_NAMES : MINI_NAMES)[id]; }
-function isOn(m, id) { return m === 'full' ? !CFG.hide[id] : miniBy(CFG.mini[m], id).on; }
+function modeIds(m) { return GRID_MODES[m] ? TILE_IDS : MINI_IDS; }
+function tileName(m, id) { return (GRID_MODES[m] ? TILE_NAMES : MINI_NAMES)[id]; }
+function isOn(m, id) { return GRID_MODES[m] ? !CFG.hide[id] : miniBy(CFG.mini[m], id).on; }
 function setOn(m, id, on) {
-  if (m !== 'full') miniBy(CFG.mini[m], id).on = on;
+  if (!GRID_MODES[m]) miniBy(CFG.mini[m], id).on = on;
   else if (on) delete CFG.hide[id];
   else CFG.hide[id] = 1;
 }
 function resetTiles(m) {
   var d = defaults();
-  if (m === 'full') { CFG.rows = d.rows; CFG.hide = d.hide; } else CFG.mini[m] = d.mini[m];
+  if (GRID_MODES[m]) { CFG.rows = d.rows; CFG.hide = d.hide; } else CFG.mini[m] = d.mini[m];
 }
 
 // ---- раскладка полного режима ----
-function alwaysWide(id) { return CFG.look === 'rows' && !!LOOK_WIDE[id]; }
-function canPair(a, b) { return !alwaysWide(a) && !alwaysWide(b); }
+function canPair() { return true; }
 // Стоят ли видимые плитки ряда рядом (иначе каждая во всю ширину).
 function isSplit(ids) { return ids.length === 2 && canPair(ids[0], ids[1]); }
 function rowOf(id) { return CFG.rows.filter(function (r) { return r.indexOf(id) >= 0; })[0]; }
@@ -142,7 +142,7 @@ function dropAt(rects, x, y, id) {
   if (canPair(id, best.id) && (u < .3 || u > .7)) return { to: best.id, how: u < .5 ? 'left' : 'right' };
   return { to: best.id, how: vert };
 }
-// То же для колонки и полоски: до или после ближайшей.
+// То же для колонки, полоски и квадрата: до или после ближайшей.
 function dropMini(rects, x, y, id, strip) {
   var best = null, bd = Infinity;
   rects.forEach(function (r) {

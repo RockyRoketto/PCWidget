@@ -12,7 +12,8 @@ function liveCfg() {
 }
 function applySetBody() {
   document.body.className = bodyClass();
-  setThemeVars(document.body.style, Math.max(CFG.glass, 70)); // настройкам нужна читаемая подложка
+  setThemeVars(document.body.style, Math.max(CFG.glass, 80)); // настройкам нужна читаемая подложка
+  post('style:' + styleKey());
 }
 
 // ---- вызовы из Go ----
@@ -34,7 +35,9 @@ window.__cfg = function (c) {
   if (settings && !isTyping()) settings.render();
 };
 window.__sys = function (sys) {
+  var acc = SYS.accent;
   SYS = sys; TOPMOST = sys.topmost;
+  if (acc !== sys.accent && CFG) { applySetBody(); if (settings && setState.tab === 'look') settings.render(); }
   if (settings && setState.tab === 'sys') settings.render();
   else if (settings) settings.update();
 };
@@ -51,3 +54,4 @@ document.addEventListener('keydown', function (e) {
 document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
 post('ready');
+if (darkMQ) darkMQ.addEventListener('change', function () { if (CFG && CFG.tone === 'auto') applySetBody(); });

@@ -1,0 +1,18 @@
+/* Тема «Прибор»: приборная доска. Плотная панель, ячейки-окошки, узкие цифры, деления вместо полос и кривых. */
+body.theme-gauge {
+  --R: 14px; --r: 4px; --r2: 4px; --vw: 400; --vw2: 350;
+  --font: Bahnschrift, "Segoe UI", system-ui, sans-serif; --vf: Bahnschrift, "Segoe UI", system-ui, sans-serif;
+}
+body.theme-gauge.tone-dark {
+  --text: #f1ead9; --dim: #9fb5b6; --lab: #d6dfd9; --sheet: #0e2229; --tile: #16323a; --tile2: #16323a; --track: #2c4b53; --hair: #23434b;
+  --ctl: #1d3d46; --pop: #10262d; --edge: #2c4b53; --a: #e9dfc3; --ok: #8fd6a8; --warm: #f3b04a; --hot: #ff6a4d;
+}
+body.theme-gauge.tone-light {
+  --text: #22302f; --dim: #5d6a68; --lab: #22302f; --sheet: #c9cfc6; --tile: #e8ebe2; --tile2: #e8ebe2; --track: #c8cec3; --hair: #b9c0b5;
+  --ctl: #d8ddd3; --pop: #e8ebe2; --edge: #b9c0b5; --a: #2f5d5c; --ok: #2c7a4b; --warm: #b86a00; --hot: #c5361b;
+}
+.theme-gauge .num { font-stretch: 87%; }
+.theme-gauge .md .v { letter-spacing: 0; }
+.theme-gauge .bar { border-radius: 0; }
+.theme-gauge .alarm { animation: none; box-shadow: inset 0 0 0 1.5px var(--hot); }
+.theme-gauge .tinted .cb, .theme-gauge .tinted.cr { --a: inherit; }

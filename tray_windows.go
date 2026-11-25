@@ -27,15 +27,15 @@ const (
 	cmdPawn      = 7
 	cmdExit      = 9
 	cmdTheme     = 10 // 10..13
-	cmdMode      = 20 // 20..22
+	cmdMode      = 20 // 20..24
 )
 
 // Порядок совпадает с ключами в странице (assets/js/00-core.js).
 var (
-	themeKeys = []string{"glass", "apple", "aero", "terminal"}
-	themeText = []string{"Стекло", "Apple", "Frutiger Aero", "Терминал"}
-	modeKeys  = []string{"full", "column", "strip"}
-	modeText  = []string{"Полный", "Колонка", "Полоска"}
+	themeKeys = []string{"sheet", "gauge", "fill"}
+	themeText = []string{"Лист", "Прибор", "Заливка"}
+	modeKeys  = []string{"full", "wide", "column", "strip", "square"}
+	modeText  = []string{"Панель", "Широкая", "Колонка", "Полоска", "Квадрат"}
 )
 
 type notifyIconData struct {
@@ -125,9 +125,6 @@ func showNativeMenu() {
 		topFlags |= mfChecked
 	}
 	curMode := app.brief.Mode
-	if curMode == "compact" {
-		curMode = app.brief.Compact
-	}
 	pAppendMenu.Call(m, mfString, cmdToggle, uintptr(unsafe.Pointer(utf16(toggleText))))
 	pAppendMenu.Call(m, mfPopup, submenu(cmdMode, modeText, modeKeys, curMode), uintptr(unsafe.Pointer(utf16("Размер"))))
 	pAppendMenu.Call(m, mfPopup, submenu(cmdTheme, themeText, themeKeys, app.brief.Theme), uintptr(unsafe.Pointer(utf16("Тема"))))

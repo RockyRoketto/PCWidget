@@ -100,7 +100,7 @@ func createUI(s Settings, page string) bool {
 	app.taskbarC = uint32(tb)
 
 	applySize()
-	setStyle(app.brief.Theme)
+	setStyle(app.brief.Theme + ":dark") // светлость уточнит страница
 	if s.Topmost {
 		setTopmost(true)
 	}
@@ -211,6 +211,8 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 	case wmTray:
 		onTray(lp)
 		return 0
+	case wmSettingChange, wmDwmColorChanged:
+		sendSysIfAccent() // сменили цвет акцента Windows
 	case wmDestroy:
 		trayRemove()
 		pPostQuitMessage.Call(0)
@@ -258,7 +260,9 @@ func onPage(m string) {
 	case strings.HasPrefix(m, "claude:"):
 		claude.setOn(m[7:] == "1")
 	case strings.HasPrefix(m, "style:"):
-		setStyle(m[6:])
+		if m[6:] != app.style {
+			setStyle(m[6:])
+		}
 	}
 }
 
@@ -271,12 +275,18 @@ type uiBrief struct {
 }
 
 func readBrief() {
-	app.brief = uiBrief{Theme: "glass", Mode: "full", Compact: "column", Scale: 100}
+	app.brief = uiBrief{Theme: "sheet", Mode: "full", Compact: "column", Scale: 100}
 	if len(app.settings.UI) > 0 {
 		_ = json.Unmarshal(app.settings.UI, &app.brief)
 	}
 	if !slices.Contains(themeKeys, app.brief.Theme) { // убранная тема из старых настроек
-		app.brief.Theme = "glass"
+		app.brief.Theme = "sheet"
+	}
+	if app.brief.Mode == "compact" { // настройки до ver 3
+		app.brief.Mode = app.brief.Compact
+	}
+	if !slices.Contains(modeKeys, app.brief.Mode) {
+		app.brief.Mode = "full"
 	}
 	if app.brief.Scale < 50 || app.brief.Scale > 300 {
 		app.brief.Scale = 100

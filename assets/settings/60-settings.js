@@ -30,8 +30,8 @@ var TILE_OPTS = {
   },
   calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>' +
-    (curMode() === 'full' ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
-  procs: function () { return curMode() !== 'full' ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
+    (GRID_MODES[curMode()] ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
+  procs: function () { return !GRID_MODES[curMode()] ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
 };
 TILE_OPTS.claude = function () { return '<div data-cl>' + claudeOpts() + '</div>'; };
 // Лимиты пишет маленький мод внутри Claude Code; кнопка кладёт его в ~/.claude/skills или убирает.
@@ -47,19 +47,18 @@ var setState = { tab: 'look', open: '', sure: false };
 
 // Свой цвет плитки: «как было», готовые и любой.
 function colorOpts(key) {
-  if (CFG.mono) return '<div class="hint">Свой цвет плитки: выбери «Разноцветный» во вкладке «Вид»</div>';
   var cur = CFG.tileColors[key] || '', own = cur && TILE_TINTS.indexOf(cur) < 0;
   var b = function (v, name, cls) { return '<button class="tint sm' + (cls || '') + (cur === v ? ' on' : '') + '" data-tc="' + v + '" title="' + name + '" aria-label="' + name + '"' + (v ? ' style="background:' + v + '"' : '') + '></button>'; };
-  return '<div class="tints sm" data-for="' + key + '">' + b('', 'Как было', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
+  return '<div class="tints sm" data-for="' + key + '">' + b('', 'Цвет темы', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
     '<label class="tint sm custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + cur + '"' : '') + '><input type="color" data-tcc value="' + (cur || TILE_TINTS[1]) + '" aria-label="Свой цвет"></label></div>';
 }
 function modeCards() {
-  return '<div class="cards c3">' + Object.keys(MODES).map(function (m) {
+  return '<div class="cards c5">' + Object.keys(MODES).map(function (m) {
     return '<button class="card' + (curMode() === m ? ' on' : '') + '" data-k="mode" data-v="' + m + '">' + PICS[m] + MODES[m] + '</button>'; }).join('') + '</div>';
 }
 // Как переставлять: сразу на виджете, правка включена, пока открыта эта вкладка.
 function tilesHint(m) {
-  if (m !== 'full') return '<p class="hint how">Перетаскивай ' + (m === 'strip' ? 'блоки' : 'строки') + ' прямо на виджете. Крестик убирает.</p>';
+  if (!GRID_MODES[m]) return '<p class="hint how">Перетаскивай ' + (m === 'column' ? 'строки' : 'блоки') + ' прямо на виджете. Крестик убирает.</p>';
   var pic = function (body) { return '<svg viewBox="0 0 56 34" fill="currentColor">' + body + '</svg>'; };
   var b = function (x, y, w, h, o) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" opacity="' + (o || .3) + '"/>'; };
   var acc = function (x, y, w, h) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" fill="var(--accent)"/>'; };
@@ -72,30 +71,47 @@ function densityRow(text) {
   return label(text, CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="' + text + '">';
 }
 function densityBlock() {
-  var t = { glass: 'Плотность стекла', apple: 'Плотность карточек', aero: 'Плотность фона' }[CFG.theme];
+  var t = { sheet: 'Плотность стекла', fill: 'Плотность карточек' }[CFG.theme];
   return t ? densityRow(t) : '';
 }
-// Цвет: разноцветный, один от темы, быстрый выбор, свой. У каждой темы запоминается отдельно.
-function curTint() { return CFG.mono ? CFG.tints[CFG.theme] || 'theme' : 'multi'; }
-function setTint(v) {
-  CFG.mono = v !== 'multi';
-  if (v === 'theme') delete CFG.tints[CFG.theme]; else if (CFG.mono) CFG.tints[CFG.theme] = v;
+// Цвет темы: у «Листа» акцент (из Windows, готовый или свой), у «Заливки» градиент. У «Прибора» цвет свой.
+function dot(attr, v, name, bg, cls) { return '<button class="tint' + (cls || '') + '" ' + attr + '="' + v + '" title="' + name + '" aria-label="' + name + '"' + (bg ? ' style="background:' + bg + '"' : '') + '></button>'; }
+function colorBlock() {
+  if (CFG.theme === 'sheet') {
+    return label('Акцент', ' ') + '<div class="tints">' + dot('data-acc', 'win', 'Как в Windows', SYS.accent || ACCENTS[0], ' win') + '<i class="tsep"></i>' +
+      ACCENTS.map(function (c) { return dot('data-acc', c, 'Цвет ' + c, c); }).join('') +
+      '<label class="tint custom" title="Свой цвет"><input type="color" data-accc aria-label="Свой цвет"></label></div>';
+  }
+  if (CFG.theme === 'fill') {
+    return label('Градиент', ' ') + '<div class="tints">' + dot('data-pal', 'win', 'Из цвета Windows', gradOf([mixTo(SYS.accent || '#2f7df0', 255, .35), SYS.accent || '#2f7df0', mixTo(SYS.accent || '#2f7df0', 0, .3)]), ' win') + '<i class="tsep"></i>' +
+      Object.keys(PALS).map(function (k) { return dot('data-pal', k, PALS[k][0], gradOf(PALS[k][1])); }).join('') + '</div>';
+  }
+  return '';
 }
-function tintBlock() {
-  var b = function (v, name, bg, cls) { return '<button class="tint' + (cls || '') + '" data-tint="' + v + '" title="' + name + '" aria-label="' + name + '"' + (bg ? ' style="background:' + bg + '"' : '') + '></button>'; };
-  return label('Цвет', ' ') + '<div class="tints">' + b('multi', 'Разноцветный', '', ' multi') + b('theme', 'Цвет темы', ONE[CFG.theme]) + '<i class="tsep"></i>' +
-    TINTS[CFG.theme].map(function (c) { return b(c, 'Цвет ' + c, c); }).join('') +
-    '<label class="tint custom" title="Свой цвет"><input type="color" data-tintc aria-label="Свой цвет"></label></div>';
+// Отметка выбранного цвета и его имя; свой акцент красит последний кружок.
+function colorMarks(body) {
+  var acc = $('[data-accc]', body), pal = $('[data-pal]', body), lab = (acc || pal) && (acc || pal).closest('.tints').previousElementSibling, name = '';
+  if (!lab) return; // цвет темы есть только на вкладке «Вид»
+  if (acc) {
+    var own = CFG.accent !== 'win' && ACCENTS.indexOf(CFG.accent) < 0, c = $('[data-accc]', body).parentNode;
+    $$('[data-acc]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.acc === CFG.accent); });
+    c.classList.toggle('on', own); c.style.background = own ? CFG.accent : '';
+    $('[data-accc]', body).value = CFG.accent.charAt(0) === '#' ? CFG.accent : SYS.accent || ACCENTS[0];
+    name = CFG.accent === 'win' ? 'Как в Windows' : own ? 'Свой' : '';
+  } else {
+    $$('[data-pal]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.pal === CFG.pal); });
+    name = CFG.pal === 'win' ? 'Из цвета Windows' : PALS[CFG.pal][0];
+  }
+  if (lab && $('[data-val]', lab)) $('[data-val]', lab).textContent = name;
 }
 
 var SET_BODY = {
   look: function () {
     return label('Режим') + modeCards() +
-      label('Тема') + '<div class="cards c4">' + Object.keys(THEMES).map(function (k) {
-        var t = THEMES[k];
-        return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '"><span class="sw4" style="background:' + t[1] + '">' +
-          t[2].map(function (c, i) { return '<i style="background:' + c + ';width:' + [90, 60, 75][i] + '%"></i>'; }).join('') + '</span>' + t[0] + '</button>'; }).join('') + '</div>' + tintBlock() + densityBlock() +
-      label('Вид плиток в полном режиме') + segment('look', Object.keys(LOOKS).map(function (k) { return [k, LOOKS[k]]; }), CFG.look) +
+      label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
+        return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>' +
+      label('Оформление') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone) +
+      colorBlock() + densityBlock() +
       label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale);
   },
   tiles: function () {
@@ -135,7 +151,7 @@ function buildSettings() {
     $$('button', tabs).forEach(function (b) { b.classList.toggle('on', b.dataset.tab === setState.tab); });
     body.innerHTML = SET_BODY[setState.tab]();
     body.scrollTop = st;
-    tintMarks();
+    colorMarks(body);
     paintRows();
     update();
   }
@@ -165,18 +181,6 @@ function buildSettings() {
     var lab = b.parentNode.previousElementSibling, val = lab && $('[data-val]', lab);
     if (val) val.textContent = b.dataset.v + '%';
   }
-  // Отметка выбранного цвета и его имя; свой цвет красит последний кружок.
-  function tintMarks() {
-    var inp = $('[data-tintc]', body), cur = curTint();
-    if (!inp) return;
-    var c = inp.parentNode;
-    var own = cur !== 'multi' && cur !== 'theme' && TINTS[CFG.theme].indexOf(cur) < 0;
-    $$('.tint[data-tint]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.tint === cur); });
-    c.classList.toggle('on', own); c.style.background = own ? cur : '';
-    $('input', c).value = cur.charAt(0) === '#' ? cur : ONE[CFG.theme];
-    $('[data-val]', c.parentNode.previousElementSibling).textContent = cur === 'multi' ? 'Разноцветный' : cur === 'theme' ? 'Цвет темы' : own ? 'Свой' : '';
-  }
-
   el.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     var d = b.dataset;
@@ -189,15 +193,16 @@ function buildSettings() {
     else if (d.sys) post('sys:' + d.sys);
     else if (d.k === 'mode') { setMode(d.v); changed(); if (setState.tab === 'tiles') render(true); else pick(b); }
     else if (b.hasAttribute('data-tc')) { setTileColor(b.parentNode, d.tc); changed(); }
-    else if (d.tint) { setTint(d.tint); changed(); tintMarks(); }
-    else if (d.k === 'theme') { CFG.theme = d.v; changed(); render(); }
+    else if (d.acc) { CFG.accent = d.acc; changed(); colorMarks(body); }
+    else if (d.pal) { CFG.pal = d.pal; changed(); colorMarks(body); }
+    else if (d.k === 'theme' || d.k === 'tone') { CFG[d.k] = d.v; changed(); render(); }
     else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
     else if (d.k) { CFG[d.k] = /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
     if (t.hasAttribute('data-city')) applyCity(t.value);
-    else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-tintc') || t.hasAttribute('data-tcc')) saveCfg();
+    else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-accc') || t.hasAttribute('data-tcc')) saveCfg();
     else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }
     else if (k === 'autostart') { SYS.autostart = t.checked; post('sys:autostart:' + (t.checked ? 1 : 0)); }
     else if (k && k.indexOf('tile:') === 0) {
@@ -215,8 +220,8 @@ function buildSettings() {
       var z = t.closest('.thr'); $('.zone', z).style.setProperty('--t', zonePos(CFG.thr[k]) + '%'); $('.t b', z).textContent = t.value + THR_ROWS[k][2];
     } else if (t.hasAttribute('data-glass')) {
       CFG.glass = Number(t.value); liveCfg(); applySetBody(); $('[data-val]', t.previousElementSibling).textContent = t.value + '%';
-    } else if (t.hasAttribute('data-tintc')) {
-      setTint(t.value); liveCfg(); applySetBody(); tintMarks();
+    } else if (t.hasAttribute('data-accc')) {
+      CFG.accent = t.value.toLowerCase(); liveCfg(); applySetBody(); colorMarks(body);
     } else if (t.hasAttribute('data-tcc')) {
       setTileColor(t.closest('.tints'), t.value); liveCfg();
     } else if (t.hasAttribute('data-city')) cityTyped(t);

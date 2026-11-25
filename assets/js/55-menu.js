@@ -4,16 +4,15 @@
 
 function menuHTML() {
   var seg = Object.keys(MODES).map(function (m) {
-    return '<button data-cmd="mode:' + m + '" class="' + (curMode() === m ? 'on' : '') + '">' + PICS[m] + MODES[m] + '</button>';
+    return '<button data-cmd="mode:' + m + '" class="' + (curMode() === m ? 'on' : '') + '" title="' + MODES[m] + '">' + PICS[m] + '<span>' + MODES[m] + '</span></button>';
   }).join('');
-  var dots = Object.keys(THEMES).map(function (k) {
-    var t = THEMES[k];
-    return '<button data-cmd="theme:' + k + '" title="' + t[0] + '" class="' + (CFG.theme === k ? 'on' : '') + '" style="background:linear-gradient(135deg,' + t[2][0] + ' 45%,' + t[1] + ' 46%)"></button>';
+  var themes = Object.keys(THEMES).map(function (k) {
+    return '<button data-cmd="theme:' + k + '" class="' + (CFG.theme === k ? 'on' : '') + '">' + themeSwatch(k) + THEMES[k] + '</button>';
   }).join('');
   var item = function (icon, text, cmd, on) {
     return '<button class="mi" data-cmd="' + cmd + '">' + I(icon) + '<span>' + text + '</span>' + (on ? '<span class="i ck">' + ICONS.check + '</span>' : '') + '</button>';
   };
-  return '<div class="menu"><div class="seg">' + seg + '</div><div class="dots"><span>Тема</span>' + dots + '</div><hr>' +
+  return '<div class="menu"><div class="mseg">' + seg + '</div><div class="mthemes">' + themes + '</div><hr>' +
     item('pen', 'Изменить плитки', 'edit') + item('gear', 'Настройки', 'settings') + item('pin', 'Поверх всех окон', 'topmost', TOPMOST) + '<hr>' +
     (SYS.sensors && !SYS.driver ? item('install', 'Датчик температуры CPU…', 'driver') : '') +
     (SYS.installed ? '' : item('install', 'Установить на ПК…', 'install')) +
@@ -21,7 +20,7 @@ function menuHTML() {
 }
 
 // Что нужно окну меню, чтобы выглядеть как виджет.
-function menuPayload(html) { return { html: html, theme: CFG.theme, cls: bodyClass(), glass: CFG.glass, vars: ownVars(), scale: CFG.scale }; }
+function menuPayload(html) { return { html: html, theme: styleKey(), cls: bodyClass(), vars: themeVars(), scale: CFG.scale }; }
 
 // Go просит меню и заодно сообщает состояние системы.
 window.__menu = function (sys) {

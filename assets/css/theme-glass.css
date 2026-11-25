@@ -1,6 +1,0 @@
-/* Тема «Стекло»: прозрачный WebView, размытие под окном делает DWM. Плотность подложки задаёт --glass. */
-body.theme-glass {
-  --bg: rgba(19, 21, 27, var(--glass, .76)); --tile: rgba(255, 255, 255, .065); --edge: rgba(255, 255, 255, .08);
-}
-/* один цвет: ещё названия и иконки */
-.theme-glass.mono .th b, .theme-glass.mono .th .i, .theme-glass.mono .cr .i, .theme-glass.mono .sb .i { color: var(--one); }

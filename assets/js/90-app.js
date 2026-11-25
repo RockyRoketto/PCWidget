@@ -11,17 +11,18 @@ function postOnce(key, v) { if (sent[key] !== v) { sent[key] = v; post(key + ':'
 
 function applyBody() {
   document.body.className = bodyClass();
-  setThemeVars(document.body.style, CFG.glass);
+  setThemeVars(document.body.style);
   rootEl.style.zoom = CFG.scale / 100;
   rootEl.classList.toggle('loading', !dataReady);
   $$('[data-id]', rootEl).forEach(paintTile);
-  postOnce('style', CFG.theme); // размытие, углы и прозрачность окна
+  if (view) placeFills(view.el);
+  postOnce('style', styleKey()); // размытие, углы и прозрачность окна
 }
 
 // Перестраивает виджет.
 function layout() {
   var old = view && view.el;
-  view = CFG.mode === 'full' ? buildFull() : buildCompact(CFG.compact === 'strip');
+  view = GRID_MODES[CFG.mode] ? buildFull() : buildCompact(CFG.mode);
   if (old) rootEl.replaceChild(view.el, old); else rootEl.insertBefore(view.el, rootEl.firstChild);
   applyBody(); syncWeather(); syncClaude();
   if (S && dataReady) refresh(Date.now());
@@ -63,10 +64,16 @@ window.__stats = function (s) {
   if (!view || (!dataReady && !checkReady(s, now))) return;
   refresh(now);
 };
-window.__sys = function (sys) { SYS = sys; TOPMOST = sys.topmost; };
+window.__sys = function (sys) {
+  var acc = SYS.accent;
+  SYS = sys; TOPMOST = sys.topmost;
+  if (sys.accent !== acc && CFG) applyBody(); // в Windows сменили цвет акцента
+};
+// Windows переключилась между светлой и тёмной: тема «как в Windows» следует за ней.
+if (darkMQ) darkMQ.addEventListener('change', function () { if (CFG && CFG.tone === 'auto' && view) applyBody(); });
 
 // Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
-var LIGHT = { glass: 1, tints: 1, tileColors: 1, thr: 1, notify: 1, city: 1, theme: 1, mono: 1, scale: 1 };
+var LIGHT = { glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1 };
 function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
 window.__cfg = function (c) {
   var old = CFG;
@@ -81,6 +88,7 @@ window.__cmd = function (c) {
   var p = c.split(':'), k = p[0], v = p[1];
   if (k === 'theme' && THEMES[v]) { CFG.theme = v; saveCfg(); layout(); }
   else if (k === 'mode' && MODES[v]) { setMode(v); saveCfg(); layout(); }
+  else if (k === 'tone' && TONES[v]) { CFG.tone = v; saveCfg(); applyBody(); }
   else if (k === 'editing') { editing = v === '1'; layout(); }
 };
 

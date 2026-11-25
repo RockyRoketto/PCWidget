@@ -8,65 +8,78 @@ function mk(html) { var d = document.createElement('div'); d.innerHTML = html.tr
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
-// имя, подложка и три цвета для образца в настройках и меню
-var THEMES = {
-  glass: ['Стекло', '#3a4256', ['#6fb1ff', '#c09bff', '#ff8fc4']],
-  apple: ['Apple', '#1c1c1e', ['#0a84ff', '#bf5af2', '#ff375f']],
-  aero: ['Aero', '#3fa9ea', ['#a6e33c', '#ffffff', '#c9f3ff']],
-  terminal: ['Терминал', '#020a04', ['#4dff7c', '#4dff7c', '#4dff7c']]
-};
-var LOOKS = { graph: 'Графики', ring: 'Кольца', rows: 'Строки' };
+// Три темы с одной раскладкой: меняется материал и индикатор (кривая и полоса, деления, заливка).
+var THEMES = { sheet: 'Лист', gauge: 'Прибор', fill: 'Заливка' };
+var TONES = { auto: 'Как в Windows', dark: 'Тёмная', light: 'Светлая' };
+var MODES = { full: 'Панель', wide: 'Широкая', column: 'Колонка', strip: 'Полоска', square: 'Квадрат' };
+var GRID_MODES = { full: 1, wide: 1 };
 var CLOCKS = { digital: 'Цифры', flip: 'Перекидные', analog: 'Стрелки' };
 var CALS = { day: 'День', week: 'Неделя', month: 'Месяц' };
-var MODES = { full: 'Полный', column: 'Колонка', strip: 'Полоска' };
 var SCALES = [90, 100, 115, 130];
-// Один цвет на всё: первый предлагает тема (ONE), дальше быстрый выбор под её фон, плюс свой цвет.
-var ONE = { glass: '#e9b872', apple: '#ffffff', aero: '#0a74d1', terminal: '#4dff7c' };
-var TINTS = {
-  glass: ['#ffffff', '#6fb1ff', '#c09bff', '#ff8fc4', '#5fe0a0', '#ff7a6b'],
-  apple: ['#0a84ff', '#30d158', '#ff9f0a', '#ff375f', '#bf5af2', '#64d2ff'],
-  aero: ['#2c820c', '#7a3ccb', '#c95600', '#007c92', '#c2185b', '#08304f'],
-  terminal: ['#ffb000', '#5ad7ff', '#e6ffe9', '#ff8fd6', '#c9a0ff', '#ff7a5c']
+// Акцент «Листа»: из Windows или свой. Градиенты «Заливки»: три точки, первая сверху слева.
+var ACCENTS = ['#7cc4ff', '#7fe0bd', '#ffc773', '#f6a8d0', '#c3b1ff', '#ffffff'];
+var PALS = {
+  aurora: ['Сияние', ['#18c7b0', '#2f7df0', '#8a4df2']],
+  sunset: ['Закат', ['#ff9a5a', '#f2558b', '#7a4be0']],
+  sea: ['Море', ['#4fd3e8', '#2a86e8', '#2c4fc4']],
+  berry: ['Ягода', ['#ff7eb6', '#c04bd8', '#5b4be6']],
+  mint: ['Мята', ['#a8dc5c', '#2fb78a', '#157f9c']]
 };
 function rgbOf(hex) { var n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
 function lumOf(hex) { var c = rgbOf(hex); return (c[0] * 299 + c[1] * 587 + c[2] * 114) / 1000; }
 function mixTo(hex, to, k) { return '#' + rgbOf(hex).map(function (v) { return (256 + Math.round(v + (to - v) * k)).toString(16).slice(1); }).join(''); }
-function accentOn(hex) { return lumOf(hex) > 150 ? '#1a1408' : '#fff'; } // цвет текста поверх акцента
-// Слишком тёмный цвет на тёмной теме подсветляется.
-function fitColor(c) { var y = c && lumOf(c); return c && CFG.theme !== 'aero' && y < 105 ? mixTo(c, 255, (105 - y) / (255 - y)) : c; }
-// Он же для цифр и подписей: на светлой Aero светлый цвет темнее.
-function inkColor(c) { c = fitColor(c); var y = c && lumOf(c); return c && CFG.theme === 'aero' && y > 115 ? mixTo(c, 0, 1 - 115 / y) : c; }
-// Выбранный руками общий цвет текущей темы ('' = разноцветный или цвет темы).
-function ownColor() { return fitColor(CFG.mono && CFG.tints[CFG.theme] || ''); }
-function ownInk() { return inkColor(CFG.mono && CFG.tints[CFG.theme] || ''); }
-// Переменные своего цвета, пустые снимаются.
-function ownVars() {
-  var c = ownColor(), on = c && accentOn(c);
-  return { '--one': c, '--accent': c, '--on-one': on, '--on-accent': on, '--ink': ownInk() };
-}
-// Плотность подложки и свой цвет. Одинаково для виджета, меню и настроек.
-function setThemeVars(style, density) {
-  style.setProperty('--glass', density / 100);
-  var v = ownVars();
-  Object.keys(v).forEach(function (k) { if (v[k]) style.setProperty(k, v[k]); else style.removeProperty(k); });
+function accentOn(hex) { return lumOf(hex) > 150 ? '#14181f' : '#fff'; } // текст поверх цвета
+// Цвет под фон: на тёмном не темнее 140, на светлом не светлее 120 (иначе не видно).
+function fitColor(c) {
+  if (!c) return c;
+  var y = lumOf(c);
+  if (isLight()) return y > 120 ? mixTo(c, 0, 1 - 120 / y) : c;
+  return y < 140 ? mixTo(c, 255, (140 - y) / (255 - y)) : c;
 }
 
-// Свой цвет отдельной плитки (общий для всех режимов и тем). Общий «один цвет» его перебивает.
-var TILE_TINTS = ['#ffffff', '#6fb1ff', '#c09bff', '#ff8fc4', '#ff7a6b', '#ffa94d', '#ffd257', '#5fe0a0'];
+// Светлая или тёмная сейчас: своя настройка или как в Windows (WebView2 следует системе).
+var darkMQ = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+function isLight() { return CFG.tone === 'light' || (CFG.tone === 'auto' && !!darkMQ && !darkMQ.matches); }
+function toneKey() { return isLight() ? 'light' : 'dark'; }
+// Ключ оформления окна для Go: тема и светлость (стекло у «Листа» разное).
+function styleKey() { return CFG.theme + ':' + toneKey(); }
+
+// Акцент: свой, из Windows (Go присылает SYS.accent), иначе спокойный голубой.
+function accentColor() { return fitColor(CFG.accent !== 'win' && CFG.accent || SYS.accent || ACCENTS[0]); }
+function palStops() {
+  if (CFG.pal !== 'win') return (PALS[CFG.pal] || PALS.aurora)[1];
+  var a = SYS.accent || '#2f7df0';
+  return [mixTo(a, 255, .35), a, mixTo(a, 0, .3)];
+}
+function gradOf(stops) { return 'linear-gradient(155deg,' + stops[0] + ',' + stops[1] + ' 48%,' + stops[2] + ')'; }
+// Переменные страницы: плотность, акцент, градиент. Одинаково для виджета, меню и настроек.
+// У «Прибора» свой цвет шкал, у «Заливки» акцент берётся из середины градиента.
+function themeVars() {
+  var a = CFG.theme === 'gauge' ? (isLight() ? '#2f5d5c' : '#e9dfc3') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
+  return { '--glass': CFG.glass / 100, '--accent': a, '--on-accent': accentOn(a), '--pal': gradOf(palStops()) };
+}
+function setThemeVars(style, density) {
+  var v = themeVars();
+  if (density != null) v['--glass'] = density / 100;
+  Object.keys(v).forEach(function (k) { style.setProperty(k, v[k]); });
+}
+function bodyClass() { return 'theme-' + CFG.theme + ' tone-' + toneKey(); }
+
+// Свой цвет плитки (общий для режимов и тем): красит только индикатор, цифры остаются цвета текста.
+var TILE_TINTS = ['#7cc4ff', '#c3b1ff', '#f6a8d0', '#ff8a7a', '#ffb35c', '#ffd85a', '#7fe0bd', '#ffffff'];
 function paintTile(el) {
-  var c = !CFG.mono && CFG.tileColors[colorKey(el.getAttribute('data-id'))] || '', h = fitColor(c), ink = inkColor(c);
-  var v = { '--h': h, '--on-accent': h && accentOn(h) };
-  if (!el.classList.contains('trow')) { // в списке настроек красится только значок
-    v['--dig'] = v['--okdig'] = v['--sec'] = ink; v['--accent'] = h; v['--fillbg'] = h && 'initial';
-  }
+  var c = CFG.tileColors[colorKey(el.getAttribute('data-id'))] || '', h = fitColor(c);
   el.classList.toggle('tinted', !!c);
-  Object.keys(v).forEach(function (k) { if (v[k]) el.style.setProperty(k, v[k]); else el.style.removeProperty(k); });
+  if (h) {
+    el.style.setProperty('--a', h);
+    el.style.setProperty('--aur', gradOf([mixTo(c, 255, .3), c, mixTo(c, 0, .35)]));
+  } else { el.style.removeProperty('--a'); el.style.removeProperty('--aur'); }
 }
 
 function defaults() {
   return {
-    ver: 2, theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tints: {}, tileColors: {},
-    rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
+    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', scale: 100, glass: 62, tileColors: {},
+    rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
   };
@@ -75,30 +88,31 @@ function defaults() {
 var CFG = null;        // задаётся в конце 05-layout.js, потом из __init
 var S = null;          // последний снимок от Go
 var TOPMOST = false;
-var SYS = { installed: false, autostart: false, driver: false, sensors: false, claude: 'none', claudeErr: '' }; // состояние системы от Go
+var SYS = { installed: false, autostart: false, driver: false, sensors: false, claude: 'none', claudeErr: '', accent: '' }; // состояние системы от Go
 
 // Настройки из файла накладываются на значения по умолчанию, лишнее и битое отбрасывается.
+// До ver 3 были другие темы и виды: тема становится «Листом», плотность по умолчанию.
 function mergeCfg(saved) {
   var c = defaults();
   if (!saved || typeof saved !== 'object') return c;
+  var old = !(saved.ver >= 3);
   if (THEMES[saved.theme]) c.theme = saved.theme;
-  if (LOOKS[saved.look]) c.look = saved.look;
-  if (saved.mode === 'full' || saved.mode === 'compact') c.mode = saved.mode;
-  if (saved.compact === 'column' || saved.compact === 'strip') c.compact = saved.compact;
+  if (TONES[saved.tone]) c.tone = saved.tone;
+  if (PALS[saved.pal] || saved.pal === 'win') c.pal = saved.pal;
+  if (MODES[saved.mode]) c.mode = saved.mode;
+  else if (saved.mode === 'compact' && MODES[saved.compact]) c.mode = saved.compact; // до ver 3
   mergeLayout(c, saved);
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
   ['notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
-  c.mono = saved.ver === 2 && saved.mono === true; // настройки до ver 2 один раз становятся разноцветными
   ['wxDays', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
   if (CALS[saved.calView]) c.calView = saved.calView;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
-  if (saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
+  if (!old && saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
   var hex = function (v) { return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : ''; };
-  if (saved.tints) Object.keys(THEMES).forEach(function (k) { if (hex(saved.tints[k])) c.tints[k] = hex(saved.tints[k]); });
-  else if (hex(saved.accent)) c.tints.glass = hex(saved.accent); // старые настройки: цвет был только у Стекла
+  if (hex(saved.accent)) c.accent = hex(saved.accent);
   if (saved.tileColors) TILE_IDS.forEach(function (k) { if (hex(saved.tileColors[k])) c.tileColors[k] = hex(saved.tileColors[k]); });
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
@@ -106,39 +120,37 @@ function mergeCfg(saved) {
   return c;
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
-// Классы и переменные страницы: общие для виджета и меню.
-function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : '') + (ownColor() ? ' own' + (accentOn(ownColor()) === '#fff' ? '' : ' lite') : ''); }
 // Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
-function weatherOn() { return ['full', 'column', 'strip'].some(function (m) { return isOn(m, 'weather'); }); }
+function weatherOn() { return Object.keys(MODES).some(function (m) { return isOn(m, 'weather'); }); }
 function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }
-// Файлы Claude Code Go читает только пока включена плитка (или строка в колонке, полоске).
-function claudeOn() { return isOn('full', 'claude') || ['column', 'strip'].some(function (m) { return isOn(m, 'claude') || isOn(m, 'claudew'); }); }
+// Файлы Claude Code Go читает только пока включена плитка (или строка в компакте).
+function claudeOn() { return Object.keys(MODES).some(function (m) { return isOn(m, 'claude') || (!GRID_MODES[m] && isOn(m, 'claudew')); }); }
 function syncClaude() { post('claude:' + (claudeOn() ? 1 : 0)); }
 
-// ---- форматирование ----
+// ---- форматирование: десятичная запятая, единица отдельно ----
+function dec(v, n) { return v.toFixed(n).replace('.', ','); }
+function num(v) { return v < 10 ? dec(v, 1) : String(Math.round(v)); }
 function rateParts(bps) { // байт/с -> [число, единица]
-  if (bps >= 1048576) return [(bps / 1048576).toFixed(bps >= 10485760 ? 0 : 1), 'МБ/с'];
-  return [(bps / 1024).toFixed(0), 'КБ/с'];
+  var k = bps / 1024;
+  if (k < 1000) return [String(Math.round(k)), 'КБ/с'];
+  var m = k / 1024;
+  return m < 1000 ? [num(m), 'МБ/с'] : [num(m / 1024), 'ГБ/с'];
 }
 function rateText(bps) { return rateParts(bps).join(' '); }
 function sizeParts(bytes) {
-  if (bytes >= 1099511627776) return [(bytes / 1099511627776).toFixed(1), 'ТБ'];
-  if (bytes >= 1073741824) return [(bytes / 1073741824).toFixed(bytes >= 107374182400 ? 0 : 1), 'ГБ'];
-  return [(bytes / 1048576).toFixed(0), 'МБ'];
+  var g = bytes / 1073741824;
+  if (g >= 1000) return [dec(g / 1024, 1), 'ТБ'];
+  return g >= 1 ? [num(g), 'ГБ'] : [String(Math.round(bytes / 1048576)), 'МБ'];
 }
 function sizeText(bytes) { return sizeParts(bytes).join(' '); }
+function gbParts(gb) { return gb >= 1000 ? [dec(gb / 1024, 1), 'ТБ'] : [String(Math.round(gb)), 'ГБ']; }
 function uptimeText(sec) {
   var d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
-  return (d ? d + ' д ' : '') + (d || h ? h + ' ч ' : '') + m + ' мин';
+  return d ? d + ' д ' + h + ' ч' : h ? h + ' ч ' + m + ' мин' : m + ' мин';
 }
 // Состояние по порогу: горячо за 5 до порога, тепло за 15.
-function level(v, thr) { return v == null ? '' : v >= thr - 5 ? 'hot' : v >= thr - 15 ? 'warm' : 'ok'; }
-function pingLevel(ms) { return ms >= 100 ? 'hot' : ms >= 50 ? 'warm' : 'ok'; }
-// Цвет по заполненности 0..100: тот же переход, что у градиента шкал (--grad в base.css).
-function fillColor(p) {
-  var low = p < 62, k = clamp(low ? p / 62 : (p - 62) / 38, 0, 1) * 100;
-  return 'color-mix(in srgb, var(' + (low ? '--warm' : '--hot') + ') ' + k.toFixed(0) + '%, var(' + (low ? '--ok' : '--warm') + '))';
-}
+function level(v, thr) { return v == null ? '' : v >= thr - 5 ? 'hot' : v >= thr - 15 ? 'warm' : ''; }
+function pingLevel(ms) { return ms >= 100 ? 'hot' : ms >= 50 ? 'warm' : ''; }
 
 function clockText(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: CFG.clockSec ? '2-digit' : undefined, hour12: !CFG.clock24 }); }
 
@@ -146,35 +158,11 @@ function clockText(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', 
 var HN = 60;
 var HIST = { cpu: [], gpu: [], mem: [], down: [], up: [] };
 function pushHist(k, v) { var a = HIST[k]; a.push(v); if (a.length > HN) a.shift(); }
-var REC = { cpuLoad: 0, cpuTemp: null, gpuLoad: 0, gpuTemp: null, mem: 0, down: 0 };
+var REC = { cpuLoad: 0, cpuTemp: null, gpuLoad: 0, gpuTemp: null, mem: 0, down: 0, up: 0 };
 function updateRecords(s) {
   var mx = function (k, v) { if (v != null && (REC[k] == null || v > REC[k])) REC[k] = v; };
   if (s.cpu) { mx('cpuLoad', s.cpu.load); mx('cpuTemp', s.cpu.temp); }
   if (s.gpu) { mx('gpuLoad', s.gpu.load); mx('gpuTemp', s.gpu.temp); }
   if (s.mem) mx('mem', s.mem.pct);
-  if (s.net) mx('down', s.net.down);
-}
-
-// Линия и заливка под ней в координатах 100x30.
-function areaPath(arr, max) {
-  if (arr.length < 2) return ['', ''];
-  var st = 100 / (HN - 1), x0 = (100 - (arr.length - 1) * st).toFixed(1);
-  var p = 'M' + arr.map(function (v, i) { return (+x0 + i * st).toFixed(1) + ',' + (29 - Math.min(v / max, 1) * 27).toFixed(1); }).join('L');
-  return [p, p + 'L100,30L' + x0 + ',30Z'];
-}
-function graphSvg(extra) { return '<svg class="graph" viewBox="0 0 100 30" preserveAspectRatio="none"><path class="a"/><path class="l"/>' + (extra || '') + '</svg>'; }
-// График сети: приём вверх от середины, отдача вниз, шкала общая.
-function netSvg() { return '<svg class="graph" viewBox="0 0 100 30" preserveAspectRatio="none"><path class="ax" d="M0,15H100"/><path class="a d"/><path class="a u"/><path class="l d"/><path class="l u"/></svg>'; }
-function drawNet(svg, down, up, max) {
-  var st = 100 / (HN - 1);
-  [['.d', down, -1], ['.u', up, 1]].forEach(function (g) {
-    var arr = g[1], x0 = 100 - (arr.length - 1) * st, p = '';
-    if (arr.length > 1) p = 'M' + arr.map(function (v, i) { return (x0 + i * st).toFixed(1) + ',' + (15 + g[2] * Math.min(v / max, 1) * 14).toFixed(1); }).join('L');
-    $('.l' + g[0], svg).setAttribute('d', p);
-    $('.a' + g[0], svg).setAttribute('d', p && p + 'L100,15L' + x0.toFixed(1) + ',15Z');
-  });
-}
-function drawGraph(svg, arr, max) {
-  var d = areaPath(arr, max);
-  $('.l', svg).setAttribute('d', d[0]); $('.a', svg).setAttribute('d', d[1]);
+  if (s.net) { mx('down', s.net.down); mx('up', s.net.up); }
 }

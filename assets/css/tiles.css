@@ -1,205 +1,75 @@
-/* Плитки полного режима и три вида: графики, кольца, строки. */
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.tile { position: relative; min-width: 0; container-type: inline-size; padding: 9px 12px; background: var(--tile); border: 1px solid var(--edge); border-radius: var(--r); overflow: hidden; }
-.tile.w2 { grid-column: span 2; }
-.th { display: flex; align-items: center; gap: 7px; min-height: 18px; color: var(--dim); font-size: 12px; white-space: nowrap; }
-.th .i { color: var(--h, var(--dim)); }
-.th .sp { flex: 1; }
-.th b { color: var(--text); font-weight: 600; }
-.num { font-weight: var(--nw); line-height: 1.1; letter-spacing: -.015em; color: var(--dig, var(--text)); }
-.num small { font-size: max(11.5px, .5em); font-weight: 500; margin-left: 1px; opacity: .85; letter-spacing: 0; }
-.big { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-top: 3px; }
-.big .load { font-size: 33px; }
-.big .temp { font-size: 25px; }
-.foot { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; color: var(--dim); white-space: nowrap; }
-.foot b { color: var(--dig, var(--text)); font-weight: 600; }
-.graph { display: block; width: calc(100% + 24px); height: 30px; margin: 3px -12px 5px; }
-.graph path { vector-effect: non-scaling-stroke; }
-.graph .l { fill: none; stroke: var(--h); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
-.graph .a { fill: var(--h); opacity: .17; stroke: none; }
-.bar { height: var(--barh); background: var(--track); border-radius: 99px; overflow: hidden; container-type: inline-size; }
-.bar i { display: block; height: 100%; width: 0; background: var(--fillbg, var(--h)); border-radius: inherit; transition: width .5s; }
-.bar.lv-warm i { background: var(--fillbg, var(--warm)); }
-.bar.lv-hot i { background: var(--hot); }
-.badge { display: none; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--hot); }
-.badge .i { width: 13px; height: 13px; color: inherit !important; }
-.ring, .lbar { display: none; }
-@container (min-width: 220px) {
-  .duo { display: grid; grid-template-columns: auto 1fr; column-gap: 16px; align-items: center; }
-  .duo .big { gap: 18px; justify-content: flex-start; }
-  .duo .graph { height: 38px; width: 100%; margin: 2px 0; }
-  .duo .foot { grid-column: span 2; }
-}
-/* часы, погода */
-.clk { font-size: 31px; margin-top: -1px; }
-.cap { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wx { display: flex; align-items: center; gap: 10px; }
-.wx .wi { width: 54px; height: 54px; margin-left: -5px; color: var(--accent); flex: none; }
-.wx .wi svg { width: 100%; height: 100%; display: block; }
-.wx .num { font-size: 44px; line-height: 1; flex: none; }
-.wx .wt { flex: 1; min-width: 0; text-align: right; font-size: 12px; line-height: 1.4; color: var(--dim); }
-.wx .wt > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wx .wc { font-size: 14px; font-weight: 650; color: var(--text); }
-.wx .wd { white-space: normal !important; display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.25; }
-.wx .wf { display: flex; flex-wrap: wrap; justify-content: flex-end; column-gap: 8px; }
-.wx .wf b { color: var(--dig, var(--text)); font-weight: 600; }
-.wx .wf i { font-style: normal; margin-right: 1px; }
-@container (max-width: 279px) {
-  .wx { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 0; }
-  .tile .wx .num { order: -1; font-size: 36px; }
-  .wx .wi { width: 44px; height: 44px; margin: 0 -3px 0 0; }
-  .wx .wt { grid-column: span 2; text-align: left; }
-  .wx .wf { justify-content: flex-start; }
-}
-/* прогноз на неделю: только в широкой плитке и если включён в настройках */
-.wdays { display: none; margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--edge); }
-.wday { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0 5px; font-size: 13px; border-radius: min(var(--r), 12px); }
-.wday.now { background: color-mix(in srgb, var(--text) 11%, transparent); }
-.wday .dn { color: var(--dim); text-transform: capitalize; }
-.wday.now .dn { color: var(--sec, #ff4f6d); font-weight: 600; }
-.wday .di { width: 22px; height: 22px; color: var(--accent); }
-.wday .di svg { width: 100%; height: 100%; display: block; }
-.wday b { color: var(--dig, var(--text)); font-size: 14px; font-weight: 650; line-height: 1.25; }
-.wday .dl { color: var(--dim); }
-@container (min-width: 280px) {
-  .wdays:not(:empty) { display: flex; }
-  .wx:has(+ .wdays:not(:empty)) .wf > span + span { display: none; } /* крайние за сегодня уже есть в прогнозе */
-}
-/* память */
-.memv { font-size: 20px; }
-.mem .bar { margin: 7px 0 2px; }
-.mem .sub { display: none; }
-@container (max-width: 219px) {
-  .mem .gb { display: none; }
-  .mem .sub { display: block; margin-top: 6px; }
-  .mem .memv { font-size: 24px; }
-}
-/* сеть */
-.net { display: flex; flex-direction: column; }
-.rates { display: flex; gap: 18px; margin-top: 4px; }
-.rate { display: flex; align-items: baseline; gap: 5px; min-width: 0; flex: 1; }
-.rate .i { width: 15px; height: 15px; align-self: center; position: relative; top: 1px; color: var(--h); }
-.rate .num { font-size: 23px; }
-.rate small { font-size: 12px; color: var(--dim); }
-.net .graph { flex: 1 0 38px; min-height: 38px; width: 100%; margin: 5px 0; }
-.net .graph .l { stroke-width: 1.5; }
-.net .graph .a { opacity: .24; }
-.net .graph .l.u { opacity: .6; }
-.net .graph .a.u { opacity: .14; }
-.net .graph .ax { fill: none; stroke: var(--track); stroke-width: 1; }
-.r-up .i { opacity: .6; }
-@container (max-width: 219px) {
-  .rates { flex-direction: column; gap: 1px; }
-  .rate .num { font-size: 20px; margin-left: auto; }
-  .rate small { min-width: 27px; text-align: right; }
-  .net .foot > :first-child { flex: 1; display: flex; justify-content: space-between; }
-  .net .foot > :last-child, .th .pgl, .th .lw { display: none; }
-}
-/* диски: строка с буквой и свободным местом, под ней шкала во всю ширину */
-.dsk { display: flex; flex-direction: column; }
-.dsk .rows { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; gap: 8px; margin-top: 5px; }
-.dl1 { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; font-size: 12px; color: var(--dim); white-space: nowrap; }
-.dl1 .ltr { font-weight: 700; font-size: 16px; line-height: 1.2; color: var(--text); }
-.dl1 .fr { margin-left: auto; }
-.dl1 .fr b { font-size: 15px; font-weight: 650; color: var(--dig); }
-.io { display: inline-flex; gap: 10px; }
-.io > span { display: inline-flex; gap: 4px; }
-.io .on { color: var(--text); }
-@container (max-width: 219px) {
-  .dr .io { display: none; }
-}
-/* процессы */
-.tabs { display: inline-flex; background: var(--ctl); border-radius: calc(var(--r)*.7); padding: 2px; }
-.tabs button { padding: 1px 9px; font-size: 12px; color: var(--dim); border-radius: calc(var(--r)*.55); line-height: 1.5; }
+/* Панель и Широкая: сетка модулей и ячейка с одной анатомией. */
+.full { position: relative; width: max-content; padding: 8px; }
+.grid { display: grid; grid-template-columns: repeat(2, 160px); grid-auto-rows: 52px; gap: 8px; }
+.m-wide .grid { grid-template-columns: repeat(4, 160px); }
+.tile { position: relative; min-width: 0; display: flex; }
+.tile > .cb, .tile > .two { flex: 1; min-width: 0; }
+
+/* ячейка: шапка, главное число, подпись, индикатор */
+.cb { position: relative; min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: var(--r); background: var(--tile); }
+.cb > *:not(.fill) { position: relative; z-index: 1; }
+.hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 16px; white-space: nowrap; }
+.hd .nm { font-weight: 600; color: var(--lab); overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 5px; }
+.hd .ax { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.md { display: flex; align-items: baseline; gap: 6px; margin-block: auto; white-space: nowrap; min-width: 0; }
+.md .v { font-size: 34px; line-height: 36px; font-weight: var(--vw); letter-spacing: -.02em; flex: none; }
+.md .v2 { font-size: 22px; line-height: 36px; font-weight: var(--vw2); margin-left: auto; }
+.md .c2 { margin-left: auto; font-size: 11px; line-height: 14px; color: var(--dim); text-align: right; min-width: 0; overflow: hidden; }
+.md .c2:empty { display: none; }
+.md .v2:not([hidden]) + .c2 { margin-left: 0; }
+.cp { color: var(--dim); font-size: 11px; line-height: 14px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.tile.w2 .cp { -webkit-line-clamp: 1; }
+.cp:empty { display: none; }
+.cb.has-vz > .md { margin-block: 0 auto; }
+
+/* строки: диски, процессы, лимиты, сеть в половинке */
+.ls { flex: 1; display: grid; grid-auto-rows: 1fr; gap: 3px; margin-top: 2px; min-height: 0; }
+.ln { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-content: center; column-gap: 8px; row-gap: 3px; white-space: nowrap; min-width: 0; }
+.ln > .n { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ln > .m { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
+.ln > .w { font-weight: 600; text-align: right; }
+.ln > .w small { font-size: 11px; color: var(--dim); font-weight: 400; margin-left: 2px; }
+.ln > .bar, .ln > .tk { grid-column: 1 / -1; }
+/* процессы: имя растягивается, вкладки в шапке */
+[data-id=procs] .ln { grid-template-columns: minmax(0, 1fr) 0 auto; }
+.tabs { display: inline-flex; background: var(--ctl); border-radius: 6px; padding: 1px; }
+.tabs button { padding: 0 7px; font-size: 11px; line-height: 16px; color: var(--dim); border-radius: 5px; }
 .tabs button.on { background: var(--track); color: var(--text); font-weight: 600; }
-.pl { display: grid; gap: 3px; margin-top: 8px; }
-.pi { position: relative; display: flex; justify-content: space-between; gap: 10px; padding: 3px 8px; border-radius: calc(var(--r)*.5); overflow: hidden; line-height: 1.35; }
-.pi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); background: var(--h); opacity: .22; transition: width .5s; border-radius: inherit; }
-.pi span, .pi b { position: relative; }
-.pi span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pi b { color: var(--dig); font-weight: 650; white-space: nowrap; }
-/* нижние */
-.rec, .rec [data-m] { color: var(--dig, var(--text)); }
-.rec { display: flex; gap: 14px; font-size: 15px; font-weight: 650; margin-top: 1px; white-space: nowrap; }
-.rec small { font-size: 12px; font-weight: 400; color: var(--dim); margin-right: 4px; }
-/* ===== вид «Кольца» ===== */
-.look-ring .duo { display: grid; grid-template-columns: 1fr 74px; gap: 0 10px; align-items: center; margin-top: 5px; }
-.look-ring .duo .graph, .look-ring .duo .foot { display: none; }
-.look-ring .ring { display: block; width: 74px; height: 74px; grid-row: 1; grid-column: 2; }
-.ring circle { fill: none; stroke-width: 3.6; }
-.ring .bg { stroke: var(--track); }
-.ring .fg { stroke: var(--h); stroke-linecap: round; transition: stroke-dasharray .5s; }
-.look-ring .big { display: contents; }
-.look-ring .big .load { grid-row: 1; grid-column: 2; justify-self: center; font-size: 22px; }
-.look-ring .big .load small { font-size: 11px; }
-.look-ring .big .temp { grid-row: 1; grid-column: 1; align-self: start; font-size: 25px; margin-top: 4px; }
-.look-ring .side { display: grid; grid-row: 1; grid-column: 1; align-self: end; font-size: 12px; color: var(--dim); line-height: 1.35; white-space: nowrap; }
-.side { display: none; }
-.side b { color: var(--dig, var(--text)); font-weight: 600; }
-@container (max-width: 219px) {
-  .look-ring .duo { grid-template-columns: 1fr 64px; }
-  .look-ring .ring { width: 64px; height: 64px; }
-  .look-ring .big .load { font-size: 19px; }
-  .look-ring .big .temp { font-size: 22px; }
-}
-@container (min-width: 220px) {
-  .look-ring .duo { grid-template-columns: auto 1fr 74px; }
-  .look-ring .ring, .look-ring .big .load { grid-column: 3; }
-  .look-ring .big .temp { align-self: center; margin: 0; }
-  .look-ring .side { grid-column: 2; align-self: center; }
-}
-/* память и диски кольцами: высота как у CPU и GPU, чтобы ряды были одинаковыми */
-.mring { display: none; }
-.look-ring .mem .bar, .look-ring .mem .memv, .look-ring .mem .gb, .look-ring .mem .sub { display: none; }
-.look-ring .mring { display: flex; justify-content: space-between; gap: 8px; height: 74px; margin-top: 5px; }
-.mtxt { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 0; white-space: nowrap; }
-.mtxt .mu { font-size: 25px; }
-.mof { font-size: 12px; color: var(--dim); }
-.mof b { color: var(--dig, var(--text)); font-weight: 600; }
-.mr { position: relative; width: 74px; height: 74px; flex: none; }
-.mr .mp { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-.mr .mp small { font-size: 11px; margin-top: 6px; }
-.look-ring .mr .ring { width: 100%; height: 100%; }
-.look-ring .dsk .rows { display: grid; flex: none; grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); align-content: start; min-height: 74px; gap: 6px; margin-top: 5px; }
-.look-ring .dr { display: grid; justify-items: center; align-items: center; height: 74px; }
-.look-ring .dr .ring { width: 100%; max-width: 74px; height: auto; aspect-ratio: 1; grid-area: 1 / 1; }
-.look-ring .dl1 { display: contents; }
-.look-ring .dl1 > .ltr, .look-ring .dl1 > .fr { grid-area: 1 / 1; z-index: 1; margin: 0; line-height: 1.1; white-space: nowrap; }
-.look-ring .dl1 > .ltr { font-size: 17px; transform: translateY(-7px); }
-.look-ring .dl1 > .fr { font-size: 10.5px; color: var(--dim); transform: translateY(10px); }
-.look-ring .dl1 .fr b { font-size: 12px; }
-.look-ring .dr .bar, .look-ring .dr .io, .look-ring .frl { display: none; }
-.ring.lv-warm .fg { stroke: var(--warm); }
-.ring.lv-hot .fg { stroke: var(--hot); }
-@container (max-width: 219px) {
-  .look-ring .mring { height: 64px; }
-  .mr { width: 64px; height: 64px; }
-  .mr .mp { font-size: 19px; }
-  .mtxt { padding: 2px 0; }
-  .mtxt .mu { font-size: 22px; }
-  .look-ring .dsk .rows { min-height: 64px; }
-  .look-ring .dr { height: 64px; }
-}
-/* ===== вид «Строки» ===== */
-.look-rows .grid { gap: 0 8px; }
-.look-rows .tile { background: none; border-color: transparent; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; }
-.look-rows .bigt { display: grid; grid-template-columns: 84px 1fr; align-items: center; }
-.look-rows .bigt .th { padding-right: 8px; }
-.look-rows .bigt .duo { display: grid; grid-template-columns: 48px 1fr 58px; gap: 10px; align-items: center; }
-.look-rows .bigt .big { display: contents; }
-.look-rows .bigt .graph, .look-rows .bigt .foot, .look-rows .net .graph, .look-rows .net .foot { display: none; }
-.look-rows .bigt .lbar { display: block; order: -1; }
-.look-rows .bigt .load { font-size: 22px; text-align: right; }
-.look-rows .bigt .temp { font-size: 22px; order: -2; }
-.look-rows .bigt .badge span:last-child { display: none; }
-.look-rows .mem { display: grid; grid-template-columns: 23px 61px 1fr 58px 48px; align-items: center; }
-.look-rows .mem .th { display: contents; }
-.look-rows .mem .th > .i { grid-area: 1/1; }
-.look-rows .mem .th > b { grid-area: 1/2; font-size: 12px; }
-.look-rows .mem .sp, .look-rows .mem .badge, .look-rows .mem .gl, .look-rows .mem .sub { display: none; }
-.look-rows .mem .bar { grid-area: 1/3; margin: 0 10px 0 0; }
-.look-rows .mem .memv { grid-area: 1/4; font-size: 22px; text-align: right; }
-.look-rows .mem .gb { grid-area: 1/5; text-align: right; font-size: 12px; color: var(--dim); }
-.look-rows .rate .num { font-size: 20px; }
-.look-rows .net .rates { margin-top: 1px; }
-.look-rows .alarm { border-radius: var(--r); }
+.hd .ax:has(.tabs) { overflow: visible; }
+
+/* одна строка-модуль: пик за сессию, ПК включён */
+.cb.r1 { flex-direction: row; align-items: center; padding-block: 0; }
+.cb.r1 .hd { flex: 1; align-items: center; }
+.cb.r1 .ax { font-size: 12px; color: var(--dim); }
+.cb.r1 .ax b { font: var(--vw2) 16px/1 var(--vf); color: var(--text); margin-left: 2px; }
+.cb.r1 .md { display: none; }
+
+/* сеть и Claude: во всю ширину две ячейки, в половинке строки */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile.w2 > .one, .tile:not(.w2) > .two { display: none; }
+.tile.many > .two { display: none; }
+.tile.many.w2 > .one { display: flex; }
+.tile:not(.nolim) > .tok, .tile.nolim > .one, .tile.nolim > .two { display: none; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); display: inline-block; }
+.dot.wait { background: var(--warm); }
+.nm small { font-weight: 400; color: var(--dim); }
+
+/* погода: иконка вместо второго числа, прогноз во всю ширину */
+.wi { display: block; width: 34px; height: 34px; color: var(--text); }
+.wi svg { width: 100%; height: 100%; display: block; }
+.wdays { display: none; }
+.tile.w2.has-days .wdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: auto; }
+.md .c2:has(.wi) { display: flex; align-items: center; gap: 10px; align-self: center; }
+.wdesc { max-width: 150px; white-space: normal; text-align: right; }
+.wday { display: grid; justify-items: center; gap: 1px; padding: 3px 0; border-radius: 7px; }
+.wday.now { background: var(--ctl); }
+.wday .dn { color: var(--dim); font-size: 11px; text-transform: capitalize; }
+.wday.now .dn { color: var(--text); font-weight: 600; }
+.wday .di { width: 18px; height: 18px; }
+.wday .di svg { width: 100%; height: 100%; display: block; }
+.wday b { font: var(--vw2) 14px/18px var(--vf); }
+.wday .dl { color: var(--dim); font-size: 11px; line-height: 13px; }
+
+.empty { padding: 12px; font-size: 12px; color: var(--dim); text-align: center; width: 160px; }
+/* часы цифрами с секундами или AM/PM не влезают в 34px */
+.cb.sec .md .v { font-size: 27px; }

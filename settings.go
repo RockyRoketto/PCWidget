@@ -23,7 +23,7 @@ type Settings struct {
 }
 
 func defaultSettings() Settings {
-	return Settings{Theme: "glass"}
+	return Settings{Theme: "sheet"}
 }
 
 func settingsPath() string {
@@ -42,7 +42,7 @@ func loadSettings() Settings {
 	}
 	_ = json.Unmarshal(b, &s) // битый файл = значения по умолчанию
 	if s.Theme == "" {
-		s.Theme = "glass"
+		s.Theme = "sheet"
 	}
 	return s
 }

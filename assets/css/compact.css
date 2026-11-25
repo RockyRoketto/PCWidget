@@ -1,28 +1,28 @@
-/* Компактный режим: колонка и полоска. */
-/* ===== компакт ===== */
-.col { position: relative; width: 164px; padding: 6px 8px; }
-.cr { position: relative; display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; height: 38px; margin: 1px 0; padding: 0 4px; border-radius: 7px; border: 1px solid transparent; }
-.cr.sep { margin-top: 5px; }
-.cr.sep::before { content: ""; position: absolute; left: 4px; right: 4px; top: -4px; border-top: 1px solid var(--edge); }
-.cr .i { width: 19px; height: 19px; color: var(--h); }
-.cr .num { font-size: 18px; white-space: nowrap; }
-.cr .num.sml { font-size: 15px; }
-.let { display: block; font-size: 16px; line-height: 19px; text-align: center; }
-.cr .s { font-size: 16px; font-weight: 650; white-space: nowrap; }
-.cr .s.u { font-size: 12px; font-weight: 400; color: var(--dim); }
-.mb { position: absolute; left: 33px; right: 4px; bottom: 1px; height: 2px; background: var(--track); border-radius: 9px; overflow: hidden; container-type: inline-size; }
-.mb i { display: block; height: 100%; background: var(--fillbg, var(--h)); transition: width .5s; }
-.strip { position: relative; display: inline-flex; padding: 5px 6px; }
-/* градусы перед загрузкой */
-.hast > .i { order: -2; }
-.hast > .s { order: -1; }
-.sb { position: relative; display: flex; align-items: center; gap: 7px; padding: 4px 10px 6px; border: 1px solid transparent; border-radius: 7px; white-space: nowrap; }
-.sb .i { width: 17px; height: 17px; color: var(--h); }
-.sb .num { font-size: 16px; }
-.sb .s { font-size: 15px; font-weight: 650; }
-.sb .s:empty { display: none; }
-.sb .num small { font-size: 11px; color: var(--dim); margin-left: 3px; opacity: 1; }
-.sb .mb { left: 10px; right: 10px; bottom: 0; }
-.sb .vv { min-width: 38px; text-align: right; }
-.sb .vt { min-width: 30px; }
-.sb .vr { min-width: 64px; text-align: right; }
+/* Колонка, Полоска, Квадрат: строка — название, середина (градусы или подпись), значение, тонкая шкала. */
+.mini { position: relative; }
+.mini.col { width: 160px; padding: 8px; display: grid; gap: 4px; }
+.mini.strip { display: inline-flex; height: 52px; padding: 8px; gap: 8px; }
+.mini.sqr { width: 160px; padding: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cr { position: relative; height: 36px; padding: 0 8px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; align-items: center; border-radius: var(--r2); background: var(--tile2); overflow: hidden; white-space: nowrap; min-width: 0; }
+.cr > *:not(.lo) { position: relative; z-index: 1; }
+.cr .n { font-weight: 600; color: var(--lab); min-width: 24px; display: flex; align-items: center; }
+.cr .n.ico svg { width: 18px; height: 18px; }
+.cr[data-id=down] .n, .cr[data-id=up] .n { font-size: 15px; }
+.cr .s { color: var(--dim); font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+.cr .s.t { font: var(--vw2) 18px/1 var(--vf); color: var(--text); }
+.cr .v { font-size: 18px; line-height: 1; font-weight: var(--vw2); text-align: right; }
+.cr .v small { font-size: 11px; }
+.cr .lo { position: absolute; left: 8px; right: 8px; bottom: 3px; width: auto; }
+.cr .bar.lo { height: 2px; border-radius: 0; }
+.cr .tk.lo { height: 4px; }
+.cr .fill.lo { inset: 0; }
+.mini.strip .cr { padding: 0 12px; min-width: 76px; display: flex; gap: 8px; justify-content: space-between; }
+.mini.strip .cr .lo { left: 12px; right: 12px; }
+/* квадрат: название и градусы сверху, значение крупнее снизу */
+.mini.sqr .cr { height: 68px; padding: 8px; grid-template: "n s" auto "v v" 1fr / auto minmax(0, 1fr); align-items: start; }
+.mini.sqr .n { grid-area: n; font-size: 11px; } .mini.sqr .s { grid-area: s; justify-self: end; font-size: 11px; }
+.mini.sqr .s.t { font: 600 11px/16px var(--font); }
+.mini.sqr .v { grid-area: v; align-self: end; justify-self: start; font-size: 22px; font-weight: var(--vw); margin-bottom: 3px; }
+.mini.sqr .cr:last-child:nth-child(odd) { grid-column: span 2; }
+/* лица часов и календаря в колонке */
+.cr.facerow { display: block; height: auto; padding: 6px 4px; }

@@ -1,84 +1,64 @@
-/* Общие стили. Цвета и формы меняют темы через переменные (css/theme-*.css). */
+/* Общие стили. Цвета, шрифты и формы задают темы (theme-*.css) через переменные; раскладка у всех одна.
+   Модуль 52px, шаг 8: плитка 160x112, колонка шириной 160, полоска высотой 52.
+   Кегли: 11 и 12 подписи, 18 и 22 числа в компакте и вторые, 34 главное число. */
 :root {
-  --text: #f4f5f8; --dim: rgba(232, 236, 245, .7); --accent: #e9b872; --on-accent: #1a1408;
-  /* цвета показателей */
-  --cpu: #6fb1ff; --gpu: #c09bff; --mem: #ff8fc4; --net: #4fd0e3; --disk: #b7c3d8; --claude: #d97757;
-  --clock: #ffa94d; --cal: #ff6b6b; --wx: #ffcc4d; --upt: #6fdc9b;
-  /* состояние: норма, тепло, горячо */
-  --ok: #6fdc9b; --warm: #ffc247; --hot: #ff6a5c;
-  --bg: #17181c; --tile: #202126; --edge: transparent; --track: rgba(255, 255, 255, .15); --ctl: rgba(255, 255, 255, .1); --pop: #23252d;
-  --r: 8px; --barh: 6px; --nw: 650;
   --font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --vf: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --vw: 400; --vw2: 400; --R: 0; --r: 0; --r2: 0;
+  --text: #fff; --dim: rgba(255, 255, 255, .66); --lab: var(--text); --track: rgba(255, 255, 255, .18); --hair: rgba(255, 255, 255, .12);
+  --sheet: #161b24; --tile: none; --tile2: var(--tile); --ctl: rgba(255, 255, 255, .08); --pop: #1c212c; --edge: rgba(255, 255, 255, .12);
+  --ok: #7fe0a6; --warm: #ffc65c; --hot: #ff7b6b; --accent: #7cc4ff; --on-accent: #14181f; --a: var(--accent);
 }
-/* --h красит графики, шкалы и иконки, --dig цифры (у плиток без показателя цвет текста).
-   Класс mono = один цвет на всё: --one предлагает тема, класс own = выбран руками (--one и --accent ставит страница, lite = он светлый).
-   «Тепло» и «горячо» остаются жёлтым и красным. */
-body { --one: var(--accent); --on-one: var(--on-accent); --ink: var(--one); }
-body.mono { --dig: var(--ink); --okdig: var(--ink); }
-body.mono [data-m], body.mono .cr, body.mono .sb { --h: var(--one); --dig: var(--ink); }
-.mono .wday.now .dn { color: var(--dig); }
-.mono .we { color: var(--dim); }
-#set { --okdig: var(--ok); }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body {
   margin: 0; background: transparent; overflow: hidden; color: var(--text);
-  font: 13px/1.35 var(--font); font-variant-numeric: tabular-nums;
+  font: 12px/16px var(--font); font-variant-numeric: tabular-nums;
   user-select: none; -webkit-user-select: none; cursor: default;
 }
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; border: 0; background: none; padding: 0; }
 body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-#root { position: relative; width: max-content; min-height: 36px; background: var(--bg); }
-.full { position: relative; width: 344px; padding: 12px; }
+#root { position: relative; width: max-content; min-height: 36px; background: var(--sheet); border-radius: var(--R); }
 
 .ico { width: 100%; height: 100%; display: block; }
 .i { width: 16px; height: 16px; flex: none; display: inline-block; }
-[data-m=cpu] { --h: var(--cpu); --dig: var(--cpu); }
-[data-m=gpu] { --h: var(--gpu); --dig: var(--gpu); }
-[data-m=mem] { --h: var(--mem); --dig: var(--mem); }
-[data-m=net] { --h: var(--net); --dig: var(--net); }
-[data-m=disks] { --h: var(--disk); --dig: var(--disk); }
-/* плитки и строки без показателя тоже с цветной иконкой (в Терминале всё зелёное) */
-:where(body:not(.theme-terminal)) :is([data-m=clock], [data-id=clock]) { --h: var(--clock); }
-:where(body:not(.theme-terminal)) :is([data-m=calendar], [data-id=calendar]) { --h: var(--cal); }
-:where(body:not(.theme-terminal)) :is([data-m=weather], [data-id=weather]) { --h: var(--wx); }
-:where(body:not(.theme-terminal)) :is([data-m=uptime], [data-id=uptime]) { --h: var(--upt); }
-/* разноцветный: шкалы и кольца показателей меняют цвет по заполненности. Ширина градиента = вся шкала. */
-body { --grad: linear-gradient(90deg, var(--ok), var(--warm) 62%, var(--hot)); }
-:where(body:not(.mono):not(.theme-terminal)) :is([data-m=cpu], [data-m=gpu], [data-m=mem], [data-m=disks]) { --fillbg: var(--grad) left / 100cqw 100% no-repeat; }
-body:not(.mono):not(.theme-terminal) [data-m]:not(.tinted) .ring .fg { stroke: var(--fill, var(--h)); }
-body:not(.mono):not(.theme-terminal) [data-m] .cl:is(.lv-warm) .ring .fg { stroke: var(--warm); }
-body:not(.mono):not(.theme-terminal) [data-m] .cl:is(.lv-hot) .ring .fg { stroke: var(--hot); }
-/* свой цвет плитки (класс tinted и переменные ставит paintTile) */
-.tinted .rec [data-m] { --dig: inherit; --okdig: inherit; }
-body .tinted.tinted .chead, body .tinted.tinted .cday b, body .tinted.tinted .wx .wi, body .tinted.tinted .wday .di { color: var(--dig); }
-body .tinted.tinted .cd.now i { background: var(--h); color: var(--on-accent); }
-.s-ok { color: var(--okdig, var(--ok)) !important; }
-.s-warm { color: var(--warm) !important; }
-.s-hot { color: var(--hot) !important; }
-.btn { background: var(--accent); color: var(--on-accent); font-weight: 650; border-radius: 7px; padding: 4px 13px; }
+.num { font-family: var(--vf); font-variant-numeric: tabular-nums; }
+.num small { font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--dim); margin-left: 2px; letter-spacing: 0; }
+.warm { color: var(--warm) !important; } .hot { color: var(--hot) !important; } .s-ok { color: var(--ok) !important; }
+/* состояние красит индикатор; свой цвет плитки (paintTile) — тоже только индикатор */
+.is-warm, .is-warm > * { --a: var(--warm); --aur: linear-gradient(120deg, #ffb341, #f58a1f); }
+.is-hot, .is-hot > *, .alarm, .alarm > * { --a: var(--hot); --aur: linear-gradient(120deg, #ff7a59, #e8203f); }
+.btn { background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 7px; padding: 4px 13px; }
 .btn.ghost { background: var(--ctl); color: var(--text); font-weight: 500; }
 .btn.wide { width: 100%; padding: 8px; }
-/* тревога */
-@keyframes pulse {
-  50% { box-shadow: inset 0 0 0 1px var(--hot), inset 0 0 22px color-mix(in srgb, var(--hot) 45%, transparent); }
-}
-.alarm { background: color-mix(in srgb, var(--hot) 20%, transparent) !important; border-color: var(--hot) !important; animation: pulse 1.8s ease-in-out infinite; }
-.tile.alarm .badge { display: inline-flex; }
+
+/* индикаторы */
+.bar { height: 6px; width: 100%; border-radius: 9px; background: var(--track); overflow: hidden; flex: none; }
+.bar i { display: block; height: 100%; width: 0; border-radius: 9px; background: var(--a); transition: width .5s; }
+.bar.thin { height: 4px; }
+.graph { display: block; width: 100%; height: 24px; flex: 1 1 24px; min-height: 24px; max-height: 56px; overflow: visible; }
+.graph path { vector-effect: non-scaling-stroke; }
+.graph .l { fill: none; stroke: var(--a); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.graph .a { fill: var(--a); opacity: .16; }
+.tk { position: relative; height: 22px; width: 100%; flex: none; background: repeating-linear-gradient(90deg, var(--track) 0 3px, transparent 3px 5px); }
+.tk > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: repeating-linear-gradient(90deg, var(--a) 0 3px, transparent 3px 5px); }
+.tk > b { position: absolute; top: 0; bottom: 0; width: 3px; background: var(--hot); opacity: .85; }
+.tk.thin { height: 6px; }
+.hist { display: block; width: 100%; height: 22px; flex: none; }
+.hist path { fill: var(--a); }
+.fill { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+/* тревога: ячейка подсвечена и мягко пульсирует */
+@keyframes pulse { 50% { box-shadow: inset 0 0 0 1.5px var(--hot), inset 0 0 22px color-mix(in srgb, var(--hot) 40%, transparent); } }
+.alarm { background-color: color-mix(in srgb, var(--hot) 22%, transparent) !important; animation: pulse 1.8s ease-in-out infinite; }
 /* загрузка */
-.loading .tile > *, .loading .cr > *, .loading .sb > * { visibility: hidden; }
-.loading .cr { position: relative; }
-.loading .tile::after, .loading .cr::after, .loading .sb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .1) 50%, transparent 70%); background-size: 220% 100%; animation: sh 1.2s linear infinite; }
-@keyframes sh {
-  from { background-position: 140% 0; }
-  to { background-position: -80% 0; }
-}
-.reveal .tile > *, .reveal .cr > *, .reveal .sb > * { animation: rv .45s ease-out; }
-@keyframes rv {
-  from { opacity: 0; transform: translateY(4px); }
-}
+.loading .cb > *, .loading .cr > * { visibility: hidden; }
+.loading .cb::after, .loading .cr::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--text) 10%, transparent) 50%, transparent 70%); background-size: 220% 100%; animation: sh 1.2s linear infinite; }
+@keyframes sh { from { background-position: 140% 0; } to { background-position: -80% 0; } }
+.reveal .cb > *, .reveal .cr > * { animation: rv .45s ease-out; }
+@keyframes rv { from { opacity: 0; transform: translateY(4px); } }
 @media (prefers-reduced-motion: reduce) {
-  .alarm, .loading .tile::after, .loading .cr::after, .loading .sb::after, .reveal .tile > * { animation: none; }
+  .alarm, .loading .cb::after, .loading .cr::after, .reveal .cb > *, .reveal .cr > * { animation: none; }
+  .bar i { transition: none; }
 }

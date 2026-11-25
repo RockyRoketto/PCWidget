@@ -1,23 +1,13 @@
-/* Часы и календарь. Размеры считаются от ширины самого лица (.face), поэтому одинаковы в плитке и в колонке. */
-body { --flip: #3a3f4d; --flip2: #31353f; --sec: #ff4f6d; }
-body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
-/* часы и календарь рядом с другой плиткой: квадрат */
-.tile.sq:not(.w2) { aspect-ratio: 1; }
-.tile.sq:not(.w2) .face.month { height: 100%; display: flex; flex-direction: column; }
-.tile.sq:not(.w2) .face.month .cgrid { flex: 1; grid-template-rows: auto; grid-auto-rows: 1fr; }
-.tile.sq:not(.w2) { padding: 7px 8px; }
-.tile.sq:not(.w2) .face.month .chead { font-size: 12px; margin-bottom: 5px; text-align: center; }
-.tile.sq:not(.w2) .face.month .cgrid { min-height: 0; font-size: 11px; }
-.tile.sq:not(.w2) .face.month .cw { font-size: 9.5px; padding: 0; }
-.tile.sq:not(.w2) .face.month .cd { height: auto; min-height: 0; }
-.tile.sq:not(.w2) .face.month .cd i { min-width: 17px; height: 17px; line-height: 17px; }
+/* Часы (перекидные, стрелки) и календарь. Размеры от ширины лица (.face): одинаковы в плитке и в колонке. */
+body { --flip: color-mix(in srgb, var(--text) 13%, transparent); --flip2: color-mix(in srgb, var(--text) 9%, transparent); --sec: var(--hot); }
+.face-cb { padding: 12px; justify-content: center; }
 .face { container-type: inline-size; width: 100%; min-width: 0; }
-.tile.mid { display: flex; flex-direction: column; justify-content: center; }
-.cr.facerow { display: block; height: auto; padding: 5px 4px; }
+.clk { font-size: 31px; font-weight: var(--vw); }
+.cap { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* перекидные */
-.flip { --gap: 6px; --w: min(112px, calc((100cqw - (var(--n) - 1) * var(--gap)) / var(--n))); --ch: calc(var(--w) * .9); display: flex; justify-content: center; gap: var(--gap); }
+.flip { --gap: 6px; --w: min(64px, calc((100cqw - (var(--n) - 1) * var(--gap)) / var(--n))); --ch: calc(var(--w) * .9); display: flex; justify-content: center; gap: var(--gap); }
 .flip + .cap { text-align: center; margin-top: 5px; }
-.fc { position: relative; width: var(--w); height: var(--ch); perspective: 320px; font-size: calc(var(--w) * .7); font-weight: 600; color: var(--dig, var(--text)); letter-spacing: -.02em; }
+.fc { position: relative; width: var(--w); height: var(--ch); perspective: 320px; font-family: var(--vf); font-size: calc(var(--w) * .7); font-weight: var(--vw); color: var(--text); letter-spacing: -.02em; }
 .fh { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; text-align: center; }
 .fh span { position: absolute; left: 0; right: 0; height: var(--ch); line-height: var(--ch); }
 .fh.t { top: 0; background: var(--flip); border-radius: calc(var(--w) * .1) calc(var(--w) * .1) 0 0; transform-origin: 50% 100%; }
@@ -25,24 +15,22 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 .fh.b { bottom: 0; background: var(--flip2); border-radius: 0 0 calc(var(--w) * .1) calc(var(--w) * .1); transform-origin: 50% 0; }
 .fh.b span { bottom: 0; }
 .fh.leaf { visibility: hidden; z-index: 1; }
-.fc::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: rgba(0, 0, 0, .55); z-index: 2; }
+.fc::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: color-mix(in srgb, var(--sheet, #000) 70%, #000); z-index: 2; }
 .fc[data-ap]::before { content: attr(data-ap); position: absolute; left: 6px; top: 4px; z-index: 3; font-size: max(8px, calc(var(--w) * .12)); letter-spacing: 0; line-height: 1; color: var(--dim); }
 .fc.go .leaf { visibility: visible; }
 .fc.go .leaf.t { animation: flipt .22s ease-in both; }
 .fc.go .leaf.b { animation: flipb .24s ease-out .2s both; }
-@keyframes flipt {
-  to { transform: rotateX(-90deg); filter: brightness(.6); }
-}
-@keyframes flipb {
-  from { transform: rotateX(90deg); filter: brightness(1.35); }
-}
-.theme-terminal .fh { border-radius: 0; }
+@keyframes flipt { to { transform: rotateX(-90deg); filter: brightness(.6); } }
+@keyframes flipb { from { transform: rotateX(90deg); filter: brightness(1.35); } }
+.theme-gauge .fh { border-radius: 2px; }
 /* стрелки */
-.dial { display: block; overflow: visible; width: min(100%, 224px); aspect-ratio: 1; margin: 0 auto; font-family: var(--font); }
-.dial text { text-anchor: middle; dominant-baseline: central; fill: var(--dig, var(--text)); }
-.hn { font-size: 24px; font-weight: 400; letter-spacing: -.03em; }
-.mn { font-size: 10px; font-weight: 400; opacity: .75; }
-.tk { stroke: var(--text); stroke-width: 1; opacity: .5; }
+.face-cb:has(.dial) { padding: 6px; }
+.dial { display: block; overflow: visible; width: min(100%, 148px); aspect-ratio: 1; margin: 0 auto; font-family: var(--vf); }
+.tile.w2 .dial { width: 148px; }
+.dial text { text-anchor: middle; dominant-baseline: central; fill: var(--text); }
+.hn { font-size: 24px; font-weight: var(--vw); letter-spacing: -.03em; }
+.mn { font-size: 10px; opacity: .7; }
+.dtk { stroke: var(--text); stroke-width: 1; opacity: .5; }
 .dt { font-size: 13px; }
 .dial .dd { fill: var(--sec); }
 .hh, .mh, .dial .sech { transform-origin: 0 0; }
@@ -51,35 +39,30 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 .hub { fill: var(--text); }
 .dial .sech { transition: transform .16s cubic-bezier(.3, 1.5, .5, 1); }
 .dial .sech line { stroke: var(--sec); stroke-width: 1.6; stroke-linecap: round; }
-.pin { fill: #111; stroke: var(--sec); stroke-width: 2; }
-@container (max-width: 189px) {
-  .dt { font-size: 15px; }
-  .dial .sech line { stroke-width: 2.2; }
-}
-/* календарь */
-.chead { font-size: 13px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; }
+.pin { fill: var(--sheet, #111); stroke: var(--sec); stroke-width: 2; }
+.theme-gauge .dial .sech line, .theme-gauge .dial .dd { stroke: var(--hot); }
+.cr .dial { width: min(100%, 144px); }
+/* календарь: месяц заполняет плитку в три модуля целиком */
+.face.month { height: 100%; display: flex; flex-direction: column; }
+.face-cb:has(.cal) { justify-content: flex-start; }
+.chead { font-weight: 600; color: var(--lab); margin-bottom: 4px; white-space: nowrap; }
 .chead::first-letter, .cday b::first-letter { text-transform: uppercase; }
-.cgrid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; }
-.cw { font-size: 11px; color: var(--dim); padding-bottom: 2px; }
-.cd { display: grid; place-items: center; height: 26px; }
-.cd i { font-style: normal; min-width: 24px; height: 24px; line-height: 24px; border-radius: 99px; }
-.we { color: color-mix(in srgb, var(--hot) 70%, var(--text)); }
+.cgrid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11.5px; }
+.face.month .cgrid { flex: 1; grid-auto-rows: 1fr; }
+.cw { font-size: 10px; color: var(--dim); }
+.cd { display: grid; place-items: center; min-height: 0; }
+.cd i { font-style: normal; min-width: 18px; height: 18px; line-height: 18px; border-radius: 99px; font-family: var(--vf); }
+.we { color: color-mix(in srgb, var(--hot) 60%, var(--text)); }
+.cw.we { color: color-mix(in srgb, var(--hot) 60%, var(--dim)); }
 .cd.off { opacity: .32; }
 .cd.now i { background: var(--accent); color: var(--on-accent); font-weight: 700; }
-.theme-terminal .cd i { border-radius: 0; }
+.theme-gauge .cd i { border-radius: 3px; }
+.face.week .cd { height: 24px; }
 .cday { display: flex; align-items: center; gap: 12px; }
-.cday .cnum { font-size: 46px; line-height: 1; color: var(--dig, var(--accent)); }
+.cday .cnum { font-size: 46px; line-height: 1; font-weight: var(--vw); }
 .cday div { min-width: 0; }
-.cday b { font-size: 15px; font-weight: 650; display: block; }
-.cday div span { font-size: 12px; color: var(--dim); white-space: nowrap; }
-@container (max-width: 189px) {
-  .cgrid { font-size: 11.5px; }
-  .cw { font-size: 10px; }
-  .cd { height: 21px; }
-  .cd i { min-width: 19px; height: 19px; line-height: 19px; }
-  .cday { display: block; }
-  .cday b { margin-top: 3px; }
-}
+.cday b { font-weight: 600; display: block; }
+.cday div span { color: var(--dim); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) {
   .dial .sech { transition: none; }
   .fc.go .leaf { animation-duration: 1ms !important; animation-delay: 0s !important; }

@@ -21,7 +21,8 @@ const (
 	setCSSH  = 600
 	setMinH  = 420
 	fullCSSW = 344 // ширина виджета в полном режиме (base.css)
-	stripH   = 48  // высота полоски с запасом
+	wideCSSW = 680 // ширина Широкой панели (tiles.css)
+	stripH   = 56  // высота полоски с запасом
 	setGap   = 12
 )
 
@@ -32,7 +33,8 @@ type setWin struct {
 	ready   bool
 	open    bool
 	tab     string
-	style   string // тема, под которую настроены стекло и углы
+	style   string // оформление, под которое настроены стекло и углы
+	want    string // какое просит страница настроек
 	cssH    int
 	editing bool // в виджете включена правка плиток
 }
@@ -188,6 +190,9 @@ func onSetPage(m string) {
 	case m == "drag":
 		pReleaseCapture.Call()
 		pPostMessage.Call(set.hwnd, wmNCLButtonDown, htCaption, 0)
+	case strings.HasPrefix(m, "style:"):
+		set.want = m[6:]
+		styleSettings(false)
 	case strings.HasPrefix(m, "tab:"):
 		set.tab = m[4:]
 		updateEditing()
@@ -222,7 +227,11 @@ func placeSettings() {
 	dpi := dpiOf(app.hwnd)
 	sc := func(css int) int { return scalePx(css, dpi) }
 	z := app.brief.Scale
-	spot := setSpot{w: sc(setCSSW), h: sc(setCSSH), minH: sc(setMinH), fullW: sc(fullCSSW * z / 100), stripH: sc(stripH * z / 100), gap: sc(setGap)}
+	fw := fullCSSW
+	if app.brief.Mode == "wide" {
+		fw = wideCSSW
+	}
+	spot := setSpot{w: sc(setCSSW), h: sc(setCSSH), minH: sc(setMinH), fullW: sc(fw * z / 100), stripH: sc(stripH * z / 100), gap: sc(setGap)}
 	x, y, h := settingsRect(a, spot, work)
 	set.cssH = h * 96 / dpi
 	// Сначала на нужный монитор (там может быть другой масштаб), потом окончательный размер.
@@ -231,11 +240,14 @@ func placeSettings() {
 	set.cr.Resize()
 }
 
-// styleSettings — стекло и углы окна по теме.
+// styleSettings — стекло и углы окна по оформлению, которое прислала страница настроек.
 func styleSettings(force bool) {
-	if set.hwnd == 0 || (!force && set.style == app.brief.Theme) {
+	if set.want == "" {
+		set.want = app.style
+	}
+	if set.hwnd == 0 || (!force && set.style == set.want) {
 		return
 	}
-	set.style = app.brief.Theme
+	set.style = set.want
 	setStyleFor(set.hwnd, set.style)
 }

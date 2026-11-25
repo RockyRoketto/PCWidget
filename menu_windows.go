@@ -33,8 +33,20 @@ func sysInfo() string {
 		"driver": pawnInstalled(), "sensors": hub != nil && hub.available(),
 		"topmost": app.settings.Topmost, "visible": app.visible,
 		"claude": claudeModState(claudeDir()), "claudeErr": claudeModErr,
+		"accent": lastAccent,
 	})
 	return string(b)
+}
+
+// lastAccent — цвет акцента Windows, который знает страница.
+var lastAccent = windowsAccent()
+
+// sendSysIfAccent: Windows сообщила о смене настроек; страницам пишем, только если поменялся акцент.
+func sendSysIfAccent() {
+	if a := windowsAccent(); a != lastAccent {
+		lastAccent = a
+		sendSys()
+	}
 }
 
 // sendSys сообщает странице состояние системы (вкладка «Система», пункты меню).
