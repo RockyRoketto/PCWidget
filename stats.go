@@ -12,8 +12,9 @@ type Stats struct {
 	Procs   *ProcStat    `json:"procs,omitempty"`
 	Weather *WeatherStat `json:"weather,omitempty"`
 	// WeatherState: "" (выключена), loading, ok, notfound, error — для подсказки у поля города.
-	WeatherState string `json:"weatherState,omitempty"`
-	Uptime       int64  `json:"uptime"` // секунды с запуска системы
+	WeatherState string      `json:"weatherState,omitempty"`
+	Claude       *ClaudeStat `json:"claude,omitempty"`
+	Uptime       int64       `json:"uptime"` // секунды с запуска системы
 }
 
 type CPUStat struct {

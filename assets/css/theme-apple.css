@@ -2,7 +2,7 @@
    иконки на цветных плашках. Карточки рисует страница, поэтому края гладкие. Плотность карточек зависит от --glass. */
 body.theme-apple {
   --text: #fff; --dim: rgba(235, 235, 245, .64); --accent: #0a84ff; --on-accent: #fff;
-  --cpu: #409cff; --gpu: #c66bf5; --mem: #ff5577; --net: #5ac8e8; --disk: #aeaeb2;
+  --cpu: #409cff; --gpu: #c66bf5; --mem: #ff5577; --net: #5ac8e8; --disk: #aeaeb2; --claude: #ff9a62;
   --ok: #30d158; --warm: #ffd60a; --hot: #ff453a; --sec: #ff9f0a; --flip: #3a3a3c; --flip2: #2f2f31;
   --card: rgba(28, 28, 30, calc(.62 + .38 * var(--glass, .76)));
   --sheen: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 60%);
@@ -10,7 +10,7 @@ body.theme-apple {
   --bg: transparent; --tile: transparent; --edge: rgba(84, 84, 88, .6); --track: rgba(120, 120, 128, .36); --ctl: rgba(120, 120, 128, .24); --pop: #3a3a3c;
   --r: 20px; --barh: 7px; --nw: 600; --font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
 }
-body.theme-apple.mono { --cpu: #fff; --gpu: #fff; --mem: #fff; --net: #fff; --disk: #fff; }
+body.theme-apple.mono { --cpu: #fff; --gpu: #fff; --mem: #fff; --net: #fff; --disk: #fff; --claude: #fff; }
 /* карточки: плитки, колонка, полоска, меню, подсказка, окно настроек */
 .theme-apple .tile, .theme-apple .col, .theme-apple .strip, .theme-apple #tip, .theme-apple #set { background: var(--sheen), var(--card); box-shadow: var(--rim); }
 /* тревога: под красным остаётся карточка */

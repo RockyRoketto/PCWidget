@@ -37,7 +37,7 @@ function defaults() {
   return {
     theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: '',
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
-    thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
+    thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
   };
 }
@@ -77,6 +77,9 @@ function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : '') +
 // Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
 function weatherOn() { return ['full', 'column', 'strip'].some(function (m) { return isOn(m, 'weather'); }); }
 function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }
+// Файлы Claude Code Go читает только пока включена плитка (или строка в колонке, полоске).
+function claudeOn() { return isOn('full', 'claude') || ['column', 'strip'].some(function (m) { return isOn(m, 'claude') || isOn(m, 'claudew'); }); }
+function syncClaude() { post('claude:' + (claudeOn() ? 1 : 0)); }
 
 // ---- форматирование ----
 function rateParts(bps) { // байт/с -> [число, единица]

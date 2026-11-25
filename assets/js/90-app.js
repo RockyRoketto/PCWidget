@@ -23,7 +23,7 @@ function layout() {
   var old = view && view.el;
   view = CFG.mode === 'full' ? buildFull() : buildCompact(CFG.compact === 'strip');
   if (old) rootEl.replaceChild(view.el, old); else rootEl.insertBefore(view.el, rootEl.firstChild);
-  applyBody(); syncWeather();
+  applyBody(); syncWeather(); syncClaude();
   if (S && dataReady) refresh(Date.now());
 }
 
@@ -74,7 +74,7 @@ window.__cfg = function (c) {
   CFG = mergeCfg(c);
   if (JSON.stringify(old.thr) !== JSON.stringify(CFG.thr)) Alarm.reset();
   if (shape(old) !== shape(CFG)) { layout(); return; }
-  applyBody(); syncWeather();
+  applyBody(); syncWeather(); syncClaude();
   if (S && dataReady) refresh(Date.now());
 };
 // Команды из меню и от окна настроек.

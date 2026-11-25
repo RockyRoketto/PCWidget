@@ -3,16 +3,15 @@
 // Полный режим: CFG.rows — ряды из одной или двух плиток, CFG.hide — скрытые плитки (место в рядах за ними остаётся).
 // Колонка и полоска: свои списки CFG.mini.column и CFG.mini.strip: [{ id, on }].
 
-var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'disks', 'procs', 'records', 'uptime'];
-var OPT_OFF = { clock: 1, weather: 1, calendar: 1 };  // по умолчанию выключены
-var ONLY_WIDE = { procs: 1 };            // рядом с другой не встаёт
+var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'disks', 'claude', 'procs', 'records', 'uptime'];
+var OPT_OFF = { clock: 1, weather: 1, calendar: 1, claude: 1 };  // по умолчанию выключены
 var LOOK_WIDE = { cpu: 1, gpu: 1, mem: 1, net: 1, disks: 1 }; // в виде «Строки» всегда во всю ширину
-var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён' };
-var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'down', 'up', 'ping', 'disk', 'space', 'uptime'];
-var MINI_OFF = { clock: 1, weather: 1, calendar: 1, ping: 1, space: 1, uptime: 1 };
-var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', down: 'Сеть: приём', up: 'Сеть: отдача', ping: 'Пинг', disk: 'Диски: скорость', space: 'Диск: занято места', uptime: 'ПК включён' };
+var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', disks: 'Диски', claude: 'Claude', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён' };
+var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'down', 'up', 'ping', 'disk', 'space', 'claude', 'claudew', 'uptime'];
+var MINI_OFF = { clock: 1, weather: 1, calendar: 1, ping: 1, space: 1, claude: 1, claudew: 1, uptime: 1 };
+var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', down: 'Сеть: приём', up: 'Сеть: отдача', ping: 'Пинг', disk: 'Диски: скорость', space: 'Диск: занято места', claude: 'Claude: 5 часов', claudew: 'Claude: неделя', uptime: 'ПК включён' };
 
-function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['disks'], ['procs'], ['records', 'uptime']]; }
+function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['disks'], ['claude'], ['procs'], ['records', 'uptime']]; }
 function defaultHide() { var h = {}; Object.keys(OPT_OFF).forEach(function (id) { h[id] = 1; }); return h; }
 function defaultMini() { return MINI_IDS.map(function (id) { return { id: id, on: !MINI_OFF[id] }; }); }
 
@@ -21,12 +20,12 @@ function cleanRows(rows) {
   var seen = {}, out = [];
   rows.forEach(function (row) {
     var r = (Array.isArray(row) ? row : []).filter(function (id) { return TILE_IDS.indexOf(id) >= 0 && !seen[id] && (seen[id] = 1); });
-    if (r.length > 2 || r.some(function (id) { return ONLY_WIDE[id]; })) r.forEach(function (id) { out.push([id]); });
+    if (r.length > 2) r.forEach(function (id) { out.push([id]); });
     else if (r.length) out.push(r);
   });
   TILE_IDS.forEach(function (id) {
     if (seen[id]) return;
-    if (OPT_OFF[id]) out.unshift([id]); else out.push([id]);
+    if (OPT_OFF[id] && id !== 'claude') out.unshift([id]); else out.push([id]);
   });
   return out;
 }
@@ -84,7 +83,7 @@ function resetTiles(m) {
 }
 
 // ---- раскладка полного режима ----
-function alwaysWide(id) { return !!(ONLY_WIDE[id] || (CFG.look === 'rows' && LOOK_WIDE[id])); }
+function alwaysWide(id) { return CFG.look === 'rows' && !!LOOK_WIDE[id]; }
 function canPair(a, b) { return !alwaysWide(a) && !alwaysWide(b); }
 // Стоят ли видимые плитки ряда рядом (иначе каждая во всю ширину).
 function isSplit(ids) { return ids.length === 2 && canPair(ids[0], ids[1]); }

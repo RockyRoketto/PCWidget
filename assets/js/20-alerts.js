@@ -30,7 +30,8 @@ var ALARMS = {
   cpuTemp: { name: 'Температура CPU', unit: '°' },
   gpuTemp: { name: 'Температура GPU', unit: '°' },
   mem: { name: 'Память', unit: '%' },
-  disk: { name: 'Заполненность диска', unit: '%' }
+  disk: { name: 'Заполненность диска', unit: '%' },
+  claude: { name: 'Лимит Claude', unit: '%' }
 };
 
 // Пересчитывает все тревоги по снимку; возвращает список ключей, включившихся сейчас.
@@ -44,5 +45,7 @@ function evalAlarms(s, now) {
   chk('gpuTemp', s.gpu && s.gpu.temp, t.gpuTemp, 'Температура GPU ' + (s.gpu && s.gpu.temp != null ? Math.round(s.gpu.temp) + '°' : ''));
   chk('mem', s.mem && s.mem.pct, t.mem, 'Память занята на ' + (s.mem ? Math.round(s.mem.pct) + '%' : ''));
   (s.disks || []).forEach(function (d) { chk('disk:' + d.name, d.usedPct, t.disk, 'Диск ' + d.name + ' заполнен на ' + Math.round(d.usedPct) + '%'); });
+  var cl = maxLimit(s);
+  chk('claude', cl, t.claude, 'Лимит Claude израсходован на ' + (cl != null ? Math.round(cl) + '%' : ''));
   return fired;
 }

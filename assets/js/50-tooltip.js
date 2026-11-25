@@ -48,6 +48,16 @@ var TIPS = {
     var w = s.weather; if (!w) return '';
     return tipTitle('weather', 'Погода', w.city) + (w.desc ? kv('Сейчас', esc(w.desc)) : '') + kv('Температура', Math.round(w.temp) + '°') + kv('Ощущается', Math.round(w.feels) + '°');
   },
+  claude: function (s) {
+    var c = s.claude; if (!c) return '';
+    var now = Date.now() / 1000, wk = (c.days || []).reduce(function (a, d) { return a + d.tokens; }, 0);
+    return tipTitle('claude', 'Claude', c.limitsAt ? 'Лимиты обновлены ' + (now - c.limitsAt < 60 ? 'только что' : spanText(now - c.limitsAt) + ' назад') : 'Данных о лимитах нет') +
+      limitsOf(s).map(function (l) {
+        return kv(esc(limitName(l.kind)), Math.round(l.pct) + '%', limitLevel(l.pct)) + (l.reset ? kv('Сброс через', spanText(Math.max(l.reset - now, 0))) : '');
+      }).join('') + (c.ctx ? kv('Контекст', tokText(c.ctx.tokens) + ' из ' + tokText(c.ctx.window)) : '') +
+      '<hr><div class="cbars">' + dayBars(c.days || []) + '</div>' + kv('Токены сегодня', tokText(todayTokens(c))) + kv('За 7 дней', tokText(wk)) +
+      (c.open ? kv('Чаты Code', c.open + (c.busy ? ', работают ' + c.busy : '') + (c.wait ? ', ждут ' + c.wait : '')) : '');
+  },
   records: function () {
     return tipTitle('records', 'Пик за сессию', 'С запуска виджета') +
       (REC.cpuLoad ? kv('Загрузка CPU', Math.round(REC.cpuLoad) + '%') : '') + (REC.cpuTemp != null ? kv('Температура CPU', Math.round(REC.cpuTemp) + '°', level(REC.cpuTemp, CFG.thr.cpuTemp)) : '') +

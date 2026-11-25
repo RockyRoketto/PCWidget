@@ -21,6 +21,9 @@ var hub *sensorHub
 // weather — сервис погоды; город ему сообщает страница (сообщение «weather:<город>»).
 var weather = startWeather()
 
+// claude — лимиты и расход Claude Code; включена ли плитка, сообщает страница (сообщение «claude:1»).
+var claude = startClaude()
+
 func newCollector() *collector {
 	hub = startSensors()
 	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), sensors: hub}
@@ -49,6 +52,7 @@ func (c *collector) collect() Stats {
 	s.Procs = c.procs.top()
 	s.Weather = weather.get()
 	s.WeatherState = weather.state()
+	s.Claude = claude.get()
 
 	if down, up, dDown, dUp, ok := c.net.read(); ok {
 		c.traffic.add(now, dDown, dUp)

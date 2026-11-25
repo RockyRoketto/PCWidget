@@ -10,6 +10,8 @@ var ICONS = (function () {
     cpu: w('<rect x="5" y="5" width="10" height="10" rx="2"/><rect x="8" y="8" width="4" height="4" rx=".6"/><path d="M8 2v3M12 2v3M8 15v3M12 15v3M2 8h3M2 12h3M15 8h3M15 12h3"/>'),
     gpu: w('<rect x="2" y="5" width="16" height="9" rx="1.5"/><circle cx="8" cy="9.5" r="2.6"/><path d="M13 8h3M13 11h3M5 14v2.5M15 14v2.5"/>'),
     mem: w('<rect x="2" y="5" width="16" height="8" rx="1"/><path d="M5 8h2M9 8h2M13 8h2M5 13v3M8 13v3M12 13v3M15 13v3"/>'),
+    claude: w('<path d="M10 2.8v14.4M2.8 10h14.4M4.9 4.9l10.2 10.2M15.1 4.9 4.9 15.1"/>'),
+    claudew: w('<path d="M8 3v11M2.5 8.5h11M4.1 4.6l7.8 7.8M11.9 4.6l-7.8 7.8M13 13h4.5l-2.6 4.5"/>'),
     down: w('<path d="M10 3.5v11M5.5 10.5 10 15l4.5-4.5M4 17.5h12"/>'),
     up: w('<path d="M10 16.5v-11M5.5 9.5 10 5l4.5 4.5M4 2.5h12"/>'),
     net: w('<path d="M7 3v13M3.5 12.5 7 16l3.5-3.5M13 17V4M9.5 7.5 13 4l3.5 3.5"/>'),

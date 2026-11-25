@@ -17,7 +17,8 @@ var THR_ROWS = {
   cpuTemp: ['cpu', 'Температура CPU', '°', function (s) { return s.cpu && s.cpu.temp; }],
   gpuTemp: ['gpu', 'Температура GPU', '°', function (s) { return s.gpu && s.gpu.temp; }],
   mem: ['mem', 'Память занята', '%', function (s) { return s.mem && s.mem.pct; }],
-  disk: ['disks', 'Диск заполнен', '%', function (s) { return s.disks && s.disks.length ? Math.max.apply(null, s.disks.map(function (d) { return d.usedPct; })) : null; }]
+  disk: ['disks', 'Диск заполнен', '%', function (s) { return s.disks && s.disks.length ? Math.max.apply(null, s.disks.map(function (d) { return d.usedPct; })) : null; }],
+  claude: ['claude', 'Лимит Claude', '%', function (s) { var l = s.claude && s.claude.limits; return l ? Math.max.apply(null, l.map(function (x) { return x.pct; })) : null; }]
 };
 var SET_TABS = { look: ['look', 'Вид'], tiles: ['tiles', 'Плитки'], alarm: ['bell', 'Тревоги'], sys: ['sys', 'Система'] };
 var TILE_OPTS = {
@@ -34,7 +35,7 @@ var TILE_OPTS = {
 };
 var setState = { tab: 'look', open: '', sure: false };
 
-var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks' };
+var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks', claudew: 'claude' };
 function modeCards() {
   return '<div class="cards c3">' + Object.keys(MODES).map(function (m) {
     return '<button class="card' + (curMode() === m ? ' on' : '') + '" data-k="mode" data-v="' + m + '">' + PICS[m] + MODES[m] + '</button>'; }).join('') + '</div>';
@@ -89,7 +90,7 @@ var SET_BODY = {
       }).join('') + '</div>' + setRow('Расположение', 'Порядок и набор плиток этого режима', ghost('tiles', 'Как в начале'));
   },
   alarm: function () {
-    return Object.keys(THR_ROWS).map(function (k) {
+    return Object.keys(THR_ROWS).filter(function (k) { return k !== 'claude' || claudeOn(); }).map(function (k) {
       var r = THR_ROWS[k], v = CFG.thr[k];
       return '<div class="thr" data-m="' + r[0] + '"><div class="t">' + I(r[0]) + '<span>' + r[1] + '</span><b>' + v + r[2] + '</b></div><div class="zone" style="--t:' + zonePos(v) + '%"><div class="tr"></div>' +
         '<div class="now" data-now="' + k + '" hidden></div><input type="range" min="50" max="100" value="' + v + '" data-thr="' + k + '" aria-label="' + r[1] + '"></div></div>';

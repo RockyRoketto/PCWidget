@@ -261,6 +261,8 @@ func onPage(m string) {
 		}
 	case strings.HasPrefix(m, "weather:"):
 		weather.setCity(m[8:])
+	case strings.HasPrefix(m, "claude:"):
+		claude.setOn(m[7:] == "1")
 	case strings.HasPrefix(m, "style:"):
 		setStyle(m[6:])
 	}

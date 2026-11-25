@@ -6,6 +6,10 @@
 function loadCell(key, thrKey) {
   return function (s) { var d = s[key]; return d && { v: Math.round(d.load), u: '%', t: d.temp, thr: CFG.thr[thrKey], pct: d.load }; };
 }
+function limitCell(kind) {
+  return function (s) { var l = limitBy(s, kind); return l && { v: Math.round(l.pct), u: '%', pct: clamp(l.pct, 0, 100), lv: limitLevel(l.pct), sm: resetText(l) }; };
+}
+function limitAlarm(kind) { return function () { var l = S && limitBy(S, kind); return !!l && Alarm.isOn('claude') && l.pct >= CFG.thr.claude - Alarm.HYST; }; }
 function rateCell(bps) { var p = rateParts(bps); return { v: p[0], u: p[1], rate: true }; }
 function anyDiskAlarm() { return (S && S.disks || []).some(function (d) { return Alarm.isOn('disk:' + d.name); }); }
 function shortUptime(sec) {
@@ -35,6 +39,8 @@ var CSPEC = {
       var d = (s.disks || []).slice().sort(function (a, b) { return b.usedPct - a.usedPct; })[0];
       return d && { v: Math.round(d.usedPct), u: '%', pct: d.usedPct, sm: d.freeGB.toFixed(0) + ' ГБ', letter: d.name.replace(':', '') };
     } },
+  claude: { g: 'claude', m: 'claude', icon: 'claude', load: true, alarm: limitAlarm('five_hour'), get: limitCell('five_hour') },
+  claudew: { g: 'claude', m: 'claude', icon: 'claudew', load: true, alarm: limitAlarm('seven_day'), get: limitCell('seven_day') },
   uptime: { g: 'time2', icon: 'uptime', cls: 'vt', get: function (s) { return s.uptime != null ? { v: shortUptime(s.uptime), small: true } : null; } }
 };
 

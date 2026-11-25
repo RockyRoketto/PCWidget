@@ -154,7 +154,7 @@ var TILE_BUILD = {
   procs: function () {
     var tabs = [['cpu', 'CPU'], ['ram', 'Память'], ['disk', 'Диск']], tint = { cpu: 'cpu', ram: 'mem', disk: 'disks' };
     var fmt = { cpu: function (v) { return v.toFixed(v < 10 ? 1 : 0) + '%'; }, ram: function (v) { return sizeText(v * 1048576); }, disk: rateText };
-    var el = mk('<div class="tile">' + head('procs', '<span class="tabs" data-nodrag>' + tabs.map(function (t) { return '<button data-k="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</span>') + '<div class="pl"></div></div>');
+    var el = mk('<div class="tile prt">' + head('procs', '<span class="tabs" data-nodrag>' + tabs.map(function (t) { return '<button data-k="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</span>') + '<div class="pl"></div></div>');
     var o = {
       el: el,
       update: function (s) {

@@ -2,14 +2,14 @@
 :root {
   --text: #f4f5f8; --dim: rgba(232, 236, 245, .7); --accent: #e9b872; --on-accent: #1a1408;
   /* цвета показателей */
-  --cpu: #6fb1ff; --gpu: #c09bff; --mem: #ff8fc4; --net: #4fd0e3; --disk: #b7c3d8;
+  --cpu: #6fb1ff; --gpu: #c09bff; --mem: #ff8fc4; --net: #4fd0e3; --disk: #b7c3d8; --claude: #f0976c;
   /* состояние: норма, тепло, горячо */
   --ok: #6fdc9b; --warm: #ffc247; --hot: #ff6a5c;
   --bg: #17181c; --tile: #202126; --edge: transparent; --track: rgba(255, 255, 255, .15); --ctl: rgba(255, 255, 255, .1); --pop: #23252d;
   --r: 8px; --barh: 6px; --nw: 650;
   --font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
 }
-body.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--accent); --net: var(--accent); --disk: var(--accent); }
+body.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--accent); --net: var(--accent); --disk: var(--accent); --claude: var(--accent); }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body {

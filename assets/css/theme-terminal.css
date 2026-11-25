@@ -1,7 +1,7 @@
 /* Тема «Терминал»: чёрный фон, зелёный моноширинный текст, шкалы из блоков, лёгкая растровая сетка. */
 body.theme-terminal {
   --text: #7dffa0; --dim: #3fbf66; --accent: #4dff7c; --on-accent: #00220b;
-  --cpu: #4dff7c; --gpu: #4dff7c; --mem: #4dff7c; --net: #4dff7c; --disk: #4dff7c;
+  --cpu: #4dff7c; --gpu: #4dff7c; --mem: #4dff7c; --net: #4dff7c; --disk: #4dff7c; --claude: #4dff7c;
   --ok: #4dff7c; --warm: #ffd84d; --hot: #ff5a4d;
   --bg: #020a04; --tile: transparent; --edge: #14552a; --track: #0f3a1c; --ctl: #0a2412; --pop: #06170b;
   --r: 0px; --barh: 8px; --nw: 500; --font: "Cascadia Mono", Consolas, "Courier New", monospace;
