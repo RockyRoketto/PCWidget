@@ -20,22 +20,43 @@ var CLOCKS = { digital: 'Цифры', flip: 'Перекидные', analog: 'С�
 var CALS = { day: 'День', week: 'Неделя', month: 'Месяц' };
 var MODES = { full: 'Полный', column: 'Колонка', strip: 'Полоска' };
 var SCALES = [90, 100, 115, 130];
-// Акцентный цвет Стекла (подписи, выбранное, кнопки, цифры при «Цвет цифр: Один»): быстрый выбор, плюс свой цвет.
-var ACCENTS = ['#e9b872', '#6fb1ff', '#c09bff', '#ff8fc4', '#5fe0a0', '#ff7a6b'];
-function accentOn(hex) { // цвет текста поверх акцента
-  var n = parseInt(hex.slice(1), 16);
-  return (((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 > 150) ? '#1a1408' : '#fff';
+// Один цвет на всё: первый предлагает тема (ONE), дальше быстрый выбор под её фон, плюс свой цвет.
+var ONE = { glass: '#e9b872', apple: '#ffffff', aero: '#0a74d1', terminal: '#4dff7c' };
+var TINTS = {
+  glass: ['#ffffff', '#6fb1ff', '#c09bff', '#ff8fc4', '#5fe0a0', '#ff7a6b'],
+  apple: ['#0a84ff', '#30d158', '#ff9f0a', '#ff375f', '#bf5af2', '#64d2ff'],
+  aero: ['#2c820c', '#7a3ccb', '#c95600', '#007c92', '#c2185b', '#08304f'],
+  terminal: ['#ffb000', '#5ad7ff', '#e6ffe9', '#ff8fd6', '#c9a0ff', '#ff7a5c']
+};
+function rgbOf(hex) { var n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; }
+function lumOf(hex) { var c = rgbOf(hex); return (c[0] * 299 + c[1] * 587 + c[2] * 114) / 1000; }
+function mixTo(hex, to, k) { return '#' + rgbOf(hex).map(function (v) { return (256 + Math.round(v + (to - v) * k)).toString(16).slice(1); }).join(''); }
+function accentOn(hex) { return lumOf(hex) > 150 ? '#1a1408' : '#fff'; } // цвет текста поверх акцента
+// Выбранный руками цвет текущей темы ('' = разноцветный или цвет темы). Слишком тёмный на тёмной теме подсветляется.
+function ownColor() {
+  var c = CFG.mono && CFG.tints[CFG.theme] || '', y = c && lumOf(c);
+  return c && CFG.theme !== 'aero' && y < 105 ? mixTo(c, 255, (105 - y) / (255 - y)) : c;
 }
-// Плотность подложки и акцент (только у Стекла: у остальных тем свой). Одинаково для виджета, подсказки и настроек.
-function setGlassVars(style, density, accent, theme) {
+// Он же для цифр и подписей: на светлой Aero светлый цвет темнее.
+function ownInk() {
+  var c = ownColor(), y = c && lumOf(c);
+  return c && CFG.theme === 'aero' && y > 115 ? mixTo(c, 0, 1 - 115 / y) : c;
+}
+// Переменные своего цвета, пустые снимаются.
+function ownVars() {
+  var c = ownColor(), on = c && accentOn(c);
+  return { '--one': c, '--accent': c, '--on-one': on, '--on-accent': on, '--ink': ownInk() };
+}
+// Плотность подложки и свой цвет. Одинаково для виджета, подсказки и настроек.
+function setThemeVars(style, density) {
   style.setProperty('--glass', density / 100);
-  if (theme === 'glass' && accent) { style.setProperty('--accent', accent); style.setProperty('--on-accent', accentOn(accent)); }
-  else { style.removeProperty('--accent'); style.removeProperty('--on-accent'); }
+  var v = ownVars();
+  Object.keys(v).forEach(function (k) { if (v[k]) style.setProperty(k, v[k]); else style.removeProperty(k); });
 }
 
 function defaults() {
   return {
-    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: '',
+    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tints: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
@@ -65,7 +86,12 @@ function mergeCfg(saved) {
   if (CALS[saved.calView]) c.calView = saved.calView;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
   if (saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
-  if (typeof saved.accent === 'string' && /^(#[0-9a-f]{6})?$/i.test(saved.accent)) c.accent = saved.accent.toLowerCase();
+  var hex = function (v) { return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : ''; };
+  if (saved.tints) Object.keys(THEMES).forEach(function (k) { if (hex(saved.tints[k])) c.tints[k] = hex(saved.tints[k]); });
+  else if (hex(saved.accent)) { // старые настройки: цвет был только у Стекла и красил всё сам
+    c.tints.glass = hex(saved.accent);
+    if (c.theme === 'glass') c.mono = true;
+  }
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
@@ -73,7 +99,7 @@ function mergeCfg(saved) {
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
 // Классы и переменные страницы: общие для виджета, подсказки и меню.
-function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : '') + (CFG.theme === 'glass' && CFG.accent ? ' acc' : ''); }
+function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : '') + (ownColor() ? ' own' + (accentOn(ownColor()) === '#fff' ? '' : ' lite') : ''); }
 // Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
 function weatherOn() { return ['full', 'column', 'strip'].some(function (m) { return isOn(m, 'weather'); }); }
 function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }

@@ -7,6 +7,12 @@ body.theme-terminal {
   --r: 0px; --barh: 8px; --nw: 500; --font: "Cascadia Mono", Consolas, "Courier New", monospace;
   font-size: 12px;
 }
+/* свой цвет: им светится весь экран */
+body.theme-terminal.own {
+  --text: color-mix(in srgb, var(--one) 72%, #fff); --dim: color-mix(in srgb, var(--one) 72%, #000); --ok: var(--one);
+  --bg: color-mix(in srgb, var(--one) 4%, #000); --edge: color-mix(in srgb, var(--one) 33%, #000); --track: color-mix(in srgb, var(--one) 22%, #000);
+  --ctl: color-mix(in srgb, var(--one) 13%, #000); --pop: color-mix(in srgb, var(--one) 8%, #000);
+}
 .theme-terminal [data-m] { --h: var(--accent); }
 .theme-terminal #root::after, .theme-terminal #set::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5;

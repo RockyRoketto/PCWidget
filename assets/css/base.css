@@ -9,10 +9,14 @@
   --r: 8px; --barh: 6px; --nw: 650;
   --font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
 }
-/* Цвет цифр (--dig). «Свой у каждого»: цвет показателя, у плиток без показателя цвет текста. «Один»: везде --one темы;
-   «тепло» и «горячо» остаются жёлтым и красным. Графики, шкалы и иконки красит --h, настройка их не трогает. */
-body { --one: var(--accent); }
-body.mono, body.mono [data-m] { --dig: var(--one); --okdig: var(--one); }
+/* --h красит графики, шкалы и иконки, --dig цифры (у плиток без показателя цвет текста).
+   Класс mono = один цвет на всё: --one предлагает тема, класс own = выбран руками (--one и --accent ставит страница, lite = он светлый).
+   «Тепло» и «горячо» остаются жёлтым и красным. */
+body { --one: var(--accent); --on-one: var(--on-accent); --ink: var(--one); }
+body.mono { --dig: var(--ink); --okdig: var(--ink); }
+body.mono [data-m], body.mono .cr, body.mono .sb { --h: var(--one); --dig: var(--ink); }
+.mono .wday.now .dn { color: var(--dig); }
+.mono .we { color: var(--dim); }
 #set { --okdig: var(--ok); }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }

@@ -15,6 +15,7 @@
 .tgrid .trow .m { min-height: 32px; gap: 6px; }
 .tgrid .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .c4 .tcard { flex-direction: column; gap: 6px; padding: 8px 4px 6px; justify-content: center; }
+.tsep { width: 1px; height: 18px; flex: none; background: var(--track); }
 .tints { display: flex; gap: 9px; align-items: center; }
 .tint { position: relative; width: 26px; height: 26px; flex: none; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .22); cursor: pointer; }
 .tint.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }

@@ -1,6 +1,7 @@
 /* Тема «Frutiger Aero»: светлая, глянец и стекло, небо, трава и пузыри (картинки в theme-aero-scene.css).
    Окно прозрачно, скруглённую панель со сценой рисует страница. Плотность сцены зависит от --glass. */
 body.theme-aero {
+  --onsh: 0 1px 2px rgba(0, 35, 80, .9); /* тень под текстом на цветной кнопке */
   --text: #08304f; --dim: #2f5d7c; --accent: #0a74d1; --on-accent: #fff;
   --cpu: #0668c8; --gpu: #7a3ccb; --mem: #c95600; --net: #007c92; --disk: #2c820c; --claude: #a83f2a;
   --ok: #26800a; --warm: #a86500; --hot: #d81e1e; --sec: #e0301e; --flip: #fff; --flip2: #dff1fc;
@@ -11,6 +12,7 @@ body.theme-aero {
   --gel: linear-gradient(180deg, rgba(255, 255, 255, .6) 0, rgba(255, 255, 255, .22) 49%, rgba(0, 0, 0, .06) 50%, rgba(255, 255, 255, .25) 100%);
   --r: 12px; --barh: 11px; --nw: 600; --font: "Segoe UI", system-ui, sans-serif;
 }
+body.theme-aero.lite { --onsh: none; }
 /* панель со сценой */
 .theme-aero .full, .theme-aero .col, .theme-aero .strip { isolation: isolate; border-radius: 24px; } /* поле 12 + скругление плитки 12: углы идут параллельно */
 .theme-aero .full::before, .theme-aero .col::before, .theme-aero .strip::before {
@@ -39,9 +41,12 @@ body.theme-aero {
 .theme-aero .ring circle { stroke-width: 4.4; r: 14.5px; }
 .theme-aero .tabs, .theme-aero .seg, .theme-aero .tabs button, .theme-aero .seg button { border-radius: 99px; }
 .theme-aero .tabs, .theme-aero .seg { box-shadow: inset 0 1px 2px rgba(0, 52, 98, .25); }
-.theme-aero .tabs button.on, .theme-aero .seg button.on { color: #fff; background: var(--gel), var(--accent); box-shadow: 0 1px 2px rgba(0, 45, 90, .4); text-shadow: 0 1px 2px rgba(0, 35, 80, .9); }
+.theme-aero .tabs button.on, .theme-aero .seg button.on { color: var(--on-accent); background: var(--gel), var(--accent); box-shadow: 0 1px 2px rgba(0, 45, 90, .4); text-shadow: var(--onsh); }
 .theme-aero .pi { border-radius: 8px; }
 .theme-aero .pi::before { background: linear-gradient(180deg, rgba(255, 255, 255, .6) 0 49%, transparent 50%), var(--h); opacity: .34; }
+.theme-aero.lite .th > .i svg, .theme-aero.lite .cr > .i:has(svg) svg, .theme-aero.lite .sb > .i:has(svg) svg, .theme-aero.lite .tipbox h3 .i svg, .theme-aero.lite .trow .m > .i svg, .theme-aero.lite .thr .t > .i svg { color: var(--on-one); filter: none; }
+.theme-aero.lite .rate .i, .theme-aero.lite .let { color: var(--ink); }
+.theme-aero.lite .graph .l { stroke: var(--ink); }
 /* часы и календарь */
 .theme-aero .clk { font-weight: 300; font-size: 37px; letter-spacing: -.02em; }
 .theme-aero .fh { box-shadow: inset 0 0 0 1px rgba(0, 72, 130, .24); }
@@ -50,8 +55,8 @@ body.theme-aero {
 .theme-aero .fc::after { background: rgba(0, 62, 112, .4); height: 1px; margin-top: 0; }
 .theme-aero .dial { border-radius: 50%; background: radial-gradient(ellipse 80% 46% at 50% 20%, #fff, rgba(255, 255, 255, 0)), radial-gradient(circle at 50% 100%, #fff, #c8e9fb 70%); box-shadow: 0 0 0 5px rgba(255, 255, 255, .9), 0 0 0 6px rgba(0, 72, 130, .3), 0 2px 6px 5px rgba(0, 55, 105, .18); }
 .theme-aero .tile.sq:not(.w2) { padding: 10px; }
-.theme-aero .chead { color: var(--accent); }
-.theme-aero .cd.now i { background: var(--gel), var(--accent); box-shadow: 0 1px 2px rgba(0, 45, 90, .4); text-shadow: 0 1px 2px rgba(0, 35, 80, .9); }
+.theme-aero .chead { color: var(--ink); }
+.theme-aero .cd.now i { background: var(--gel), var(--accent); box-shadow: 0 1px 2px rgba(0, 45, 90, .4); text-shadow: var(--onsh); }
 .theme-aero .cday .cnum { font-weight: 300; font-size: 54px; }
 /* погода: небо */
 .theme-aero .tile[data-tip=weather] {
@@ -65,9 +70,9 @@ body.theme-aero {
 .theme-aero .look-rows .grid { background: var(--sheet); box-shadow: var(--rim); border-radius: var(--r); padding: 4px 10px 0; overflow: hidden; }
 .theme-aero .look-rows .tile { background: none; box-shadow: none; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; margin-bottom: -1px; }
 .theme-aero .look-rows .tile[data-tip=weather] { --dig: initial; --text: #08304f; --dim: #2f5d7c; --sec: #e0301e; --edge: rgba(0, 74, 128, .2); background: none; color: var(--text); }
-.theme-aero.mono .look-rows .tile[data-tip=weather] { --dig: var(--one); }
+.theme-aero.mono .look-rows .tile[data-tip=weather] { --dig: var(--ink); }
 .theme-aero .look-rows .wx, .theme-aero .look-rows .wdays { text-shadow: none !important; }
-.theme-aero .look-rows .wx .wi, .theme-aero .look-rows .wday .di { color: var(--accent); filter: none; }
+.theme-aero .look-rows .wx .wi, .theme-aero .look-rows .wday .di { color: var(--ink); filter: none; }
 .theme-aero .look-rows .tile.alarm { background: color-mix(in srgb, var(--hot) 20%, transparent) !important; border-radius: 10px; }
 .theme-aero .look-rows .mem { grid-template-columns: 30px 54px 1fr 58px 48px; }
 /* колонка: лист поверх сцены; полоска: глянцевая капсула */
@@ -81,8 +86,8 @@ body.theme-aero {
 /* меню и подсказка */
 .theme-aero #tip { border-radius: 14px; overflow: hidden; background: linear-gradient(180deg, rgba(255, 255, 255, .95) 0, rgba(255, 255, 255, .84) 26px, rgba(240, 250, 255, .8) 27px, rgba(255, 255, 255, .88) 100%), linear-gradient(160deg, #4fb4ee, #9be3f2 60%, #a9e25c); box-shadow: inset 0 0 0 1px rgba(0, 70, 130, .5), inset 0 0 0 2px rgba(255, 255, 255, .85); }
 .theme-aero .mi { border-radius: 10px; }
-.theme-aero .mi:hover { background: var(--gel), var(--accent); color: #fff; text-shadow: 0 1px 2px rgba(0, 35, 80, .9); }
-.theme-aero .mi:hover .i, .theme-aero .mi:hover .ck { color: #fff; }
+.theme-aero .mi:hover { background: var(--gel), var(--accent); color: var(--on-accent); text-shadow: var(--onsh); }
+.theme-aero .mi:hover .i, .theme-aero .mi:hover .ck { color: var(--on-accent); }
 .theme-aero .dots button, .theme-aero .tint, .theme-aero .sw4 { border-color: rgba(0, 50, 95, .35); }
 /* окно настроек */
 .theme-aero #set { border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, transparent 46px, rgba(255, 255, 255, .93) 47px, rgba(250, 254, 255, .88) 100%), var(--sc-sun), var(--sc-grass) 0 100% / 100% 130px no-repeat, var(--sc-sky); box-shadow: inset 0 0 0 1px rgba(0, 60, 115, .6), inset 0 0 0 2px rgba(255, 255, 255, .6); }
@@ -92,7 +97,7 @@ body.theme-aero {
 .theme-aero .stabs button.on { background: linear-gradient(180deg, transparent, rgba(10, 116, 209, .14)); }
 .theme-aero .card, .theme-aero .hows > div { background: linear-gradient(180deg, #fff 0, #fff 49%, #e9f6fd 50%, #f7fcff 100%); }
 .theme-aero .card.on { border-color: var(--accent); background: linear-gradient(180deg, #f3fbff 0, #e2f4fe 49%, #c9e9fb 50%, #e6f7ff 100%); }
-.theme-aero .btn { border-radius: 99px; background: var(--gel), var(--accent); text-shadow: 0 1px 2px rgba(0, 35, 80, .9); box-shadow: inset 0 0 0 1px rgba(0, 45, 95, .4), 0 1px 2px rgba(0, 45, 90, .3); }
+.theme-aero .btn { border-radius: 99px; background: var(--gel), var(--accent); text-shadow: var(--onsh); box-shadow: inset 0 0 0 1px rgba(0, 45, 95, .4), 0 1px 2px rgba(0, 45, 90, .3); }
 .theme-aero .btn.ghost { background: linear-gradient(180deg, #fff 0, #f3f9fd 49%, #dcedf8 50%, #f1f9fe 100%); text-shadow: none; }
 .theme-aero .sw i { box-shadow: inset 0 1px 3px rgba(0, 50, 95, .45); }
 .theme-aero .sw input:checked + i { background: var(--gel), #4db316; }

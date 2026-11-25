@@ -1,7 +1,7 @@
 /* Тема «Apple»: окно прозрачно, каждая плитка — отдельная карточка с крупным скруглением, системные цвета iOS,
    иконки на цветных плашках. Карточки рисует страница, поэтому края гладкие. Плотность карточек зависит от --glass. */
 body.theme-apple {
-  --text: #fff; --dim: rgba(235, 235, 245, .64); --accent: #0a84ff; --on-accent: #fff; --one: #fff;
+  --text: #fff; --dim: rgba(235, 235, 245, .64); --accent: #0a84ff; --on-accent: #fff; --one: #fff; --on-one: #000;
   --cpu: #409cff; --gpu: #c66bf5; --mem: #ff5577; --net: #5ac8e8; --disk: #aeaeb2; --claude: #ff9a62;
   --ok: #30d158; --warm: #ffd60a; --hot: #ff453a; --sec: #ff9f0a; --flip: #3a3a3c; --flip2: #2f2f31;
   --card: rgba(28, 28, 30, calc(.62 + .38 * var(--glass, .76)));
@@ -27,6 +27,8 @@ body.theme-apple {
   background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0)), var(--h, #8e8e93);
 }
 .theme-apple .alarm .badge { color: #fff; }
+.theme-apple.mono:not(.own) .th > .i, .theme-apple.mono:not(.own) .cr > .i:has(svg), .theme-apple.mono:not(.own) .sb > .i:has(svg), .theme-apple.mono:not(.own) .tipbox h3 .i, .theme-apple.mono:not(.own) .trow .m > .i, .theme-apple.mono:not(.own) .thr .t > .i { --h: #636366; } /* белый от темы: плашки серые */
+.theme-apple.mono.own .th > .i, .theme-apple.mono.own .cr > .i:has(svg), .theme-apple.mono.own .sb > .i:has(svg), .theme-apple.mono.own .tipbox h3 .i, .theme-apple.mono.own .trow .m > .i, .theme-apple.mono.own .thr .t > .i { color: var(--on-one); }
 /* часы и календарь */
 .theme-apple .clk { font-weight: 300; font-size: 38px; letter-spacing: -.03em; }
 .theme-apple .chead { color: var(--hot); }
@@ -34,9 +36,11 @@ body.theme-apple {
 .theme-apple .cd.now i { background: var(--hot); color: #fff; }
 .theme-apple .cday .cnum { color: var(--dig, var(--text)); font-weight: 300; font-size: 54px; }
 .theme-apple .cday b { color: var(--hot); }
+.theme-apple.mono .chead, .theme-apple.mono .cday b { color: var(--one); }
+.theme-apple.mono .cd.now i { background: var(--one); color: var(--on-one); }
 .theme-apple .hn { font-weight: 500; }
 /* погода: небо */
-.theme-apple .tile[data-tip=weather] { --dim: rgba(255, 255, 255, .78); --sec: #fff; --edge: rgba(255, 255, 255, .22); background: linear-gradient(180deg, #245ba6, #5b97d2); }
+.theme-apple .tile[data-tip=weather] { --dim: rgba(255, 255, 255, .78); --sec: #fff; --dig: #fff; --edge: rgba(255, 255, 255, .22); background: linear-gradient(180deg, #245ba6, #5b97d2); }
 .theme-apple .wx .wi, .theme-apple .wday .di { color: #fff; }
 .theme-apple .wx .num { font-weight: 300; font-size: 46px; }
 /* кольца толще */
@@ -48,6 +52,7 @@ body.theme-apple {
 /* вид «Строки»: одна общая карточка */
 .theme-apple .look-rows .grid { background: var(--sheen), var(--card); box-shadow: var(--rim); border-radius: var(--r); padding: 4px 12px 0; gap: 0 8px; overflow: hidden; }
 .theme-apple .look-rows .tile, .theme-apple .look-rows .tile[data-tip=weather] { background: none; box-shadow: none; border-bottom-color: var(--edge); border-radius: 0; padding: 10px 4px; margin-bottom: -1px; }
+.theme-apple.mono .look-rows .tile[data-tip=weather] { --dig: var(--one); }
 .theme-apple .look-rows .mem { grid-template-columns: 30px 54px 1fr 58px 48px; }
 /* колонка и полоска */
 .theme-apple .col { width: 172px; border-radius: 22px; padding: 8px 9px; }
@@ -59,8 +64,8 @@ body.theme-apple {
 /* меню и подсказка */
 .theme-apple #tip { --card: rgba(37, 37, 39, .97); border-radius: 18px; overflow: hidden; }
 .theme-apple .mi { border-radius: 12px; }
-.theme-apple .mi:hover { background: var(--accent); }
-.theme-apple .mi:hover .i, .theme-apple .mi:hover .ck { color: #fff; }
+.theme-apple .mi:hover { background: var(--accent); color: var(--on-accent); }
+.theme-apple .mi:hover .i, .theme-apple .mi:hover .ck { color: var(--on-accent); }
 /* окно настроек */
 .theme-apple #set { --card: rgba(28, 28, 30, .98); border-radius: 24px; overflow: hidden; }
 .theme-apple .stabs { margin: 0 14px; padding: 3px; gap: 0; background: var(--ctl); border: 0; border-radius: 14px; }
@@ -71,6 +76,7 @@ body.theme-apple {
 .theme-apple .card.on { border-color: var(--accent); }
 .theme-apple .btn { border-radius: 99px; }
 .theme-apple .btn.ghost { color: #4da3ff; font-weight: 600; }
+.theme-apple.own .btn.ghost { color: var(--one); }
 .theme-apple .sw { width: 38px; height: 22px; }
 .theme-apple .sw i::after { left: 2px; top: 2px; width: 18px; height: 18px; box-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
 .theme-apple .sw input:checked + i { background: var(--ok); }
