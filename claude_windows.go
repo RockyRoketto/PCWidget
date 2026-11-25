@@ -15,7 +15,7 @@ import (
 
 const (
 	claudeEvery = 5 * time.Second
-	// файл лимитов пишет мод внутри Claude Code (сам виджет в аккаунт не ходит)
+	// файл лимитов пишет мод внутри Claude Code: виджет сам в аккаунт не ходит
 	claudeLimitsFile = "pcwidget-limits.json"
 )
 
@@ -28,6 +28,7 @@ type claudeSvc struct {
 	// ниже: только поток loop
 	pos    map[string]int64 // сколько байт журнала уже разобрано
 	totals claudeTotals
+	raw    []byte // последний целый файл лимитов
 }
 
 func startClaude() *claudeSvc {
@@ -100,7 +101,10 @@ func (c *claudeSvc) collect(now time.Time) *ClaudeStat {
 	}
 	st := &ClaudeStat{}
 	if b, err := os.ReadFile(filepath.Join(dir, claudeLimitsFile)); err == nil {
-		st.Limits, st.Ctx, st.LimitsAt = parseClaudeLimits(b, now)
+		if l, _, _ := parseClaudeLimits(b, now); len(l) > 0 {
+			c.raw = b // целый файл; полузаписанный пропускаем и держим прежний
+		}
+		st.Limits, st.Ctx, st.LimitsAt = parseClaudeLimits(c.raw, now)
 	}
 	c.scan(filepath.Join(dir, "projects"), now)
 	st.Days = c.totals.days(now)
