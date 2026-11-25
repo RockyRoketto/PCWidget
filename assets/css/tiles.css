@@ -17,9 +17,9 @@
 .graph path { vector-effect: non-scaling-stroke; }
 .graph .l { fill: none; stroke: var(--h); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
 .graph .a { fill: var(--h); opacity: .17; stroke: none; }
-.bar { height: var(--barh); background: var(--track); border-radius: 99px; overflow: hidden; }
-.bar i { display: block; height: 100%; width: 0; background: var(--h); border-radius: inherit; transition: width .5s; }
-.bar.lv-warm i { background: var(--warm); }
+.bar { height: var(--barh); background: var(--track); border-radius: 99px; overflow: hidden; container-type: inline-size; }
+.bar i { display: block; height: 100%; width: 0; background: var(--fillbg, var(--h)); border-radius: inherit; transition: width .5s; }
+.bar.lv-warm i { background: var(--fillbg, var(--warm)); }
 .bar.lv-hot i { background: var(--hot); }
 .badge { display: none; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--hot); }
 .badge .i { width: 13px; height: 13px; color: inherit !important; }
@@ -123,42 +123,42 @@
 .rec { display: flex; gap: 14px; font-size: 15px; font-weight: 650; margin-top: 1px; white-space: nowrap; }
 .rec small { font-size: 12px; font-weight: 400; color: var(--dim); margin-right: 4px; }
 /* ===== вид «Кольца» ===== */
-.look-ring .duo { display: grid; grid-template-columns: 74px 1fr; gap: 0 10px; align-items: center; margin-top: 5px; }
+.look-ring .duo { display: grid; grid-template-columns: 1fr 74px; gap: 0 10px; align-items: center; margin-top: 5px; }
 .look-ring .duo .graph, .look-ring .duo .foot { display: none; }
-.look-ring .ring { display: block; width: 74px; height: 74px; grid-row: 1; grid-column: 1; }
+.look-ring .ring { display: block; width: 74px; height: 74px; grid-row: 1; grid-column: 2; }
 .ring circle { fill: none; stroke-width: 3.6; }
 .ring .bg { stroke: var(--track); }
 .ring .fg { stroke: var(--h); stroke-linecap: round; transition: stroke-dasharray .5s; }
 .look-ring .big { display: contents; }
-.look-ring .big .load { grid-row: 1; grid-column: 1; justify-self: center; font-size: 22px; }
+.look-ring .big .load { grid-row: 1; grid-column: 2; justify-self: center; font-size: 22px; }
 .look-ring .big .load small { font-size: 11px; }
-.look-ring .big .temp { grid-row: 1; grid-column: 2; align-self: start; font-size: 25px; margin-top: 4px; }
-.look-ring .side { display: grid; grid-row: 1; grid-column: 2; align-self: end; font-size: 12px; color: var(--dim); line-height: 1.35; white-space: nowrap; }
+.look-ring .big .temp { grid-row: 1; grid-column: 1; align-self: start; font-size: 25px; margin-top: 4px; }
+.look-ring .side { display: grid; grid-row: 1; grid-column: 1; align-self: end; font-size: 12px; color: var(--dim); line-height: 1.35; white-space: nowrap; }
 .side { display: none; }
 .side b { color: var(--dig, var(--text)); font-weight: 600; }
 @container (max-width: 219px) {
-  .look-ring .duo { grid-template-columns: 64px 1fr; }
+  .look-ring .duo { grid-template-columns: 1fr 64px; }
   .look-ring .ring { width: 64px; height: 64px; }
   .look-ring .big .load { font-size: 19px; }
   .look-ring .big .temp { font-size: 22px; }
-  .look-ring .side { justify-self: end; text-align: right; }
 }
 @container (min-width: 220px) {
-  .look-ring .duo { grid-template-columns: 74px auto 1fr; }
+  .look-ring .duo { grid-template-columns: auto 1fr 74px; }
+  .look-ring .ring, .look-ring .big .load { grid-column: 3; }
   .look-ring .big .temp { align-self: center; margin: 0; }
-  .look-ring .side { grid-column: 3; align-self: center; justify-self: end; text-align: right; }
+  .look-ring .side { grid-column: 2; align-self: center; }
 }
 /* ===== вид «Строки» ===== */
 .look-rows .grid { gap: 0 8px; }
 .look-rows .tile { background: none; border-color: transparent; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; }
 .look-rows .bigt { display: grid; grid-template-columns: 84px 1fr; align-items: center; }
 .look-rows .bigt .th { padding-right: 8px; }
-.look-rows .bigt .duo { display: grid; grid-template-columns: 1fr 58px 48px; gap: 10px; align-items: center; }
+.look-rows .bigt .duo { display: grid; grid-template-columns: 48px 1fr 58px; gap: 10px; align-items: center; }
 .look-rows .bigt .big { display: contents; }
 .look-rows .bigt .graph, .look-rows .bigt .foot, .look-rows .net .graph, .look-rows .net .foot { display: none; }
 .look-rows .bigt .lbar { display: block; order: -1; }
 .look-rows .bigt .load { font-size: 22px; text-align: right; }
-.look-rows .bigt .temp { font-size: 22px; text-align: right; }
+.look-rows .bigt .temp { font-size: 22px; order: -2; }
 .look-rows .bigt .badge span:last-child { display: none; }
 .look-rows .mem { display: grid; grid-template-columns: 23px 61px 1fr 58px 48px; align-items: center; }
 .look-rows .mem .th { display: contents; }

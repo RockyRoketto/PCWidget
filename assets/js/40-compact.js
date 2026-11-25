@@ -81,6 +81,7 @@ function buildCompact(strip) {
     var ic = d.letter ? '<b class="let">' + esc(d.letter) + '</b>' : d.icon ? ICONS[d.icon] : '';
     if (ic && it.ico !== ic) { it.ico = ic; it.ic.innerHTML = ic; }
     var temp = d.t != null;
+    it.el.classList.toggle('hast', temp);
     it.s.className = 's ' + (temp ? 's-' + level(d.t, d.thr) : 'u');
     it.s.textContent = temp ? Math.round(d.t) + '°' : strip ? '' : d.rate ? d.u : d.sm || '';
     if (it.mb) it.mb.style.width = clamp(d.pct, 0, 100) + '%';

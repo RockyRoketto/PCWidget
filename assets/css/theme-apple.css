@@ -2,7 +2,7 @@
    иконки на цветных плашках. Карточки рисует страница, поэтому края гладкие. Плотность карточек зависит от --glass. */
 body.theme-apple {
   --text: #fff; --dim: rgba(235, 235, 245, .64); --accent: #0a84ff; --on-accent: #fff; --one: #fff; --on-one: #000;
-  --cpu: #409cff; --gpu: #c66bf5; --mem: #ff5577; --net: #5ac8e8; --disk: #aeaeb2; --claude: #ff9a62;
+  --cpu: #409cff; --gpu: #c66bf5; --mem: #ff5577; --net: #5ac8e8; --disk: #aeaeb2; --claude: #d97757;
   --ok: #30d158; --warm: #ffd60a; --hot: #ff453a; --sec: #ff9f0a; --flip: #3a3a3c; --flip2: #2f2f31;
   --card: rgba(28, 28, 30, calc(.62 + .38 * var(--glass, .76)));
   --sheen: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, 0) 60%);

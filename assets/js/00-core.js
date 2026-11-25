@@ -56,7 +56,7 @@ function setThemeVars(style, density) {
 
 function defaults() {
   return {
-    theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tints: {},
+    ver: 2, theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tints: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
@@ -80,7 +80,8 @@ function mergeCfg(saved) {
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
-  ['mono', 'notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
+  ['notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
+  c.mono = saved.ver === 2 && saved.mono === true; // настройки до ver 2 один раз становятся разноцветными
   ['wxDays', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
   if (CALS[saved.calView]) c.calView = saved.calView;
@@ -88,10 +89,7 @@ function mergeCfg(saved) {
   if (saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);
   var hex = function (v) { return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : ''; };
   if (saved.tints) Object.keys(THEMES).forEach(function (k) { if (hex(saved.tints[k])) c.tints[k] = hex(saved.tints[k]); });
-  else if (hex(saved.accent)) { // старые настройки: цвет был только у Стекла и красил всё сам
-    c.tints.glass = hex(saved.accent);
-    if (c.theme === 'glass') c.mono = true;
-  }
+  else if (hex(saved.accent)) c.tints.glass = hex(saved.accent); // старые настройки: цвет был только у Стекла
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
@@ -126,6 +124,11 @@ function uptimeText(sec) {
 // Состояние по порогу: горячо за 5 до порога, тепло за 15.
 function level(v, thr) { return v == null ? '' : v >= thr - 5 ? 'hot' : v >= thr - 15 ? 'warm' : 'ok'; }
 function pingLevel(ms) { return ms >= 100 ? 'hot' : ms >= 50 ? 'warm' : 'ok'; }
+// Цвет по заполненности 0..100: тот же переход, что у градиента шкал (--grad в base.css).
+function fillColor(p) {
+  var low = p < 62, k = clamp(low ? p / 62 : (p - 62) / 38, 0, 1) * 100;
+  return 'color-mix(in srgb, var(' + (low ? '--warm' : '--hot') + ') ' + k.toFixed(0) + '%, var(' + (low ? '--ok' : '--warm') + '))';
+}
 
 function clockText(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: CFG.clockSec ? '2-digit' : undefined, hour12: !CFG.clock24 }); }
 

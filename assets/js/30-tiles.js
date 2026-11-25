@@ -21,7 +21,7 @@ function ring() {
 function bigTile(id, details) {
   var thrKey = id + 'Temp';
   var el = mk('<div class="tile bigt" data-m="' + id + '" data-tip="' + id + '">' + head(id, badge()) + '<div class="duo">' + ring() +
-    '<div class="big"><span class="num load"><span class="v">0</span><small>%</small></span><span class="num temp"></span></div>' +
+    '<div class="big"><span class="num temp"></span><span class="num load"><span class="v">0</span><small>%</small></span></div>' +
     '<div class="side"><span></span><span></span></div>' + bar('lbar') + graphSvg() + '<div class="foot"><span>&nbsp;</span><span></span></div></div></div>');
   var v = $('.v', el), t = $('.temp', el), g = $('.graph', el), fg = $('.fg', el), lb = $('.lbar', el);
   var foot = $('.foot', el), ft = $$('.foot span', el), sd = $$('.side span', el);
@@ -34,6 +34,7 @@ function bigTile(id, details) {
       t.className = 'num temp s-' + level(d.temp, CFG.thr[thrKey]);
       drawGraph(g, HIST[id], 100); setBar(lb, d.load);
       fg.setAttribute('stroke-dasharray', (d.load * .75).toFixed(1) + ' 100');
+      fg.style.setProperty('--fill', fillColor(d.load));
       var x = details(d).filter(Boolean);
       [0, 1].forEach(function (i) { ft[i].innerHTML = sd[i].innerHTML = x[i] || ''; });
       foot.hidden = !x.length;

@@ -10,9 +10,12 @@
 .let { display: block; font-size: 16px; line-height: 19px; text-align: center; }
 .cr .s { font-size: 16px; font-weight: 650; white-space: nowrap; }
 .cr .s.u { font-size: 12px; font-weight: 400; color: var(--dim); }
-.mb { position: absolute; left: 33px; right: 4px; bottom: 1px; height: 2px; background: var(--track); border-radius: 9px; overflow: hidden; }
-.mb i { display: block; height: 100%; background: var(--h); transition: width .5s; }
+.mb { position: absolute; left: 33px; right: 4px; bottom: 1px; height: 2px; background: var(--track); border-radius: 9px; overflow: hidden; container-type: inline-size; }
+.mb i { display: block; height: 100%; background: var(--fillbg, var(--h)); transition: width .5s; }
 .strip { position: relative; display: inline-flex; padding: 5px 6px; }
+/* градусы перед загрузкой */
+.hast > .i { order: -2; }
+.hast > .s { order: -1; }
 .sb { position: relative; display: flex; align-items: center; gap: 7px; padding: 4px 10px 6px; border: 1px solid transparent; border-radius: 7px; white-space: nowrap; }
 .sb .i { width: 17px; height: 17px; color: var(--h); }
 .sb .num { font-size: 16px; }

@@ -3,7 +3,8 @@
 body.theme-aero {
   --onsh: 0 1px 2px rgba(0, 35, 80, .9); /* тень под текстом на цветной кнопке */
   --text: #08304f; --dim: #2f5d7c; --accent: #0a74d1; --on-accent: #fff;
-  --cpu: #0668c8; --gpu: #7a3ccb; --mem: #c95600; --net: #007c92; --disk: #2c820c; --claude: #a83f2a;
+  --cpu: #0668c8; --gpu: #7a3ccb; --mem: #c95600; --net: #007c92; --disk: #2c820c; --claude: #b5573a;
+  --clock: #d9730d; --cal: #d63c3c; --wx: #c98a00; --upt: #26800a;
   --ok: #26800a; --warm: #a86500; --hot: #d81e1e; --sec: #e0301e; --flip: #fff; --flip2: #dff1fc;
   --bg: transparent; --tile: transparent; --edge: rgba(0, 74, 128, .2); --track: rgba(0, 66, 115, .17); --ctl: rgba(0, 92, 160, .12); --pop: #fff;
   --sheet: linear-gradient(180deg, rgba(255, 255, 255, .95) 0, rgba(255, 255, 255, .82) 22px, rgba(238, 249, 255, .74) 23px, rgba(255, 255, 255, .84) 100%);

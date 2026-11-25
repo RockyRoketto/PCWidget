@@ -2,7 +2,8 @@
 :root {
   --text: #f4f5f8; --dim: rgba(232, 236, 245, .7); --accent: #e9b872; --on-accent: #1a1408;
   /* цвета показателей */
-  --cpu: #6fb1ff; --gpu: #c09bff; --mem: #ff8fc4; --net: #4fd0e3; --disk: #b7c3d8; --claude: #f0976c;
+  --cpu: #6fb1ff; --gpu: #c09bff; --mem: #ff8fc4; --net: #4fd0e3; --disk: #b7c3d8; --claude: #d97757;
+  --clock: #ffa94d; --cal: #ff6b6b; --wx: #ffcc4d; --upt: #6fdc9b;
   /* состояние: норма, тепло, горячо */
   --ok: #6fdc9b; --warm: #ffc247; --hot: #ff6a5c;
   --bg: #17181c; --tile: #202126; --edge: transparent; --track: rgba(255, 255, 255, .15); --ctl: rgba(255, 255, 255, .1); --pop: #23252d;
@@ -39,6 +40,17 @@ body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 [data-m=mem] { --h: var(--mem); --dig: var(--mem); }
 [data-m=net] { --h: var(--net); --dig: var(--net); }
 [data-m=disks] { --h: var(--disk); --dig: var(--disk); }
+/* плитки и строки без показателя тоже с цветной иконкой (в Терминале всё зелёное) */
+:where(body:not(.theme-terminal)) :is([data-m=clock], [data-id=clock]) { --h: var(--clock); }
+:where(body:not(.theme-terminal)) :is([data-m=calendar], [data-id=calendar]) { --h: var(--cal); }
+:where(body:not(.theme-terminal)) :is([data-m=weather], [data-id=weather]) { --h: var(--wx); }
+:where(body:not(.theme-terminal)) :is([data-m=uptime], [data-id=uptime]) { --h: var(--upt); }
+/* разноцветный: шкалы и кольца показателей меняют цвет по заполненности. Ширина градиента = вся шкала. */
+body { --grad: linear-gradient(90deg, var(--ok), var(--warm) 62%, var(--hot)); }
+:where(body:not(.mono):not(.theme-terminal)) :is([data-m=cpu], [data-m=gpu], [data-m=mem], [data-m=disks]) { --fillbg: var(--grad) left / 100cqw 100% no-repeat; }
+body:not(.mono):not(.theme-terminal) [data-m] .ring .fg { stroke: var(--fill, var(--h)); }
+body:not(.mono):not(.theme-terminal) [data-m] .cl:is(.lv-warm) .ring .fg { stroke: var(--warm); }
+body:not(.mono):not(.theme-terminal) [data-m] .cl:is(.lv-hot) .ring .fg { stroke: var(--hot); }
 .s-ok { color: var(--okdig, var(--ok)) !important; }
 .s-warm { color: var(--warm) !important; }
 .s-hot { color: var(--hot) !important; }

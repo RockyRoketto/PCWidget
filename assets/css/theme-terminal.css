@@ -1,7 +1,7 @@
 /* Тема «Терминал»: чёрный фон, зелёный моноширинный текст, шкалы из блоков, лёгкая растровая сетка. */
 body.theme-terminal {
   --text: #7dffa0; --dim: #3fbf66; --accent: #4dff7c; --on-accent: #00220b;
-  --cpu: #5ad7ff; --gpu: #c9a0ff; --mem: #ff8fd6; --net: #52f0d0; --disk: #cfe3d4; --claude: #ffab70; /* только цифры, остальное зелёное */
+  --cpu: #5ad7ff; --gpu: #c9a0ff; --mem: #ff8fd6; --net: #52f0d0; --disk: #cfe3d4; --claude: #e08566; /* только цифры, остальное зелёное; Claude целиком в своём цвете */
   --ok: #4dff7c; --warm: #ffd84d; --hot: #ff5a4d;
   --bg: #020a04; --tile: transparent; --edge: #14552a; --track: #0f3a1c; --ctl: #0a2412; --pop: #06170b;
   --r: 0px; --barh: 8px; --nw: 500; --font: "Cascadia Mono", Consolas, "Courier New", monospace;
@@ -14,6 +14,7 @@ body.theme-terminal.own {
   --ctl: color-mix(in srgb, var(--one) 13%, #000); --pop: color-mix(in srgb, var(--one) 8%, #000);
 }
 .theme-terminal [data-m] { --h: var(--accent); }
+.theme-terminal:not(.mono) [data-m=claude] { --h: var(--claude); }
 .theme-terminal #root::after, .theme-terminal #set::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5;
   background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px);
