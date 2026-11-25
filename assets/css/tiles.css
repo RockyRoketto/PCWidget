@@ -148,6 +148,30 @@
   .look-ring .big .temp { align-self: center; margin: 0; }
   .look-ring .side { grid-column: 2; align-self: center; }
 }
+/* память и диски кольцами */
+.mring { display: none; position: relative; width: 74px; height: 74px; }
+.mring .mp { position: absolute; inset: 0; display: grid; grid-auto-flow: column; place-content: center; align-items: baseline; font-size: 22px; }
+.mring .mp small { font-size: 11px; }
+.look-ring .mem { display: grid; grid-template-columns: 1fr auto; align-content: space-between; align-items: center; row-gap: 5px; }
+.look-ring .mem .th { grid-column: 1 / -1; }
+.look-ring .mem .bar, .look-ring .mem .memv, .look-ring .mem .gb { display: none; }
+.look-ring .mem .sub { display: block; margin: 0; }
+.look-ring .mem .mring { display: block; grid-area: 2 / 2; }
+.look-ring .mem .sub { grid-area: 2 / 1; }
+.look-ring .mem .ring { width: 74px; height: 74px; grid-area: auto; }
+.look-ring .dsk .rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); align-content: center; gap: 8px 6px; }
+.look-ring .dr { display: grid; justify-items: center; align-content: start; }
+.look-ring .dr .ring { width: 100%; max-width: 66px; height: auto; aspect-ratio: 1; grid-area: 1 / 1; }
+.look-ring .dl1 { display: contents; }
+.look-ring .dl1 .ltr { grid-area: 1 / 1; align-self: center; z-index: 1; font-size: 18px; }
+.look-ring .dl1 .fr { grid-area: 2 / 1; margin: 0; font-size: 12px; color: var(--dim); white-space: nowrap; }
+.look-ring .dr .bar, .look-ring .dr .io, .look-ring .frl { display: none; }
+.ring.lv-warm .fg { stroke: var(--warm); }
+.ring.lv-hot .fg { stroke: var(--hot); }
+@container (max-width: 219px) {
+  .look-ring .mem .mring { grid-area: 2 / 1 / auto / -1; justify-self: center; }
+  .look-ring .mem .sub { grid-area: 3 / 1 / auto / -1; justify-self: center; }
+}
 /* ===== вид «Строки» ===== */
 .look-rows .grid { gap: 0 8px; }
 .look-rows .tile { background: none; border-color: transparent; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; }

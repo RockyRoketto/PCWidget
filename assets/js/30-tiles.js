@@ -10,6 +10,14 @@ function setBar(el, pct, lv) {
   $('i', el).style.width = clamp(pct, 0, 100) + '%';
   el.classList.toggle('lv-warm', lv === 'warm'); el.classList.toggle('lv-hot', lv === 'hot');
 }
+// Кольцо: дуга по значению, цвет по заполненности; тревога и «тепло» перебивают.
+function setRing(svg, pct, lv) {
+  var fg = $('.fg', svg);
+  fg.setAttribute('stroke-dasharray', (clamp(pct, 0, 100) * .75).toFixed(1) + ' 100');
+  fg.style.visibility = pct > 0 ? '' : 'hidden'; // круглый конец рисует точку и у нуля
+  fg.style.setProperty('--fill', lv === 'hot' ? 'var(--hot)' : fillColor(pct));
+  svg.classList.toggle('lv-warm', lv === 'warm'); svg.classList.toggle('lv-hot', lv === 'hot');
+}
 function badge() { return '<span class="badge">' + I('warn') + '<span></span></span>'; }
 function setAlarm(el, on, text) { el.classList.toggle('alarm', !!on); $('.badge span:last-child', el).textContent = text; }
 function ring() {
@@ -23,7 +31,7 @@ function bigTile(id, details) {
   var el = mk('<div class="tile bigt" data-m="' + id + '" data-tip="' + id + '">' + head(id, badge()) + '<div class="duo">' + ring() +
     '<div class="big"><span class="num temp"></span><span class="num load"><span class="v">0</span><small>%</small></span></div>' +
     '<div class="side"><span></span><span></span></div>' + bar('lbar') + graphSvg() + '<div class="foot"><span>&nbsp;</span><span></span></div></div></div>');
-  var v = $('.v', el), t = $('.temp', el), g = $('.graph', el), fg = $('.fg', el), lb = $('.lbar', el);
+  var v = $('.v', el), t = $('.temp', el), g = $('.graph', el), rg = $('.ring', el), lb = $('.lbar', el);
   var foot = $('.foot', el), ft = $$('.foot span', el), sd = $$('.side span', el);
   return {
     el: el,
@@ -33,8 +41,7 @@ function bigTile(id, details) {
       t.textContent = d.temp != null ? Math.round(d.temp) + '°' : '';
       t.className = 'num temp s-' + level(d.temp, CFG.thr[thrKey]);
       drawGraph(g, HIST[id], 100); setBar(lb, d.load);
-      fg.setAttribute('stroke-dasharray', (d.load * .75).toFixed(1) + ' 100');
-      fg.style.setProperty('--fill', fillColor(d.load));
+      setRing(rg, d.load);
       var x = details(d).filter(Boolean);
       [0, 1].forEach(function (i) { ft[i].innerHTML = sd[i].innerHTML = x[i] || ''; });
       foot.hidden = !x.length;
@@ -91,14 +98,15 @@ var TILE_BUILD = {
   },
 
   mem: function () {
-    var el = mk('<div class="tile mem" data-m="mem" data-tip="mem">' + head('mem', badge() + '<span class="gb"></span><span class="num memv">0<small>%</small></span>') + bar() + '<div class="cap sub">&nbsp;</div></div>');
+    var el = mk('<div class="tile mem" data-m="mem" data-tip="mem">' + head('mem', badge() + '<span class="gb"></span><span class="num memv">0<small>%</small></span>') + bar() + '<div class="mring">' + ring() + '<span class="num mp">0<small>%</small></span></div><div class="cap sub">&nbsp;</div></div>');
     return {
       el: el,
       update: function (s) {
         var m = s.mem; el.hidden = !m; if (!m) return;
         $('.gb', el).innerHTML = $('.sub', el).innerHTML = m.usedGB.toFixed(1) + '<span class="gl"> из ' + m.totalGB.toFixed(0) + '</span> ГБ';
-        $('.memv', el).innerHTML = Math.round(m.pct) + '<small>%</small>';
-        setBar($('.bar', el), m.pct, Alarm.isOn('mem') ? 'hot' : '');
+        $('.memv', el).innerHTML = $('.mp', el).innerHTML = Math.round(m.pct) + '<small>%</small>';
+        var lv = Alarm.isOn('mem') ? 'hot' : '';
+        setBar($('.bar', el), m.pct, lv); setRing($('.ring', el), m.pct, lv);
         setAlarm(el, Alarm.isOn('mem'), '');
       }
     };
@@ -127,7 +135,7 @@ var TILE_BUILD = {
   },
 
   disks: function () {
-    var row = function (n) { return mk('<div class="dr"><div class="dl1"><b class="ltr">' + esc(n) + '</b><span class="io"></span><span class="fr">&nbsp;</span></div>' + bar() + '</div>'); };
+    var row = function (n) { return mk('<div class="dr"><div class="dl1"><b class="ltr">' + esc(n) + '</b><span class="io"></span><span class="fr">&nbsp;</span></div>' + bar() + ring() + '</div>'); };
     var el = mk('<div class="tile dsk" data-m="disks" data-tip="disks">' + head('disks', badge()) + '<div class="rows"></div></div>');
     var rows = $('.rows', el), built = {}, stub = row('C');
     rows.appendChild(stub);
@@ -142,8 +150,9 @@ var TILE_BUILD = {
           names[d.name] = 1;
           var r = built[d.name]; if (!r) { r = built[d.name] = row(d.name.replace(':', '')); rows.appendChild(r); }
           var on = Alarm.isOn('disk:' + d.name), thr = CFG.thr.disk; al = al || on;
-          setBar($('.bar', r), d.usedPct, on ? 'hot' : d.usedPct >= thr - 5 ? 'warm' : '');
-          $('.fr', r).innerHTML = 'своб. ' + unit(d.freeGB.toFixed(0), 'ГБ');
+          var lv = on ? 'hot' : d.usedPct >= thr - 5 ? 'warm' : '';
+          setBar($('.bar', r), d.usedPct, lv); setRing($('.ring', r), d.usedPct, lv);
+          $('.fr', r).innerHTML = '<span class="frl">своб. </span>' + unit(d.freeGB.toFixed(0), 'ГБ');
           $('.io', r).innerHTML = d.read != null ? io('чт', d.read) + io('зп', d.write) : '';
         });
         Object.keys(built).forEach(function (k) { if (!names[k]) { built[k].remove(); delete built[k]; } }); // флешку вынули
