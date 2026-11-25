@@ -69,7 +69,7 @@ func showMenuHTML(raw string) {
 	}
 	tip.want = false
 	menu.open = true
-	setGlassFor(tip.hwnd, r.Theme == "glass", r.Theme == "terminal")
+	setStyleFor(tip.hwnd, r.Theme)
 	tip.cr.Eval("window.__tip(" + raw + ")")
 }
 

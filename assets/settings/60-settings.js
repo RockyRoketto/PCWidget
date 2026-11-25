@@ -49,8 +49,12 @@ function tilesHint(m) {
     '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между ними:<br>во всю ширину</span></div></div>';
 }
 
-// Только у Стекла: акцентный цвет и плотность подложки.
+function densityRow(text) {
+  return label(text, CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="' + text + '">';
+}
+// Стекло: акцентный цвет и плотность подложки; Apple: только плотность карточек.
 function glassBlock() {
+  if (CFG.theme === 'apple') return densityRow('Плотность карточек');
   if (CFG.theme !== 'glass') return '';
   var own = !!CFG.accent && ACCENTS.indexOf(CFG.accent) < 0;
   return label('Цвет') + '<div class="tints"><button class="tint multi' + (CFG.accent ? '' : ' on') + '" data-accent="" title="Цветной: у каждого показателя свой" aria-label="Цветной"></button>' + ACCENTS.map(function (c) {
@@ -58,7 +62,7 @@ function glassBlock() {
     return '<button class="tint' + (CFG.accent === c ? ' on' : '') + '" data-accent="' + c + '" style="background:' + c + '" aria-label="Цвет ' + c + '"></button>';
   }).join('') + '<label class="tint custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + CFG.accent + '"' : '') +
     '><input type="color" data-tintc value="' + (CFG.accent || ACCENTS[0]) + '" aria-label="Свой цвет"></label></div>' +
-    label('Плотность стекла', CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="Плотность стекла">';
+    densityRow('Плотность стекла');
 }
 
 var SET_BODY = {

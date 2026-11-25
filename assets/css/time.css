@@ -1,6 +1,5 @@
 /* Часы и календарь. Размеры считаются от ширины самого лица (.face), поэтому одинаковы в плитке и в колонке. */
 body { --flip: #3a3f4d; --flip2: #31353f; --sec: #ff4f6d; }
-body.theme-neon { --flip: #2c2763; --flip2: #221e4f; }
 body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 /* часы и календарь рядом с другой плиткой: квадрат */
 .tile.sq:not(.w2) { aspect-ratio: 1; }
@@ -39,7 +38,7 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 }
 .theme-terminal .fh { border-radius: 0; }
 /* стрелки */
-.dial { display: block; width: min(100%, 224px); aspect-ratio: 1; margin: 0 auto; font-family: var(--font); }
+.dial { display: block; overflow: visible; width: min(100%, 224px); aspect-ratio: 1; margin: 0 auto; font-family: var(--font); }
 .dial text { text-anchor: middle; dominant-baseline: central; fill: var(--text); }
 .hn { font-size: 24px; font-weight: 400; letter-spacing: -.03em; }
 .mn { font-size: 10px; font-weight: 400; opacity: .75; }

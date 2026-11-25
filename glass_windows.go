@@ -12,15 +12,22 @@ type compAttrData struct {
 	size uintptr
 }
 
-// setGlass включает или выключает размытие под окном.
-// Win11 22621+: системный backdrop; старее: accent acrylic. Не получилось — окно остаётся
-// просто полупрозрачным (тема рисует тёмную подложку сама).
-func setGlass(on bool) { app.glassOn = on; setGlassFor(app.hwnd, on, app.square) }
+type dwmBlurBehind struct {
+	flags, enable uint32
+	rgn           uintptr
+	onMaximized   uint32
+}
 
-// square — прямые углы окна (Ретро-терминал); иначе системное скругление.
-func setGlassFor(h uintptr, on, square bool) {
+// setStyle настраивает вид окна виджета под тему.
+func setStyle(theme string) { app.style = theme; setStyleFor(app.hwnd, theme) }
+
+// setStyleFor: Стекло — размытие (accent acrylic) и системное скругление; Терминал — прямые углы;
+// Apple — само окно полностью прозрачно, скруглённые карточки рисует страница.
+// Не получилось размытие — окно остаётся просто полупрозрачным (тема рисует тёмную подложку сама).
+func setStyleFor(h uintptr, theme string) {
+	on := theme == "glass"
 	round := int32(2) // DWMWCP_ROUND
-	if square {
+	if theme != "glass" {
 		round = 1 // DWMWCP_DONOTROUND
 	}
 	pDwmSetWindowAttribute.Call(h, 33, uintptr(unsafe.Pointer(&round)), 4)
@@ -38,10 +45,22 @@ func setGlassFor(h uintptr, on, square bool) {
 		pDwmExtendFrame.Call(h, uintptr(unsafe.Pointer(&m)))
 		pDwmSetWindowAttribute.Call(h, 38, uintptr(unsafe.Pointer(&bt)), 4)
 	}
+	setClear(h, theme == "apple")
 	ap := accentPolicy{state: 0}
 	if on {
 		ap = accentPolicy{state: 4, flags: 2, gradientColor: 0x101B1513} // ACRYLICBLURBEHIND, AABBGGRR; плотность рисует страница (--glass)
 	}
 	d := compAttrData{attr: 19, data: uintptr(unsafe.Pointer(&ap)), size: unsafe.Sizeof(ap)}
 	pSetWindowCompAttribute.Call(h, uintptr(unsafe.Pointer(&d)))
+}
+
+// setClear: DWM учитывает прозрачность содержимого окна. Размытие при этом просим для пустой области, то есть нигде.
+func setClear(h uintptr, on bool) {
+	bb := dwmBlurBehind{flags: 1} // DWM_BB_ENABLE
+	if on {
+		bb.flags, bb.enable = 3, 1 // | DWM_BB_BLURREGION
+		bb.rgn, _, _ = pCreateRectRgn.Call(0, 0, ^uintptr(0), ^uintptr(0))
+		defer pDeleteObject.Call(bb.rgn)
+	}
+	pDwmEnableBlurBehind.Call(h, uintptr(unsafe.Pointer(&bb)))
 }

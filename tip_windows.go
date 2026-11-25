@@ -129,7 +129,7 @@ func showTipRequest(raw string) {
 		return
 	}
 	tip.want, tip.rowY = true, r.Y
-	setGlassFor(tip.hwnd, r.Theme == "glass", r.Theme == "terminal")
+	setStyleFor(tip.hwnd, r.Theme)
 	tip.req = raw
 	if tip.ready {
 		tip.cr.Eval("window.__tip(" + raw + ")")

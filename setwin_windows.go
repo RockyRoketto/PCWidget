@@ -238,5 +238,5 @@ func styleSettings(force bool) {
 		return
 	}
 	set.style = app.brief.Theme
-	setGlassFor(set.hwnd, set.style == "glass", set.style == "terminal")
+	setStyleFor(set.hwnd, set.style)
 }

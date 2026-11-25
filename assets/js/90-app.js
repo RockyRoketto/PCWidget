@@ -14,8 +14,7 @@ function applyBody() {
   setGlassVars(document.body.style, CFG.glass, CFG.accent, CFG.theme);
   rootEl.style.zoom = CFG.scale / 100;
   rootEl.classList.toggle('loading', !dataReady);
-  postOnce('corners', CFG.theme === 'terminal' ? 'square' : 'round');
-  postOnce('glass', CFG.theme === 'glass' ? 1 : 0); // непрозрачным темам размытие не нужно
+  postOnce('style', CFG.theme); // размытие, углы и прозрачность окна
 }
 
 // Перестраивает виджет.

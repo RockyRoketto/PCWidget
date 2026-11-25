@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,8 +24,7 @@ const (
 type ui struct {
 	hwnd     uintptr
 	cr       *edge.Chromium
-	square   bool // прямые углы окна (Ретро-терминал)
-	glassOn  bool
+	style    string // тема, под которую настроено окно
 	cssW     int
 	cssH     int
 	ready    bool
@@ -100,7 +100,7 @@ func createUI(s Settings, page string) bool {
 	app.taskbarC = uint32(tb)
 
 	applySize()
-	setGlass(true)
+	setStyle(app.brief.Theme)
 	if s.Topmost {
 		setTopmost(true)
 	}
@@ -180,7 +180,7 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 				if app.cr != nil {
 					app.cr.Resize()
 				}
-				setGlass(app.glassOn)
+				setStyle(app.style)
 			})
 		}()
 		return 0
@@ -205,7 +205,7 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		if app.cr != nil {
 			app.cr.Resize()
 		}
-		setGlass(app.glassOn)
+		setStyle(app.style)
 		savePos()
 		return 0
 	case wmTray:
@@ -261,11 +261,8 @@ func onPage(m string) {
 		}
 	case strings.HasPrefix(m, "weather:"):
 		weather.setCity(m[8:])
-	case strings.HasPrefix(m, "glass:"):
-		setGlass(m == "glass:1")
-	case strings.HasPrefix(m, "corners:"):
-		app.square = m == "corners:square"
-		setGlass(app.glassOn)
+	case strings.HasPrefix(m, "style:"):
+		setStyle(m[6:])
 	}
 }
 
@@ -281,6 +278,9 @@ func readBrief() {
 	app.brief = uiBrief{Theme: "glass", Mode: "full", Compact: "column", Scale: 100}
 	if len(app.settings.UI) > 0 {
 		_ = json.Unmarshal(app.settings.UI, &app.brief)
+	}
+	if !slices.Contains(themeKeys, app.brief.Theme) { // убранная тема из старых настроек
+		app.brief.Theme = "glass"
 	}
 	if app.brief.Scale < 50 || app.brief.Scale > 300 {
 		app.brief.Scale = 100
@@ -306,7 +306,7 @@ func initData() string {
 	return string(b)
 }
 
-// sendCmd передаёт странице команду («theme:neon», «mode:strip», «editing:1»).
+// sendCmd передаёт странице команду («theme:apple», «mode:strip», «editing:1»).
 func sendCmd(c string) {
 	if app.cr != nil && app.ready {
 		app.cr.Eval(`window.__cmd("` + c + `")`)
