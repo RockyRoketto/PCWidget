@@ -124,7 +124,7 @@ func createUI(s Settings, page string) bool {
 	}
 	cr.Resize()
 	cr.NavigateToString(page)
-	createTip(hInst)
+	createPopup(hInst)
 
 	pShowWindow.Call(h, swShowNA)
 	if !s.Topmost {
@@ -232,21 +232,15 @@ func onPage(m string) {
 		app.cr.Eval("window.__init(" + initData() + ")")
 	case m == "drag":
 		closeMenu()
-		hideTip()
 		pReleaseCapture.Call()
 		pPostMessage.Call(app.hwnd, wmNCLButtonDown, htCaption, 0)
 	case m == "menu":
-		hideTip()
 		runOnUI(showMenu)
 	case strings.HasPrefix(m, "menuhtml:"):
 		showMenuHTML(m[9:])
 	case strings.HasPrefix(m, "cfg:"):
 		onCfg(m[4:])
 		evalCfg(set.cr, set.ready, m[4:])
-	case strings.HasPrefix(m, "tip:"):
-		showTipRequest(m[4:])
-	case m == "tipoff":
-		hideTip()
 	case strings.HasPrefix(m, "notify:"):
 		trayNotify(m[7:])
 	case strings.HasPrefix(m, "size:"):

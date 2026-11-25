@@ -45,7 +45,14 @@ function claudeOpts() {
 }
 var setState = { tab: 'look', open: '', sure: false };
 
-var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks', claudew: 'claude' };
+// Свой цвет плитки: «как было», готовые и любой.
+function colorOpts(key) {
+  if (CFG.mono) return '<div class="hint">Свой цвет плитки: выбери «Разноцветный» во вкладке «Вид»</div>';
+  var cur = CFG.tileColors[key] || '', own = cur && TILE_TINTS.indexOf(cur) < 0;
+  var b = function (v, name, cls) { return '<button class="tint sm' + (cls || '') + (cur === v ? ' on' : '') + '" data-tc="' + v + '" title="' + name + '" aria-label="' + name + '"' + (v ? ' style="background:' + v + '"' : '') + '></button>'; };
+  return '<div class="tints sm" data-for="' + key + '">' + b('', 'Как было', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
+    '<label class="tint sm custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + cur + '"' : '') + '><input type="color" data-tcc value="' + (cur || TILE_TINTS[1]) + '" aria-label="Свой цвет"></label></div>';
+}
 function modeCards() {
   return '<div class="cards c3">' + Object.keys(MODES).map(function (m) {
     return '<button class="card' + (curMode() === m ? ' on' : '') + '" data-k="mode" data-v="' + m + '">' + PICS[m] + MODES[m] + '</button>'; }).join('') + '</div>';
@@ -95,10 +102,10 @@ var SET_BODY = {
     var m = curMode();
     return label('Плитки режима') + segment('mode', Object.keys(MODES).map(function (k) { return [k, MODES[k]]; }), m) + tilesHint(m) + '<div class="tgrid">' +
       modeIds(m).map(function (id) {
-        var o = TILE_OPTS[id] && TILE_OPTS[id](), on = isOn(m, id), name = tileName(m, id);
-        return '<div class="trow' + (on ? '' : ' off') + (o && setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + (MINI_TINT[id] || id) + '"><div class="m">' + I(id === 'space' ? 'disk' : id) +
-          '<span class="nm">' + name + '</span>' + (o ? '<button class="chev" data-open="' + id + '" title="Параметры">' + ICONS.chev + '</button>' : '') +
-          toggle('tile:' + id, on, name) + '</div>' + (o ? '<div class="opts">' + o + '</div>' : '') + '</div>';
+        var o = (TILE_OPTS[id] ? TILE_OPTS[id]() : '') + colorOpts(colorKey(id)), on = isOn(m, id), name = tileName(m, id);
+        return '<div class="trow' + (on ? '' : ' off') + (setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + colorKey(id) + '"><div class="m">' + I(id === 'space' ? 'disk' : id) +
+          '<span class="nm">' + name + '</span>' + '<button class="chev" data-open="' + id + '" title="Цвет и параметры">' + ICONS.chev + '</button>' +
+          toggle('tile:' + id, on, name) + '</div><div class="opts">' + o + '</div></div>';
       }).join('') + '</div>' + setRow('Расположение', 'Порядок и набор плиток этого режима', ghost('tiles', 'Как в начале'));
   },
   alarm: function () {
@@ -129,6 +136,7 @@ function buildSettings() {
     body.innerHTML = SET_BODY[setState.tab]();
     body.scrollTop = st;
     tintMarks();
+    paintRows();
     update();
   }
   // живые части: черта текущего значения и состояние города
@@ -141,6 +149,15 @@ function buildSettings() {
     var cl = $('[data-cl]', body), html = cl && claudeOpts();
     if (cl && cl.dataset.was !== html) { cl.dataset.was = html; cl.innerHTML = html; }
   }
+  function paintRows() { $$('.trow', body).forEach(paintTile); }
+  // Цвет плитки: отметка в ряду кружков и сразу цвет иконки в списке.
+  function setTileColor(row, v) {
+    var key = row.dataset.for, custom = $('.custom', row), own = !!v && TILE_TINTS.indexOf(v) < 0;
+    if (v) CFG.tileColors[key] = v; else delete CFG.tileColors[key];
+    $$('[data-tc]', row).forEach(function (x) { x.classList.toggle('on', x.dataset.tc === v); });
+    custom.classList.toggle('on', own); custom.style.background = own ? v : '';
+    paintRows();
+  }
   function changed() { saveCfg(); applySetBody(); }
   // Выбор в группе меняет только отметку: список не пересобирается и не мигает.
   function pick(b) {
@@ -150,8 +167,9 @@ function buildSettings() {
   }
   // Отметка выбранного цвета и его имя; свой цвет красит последний кружок.
   function tintMarks() {
-    var c = $('.tint.custom', body), cur = curTint();
-    if (!c) return;
+    var inp = $('[data-tintc]', body), cur = curTint();
+    if (!inp) return;
+    var c = inp.parentNode;
     var own = cur !== 'multi' && cur !== 'theme' && TINTS[CFG.theme].indexOf(cur) < 0;
     $$('.tint[data-tint]', body).forEach(function (x) { x.classList.toggle('on', x.dataset.tint === cur); });
     c.classList.toggle('on', own); c.style.background = own ? cur : '';
@@ -170,6 +188,7 @@ function buildSettings() {
     else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
     else if (d.sys) post('sys:' + d.sys);
     else if (d.k === 'mode') { setMode(d.v); changed(); if (setState.tab === 'tiles') render(true); else pick(b); }
+    else if (b.hasAttribute('data-tc')) { setTileColor(b.parentNode, d.tc); changed(); }
     else if (d.tint) { setTint(d.tint); changed(); tintMarks(); }
     else if (d.k === 'theme') { CFG.theme = d.v; changed(); render(); }
     else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
@@ -178,7 +197,7 @@ function buildSettings() {
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
     if (t.hasAttribute('data-city')) applyCity(t.value);
-    else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-tintc')) saveCfg();
+    else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-tintc') || t.hasAttribute('data-tcc')) saveCfg();
     else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }
     else if (k === 'autostart') { SYS.autostart = t.checked; post('sys:autostart:' + (t.checked ? 1 : 0)); }
     else if (k && k.indexOf('tile:') === 0) {
@@ -198,6 +217,8 @@ function buildSettings() {
       CFG.glass = Number(t.value); liveCfg(); applySetBody(); $('[data-val]', t.previousElementSibling).textContent = t.value + '%';
     } else if (t.hasAttribute('data-tintc')) {
       setTint(t.value); liveCfg(); applySetBody(); tintMarks();
+    } else if (t.hasAttribute('data-tcc')) {
+      setTileColor(t.closest('.tints'), t.value); liveCfg();
     } else if (t.hasAttribute('data-city')) cityTyped(t);
   });
   render(true);

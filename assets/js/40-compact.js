@@ -20,7 +20,7 @@ function shortUptime(sec) {
 // g — группа: между разными группами в колонке тонкая линия. cls — ширина значения в полоске.
 var CSPEC = {
   clock: { g: 'time', icon: 'clock', cls: 'vt', clock: true, face: function () { return CFG.clockView === 'digital' ? null : clockFace(); }, get: function () { var d = new Date(); return { v: clockText(d), sm: d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' }) }; } },
-  weather: { g: 'time', tip: 'weather', icon: 'weather', cls: 'vt', get: function (s) { var w = s.weather; return w && { v: Math.round(w.temp) + '°', icon: w.icon, sm: 'ощ. ' + Math.round(w.feels) + '°' }; } },
+  weather: { g: 'time', icon: 'weather', cls: 'vt', get: function (s) { var w = s.weather; return w && { v: Math.round(w.temp) + '°', icon: w.icon, sm: 'ощ. ' + Math.round(w.feels) + '°' }; } },
   calendar: { g: 'time', icon: 'calendar', cls: 'vt', face: calendarFace, get: function () { return { v: new Date().toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '') }; } },
   cpu: { g: 'load', m: 'cpu', icon: 'cpu', load: true, alarm: function () { return Alarm.isOn('cpuTemp'); }, get: loadCell('cpu', 'cpuTemp') },
   gpu: { g: 'load', m: 'gpu', icon: 'gpu', load: true, alarm: function () { return Alarm.isOn('gpuTemp'); }, get: loadCell('gpu', 'gpuTemp') },
@@ -49,7 +49,7 @@ function buildCompact(strip) {
   var root = mk('<div class="' + (strip ? 'strip' : 'col') + (editing ? ' editing' : '') + '"></div>');
   var items = list.map(function (t, i) {
     var sp = CSPEC[t.id], face = !strip && sp.face ? sp.face() : null, prev = i > 0 && CSPEC[list[i - 1].id];
-    var el = mk('<div class="' + (strip ? 'sb' : 'cr') + '" data-id="' + t.id + '"' + (sp.m ? ' data-m="' + sp.m + '"' : '') + (sp.tip || sp.m ? ' data-tip="' + (sp.tip || sp.m) + '"' : '') + '>' + I(sp.icon) +
+    var el = mk('<div class="' + (strip ? 'sb' : 'cr') + '" data-id="' + t.id + '"' + (sp.m ? ' data-m="' + sp.m + '"' : '') + '>' + I(sp.icon) +
       '<span class="num ' + (sp.cls || (sp.load ? 'vv' : 'vr')) + '">0</span><span class="s"></span>' + (sp.load ? '<span class="mb"><i></i></span>' : '') + '</div>');
     if (!strip && prev && prev.g !== sp.g) el.classList.add('sep');
     if (editing) { el.setAttribute('data-nodrag', ''); el.appendChild(editButton()); }

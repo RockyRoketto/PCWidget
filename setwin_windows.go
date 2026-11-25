@@ -88,7 +88,6 @@ func openSettings(tab string) {
 	}
 	set.cr.Eval("window.__init(" + initData() + ")")
 	if !set.open {
-		hideTip()
 		placeSettings()
 		set.open = true
 		setRaised(true)

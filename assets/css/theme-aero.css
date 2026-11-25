@@ -26,15 +26,18 @@ body.theme-aero.lite { --onsh: none; }
 .theme-aero .tile.alarm { background: linear-gradient(color-mix(in srgb, var(--hot) 24%, transparent) 0 0), rgba(255, 255, 255, .9) !important; }
 .theme-aero .loading .tile::after, .theme-aero .loading .cr::after, .theme-aero .loading .sb::after { background-image: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .9) 50%, transparent 70%); }
 /* иконка на глянцевом шарике */
-.theme-aero .th > .i, .theme-aero .cr > .i:has(svg), .theme-aero .sb > .i:has(svg), .theme-aero .tipbox h3 .i, .theme-aero .trow .m > .i, .theme-aero .thr .t > .i {
+.theme-aero .th > .i, .theme-aero .cr > .i:has(svg), .theme-aero .sb > .i:has(svg), .theme-aero .trow .m > .i, .theme-aero .thr .t > .i {
   width: 22px; height: 22px; padding: 4px; border-radius: 50%; color: #fff;
   background: radial-gradient(ellipse 72% 46% at 50% 18%, rgba(255, 255, 255, .85), rgba(255, 255, 255, .12) 100%, transparent), radial-gradient(circle at 50% 105%, rgba(255, 255, 255, .6), transparent 58%), var(--h, #3f84b8);
   box-shadow: inset 0 0 0 1px rgba(0, 30, 70, .28), 0 1px 2px rgba(0, 45, 90, .4);
 }
-.theme-aero .th > .i svg, .theme-aero .cr > .i svg, .theme-aero .sb > .i svg, .theme-aero .tipbox h3 .i svg, .theme-aero .trow .m > .i svg, .theme-aero .thr .t > .i svg { filter: drop-shadow(0 1px 1px rgba(0, 25, 60, .75)); }
+.theme-aero .th > .i svg, .theme-aero .cr > .i svg, .theme-aero .sb > .i svg, .theme-aero .trow .m > .i svg, .theme-aero .thr .t > .i svg { filter: drop-shadow(0 1px 1px rgba(0, 25, 60, .75)); }
 .theme-aero .th { gap: 5px; }
 .theme-aero .graph .a { opacity: .24; }
 .theme-aero .graph .l { stroke-width: 2; }
+.theme-aero .tinted .th > .i, .theme-aero .cr.tinted > .i:has(svg), .theme-aero .sb.tinted > .i:has(svg), .theme-aero .trow.tinted .m > .i { color: var(--on-accent); }
+.theme-aero .tinted .th > .i svg, .theme-aero .cr.tinted > .i svg, .theme-aero .sb.tinted > .i svg, .theme-aero .trow.tinted .m > .i svg { filter: none; }
+body.theme-aero .full:not(.look-rows) .tile.tinted[data-id=weather] { --dig: #fff !important; --sec: #fff !important; background: linear-gradient(180deg, color-mix(in srgb, var(--h) 55%, #000), color-mix(in srgb, var(--h) 80%, #000)); }
 /* шкалы: стеклянная трубка */
 .theme-aero .bar { position: relative; }
 .theme-aero .bar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--gel); box-shadow: inset 0 0 0 1px rgba(0, 50, 95, .28); }
@@ -45,7 +48,7 @@ body.theme-aero.lite { --onsh: none; }
 .theme-aero .tabs button.on, .theme-aero .seg button.on { color: var(--on-accent); background: var(--gel), var(--accent); box-shadow: 0 1px 2px rgba(0, 45, 90, .4); text-shadow: var(--onsh); }
 .theme-aero .pi { border-radius: 8px; }
 .theme-aero .pi::before { background: linear-gradient(180deg, rgba(255, 255, 255, .6) 0 49%, transparent 50%), var(--h); opacity: .34; }
-.theme-aero.lite .th > .i svg, .theme-aero.lite .cr > .i:has(svg) svg, .theme-aero.lite .sb > .i:has(svg) svg, .theme-aero.lite .tipbox h3 .i svg, .theme-aero.lite .trow .m > .i svg, .theme-aero.lite .thr .t > .i svg { color: var(--on-one); filter: none; }
+.theme-aero.lite .th > .i svg, .theme-aero.lite .cr > .i:has(svg) svg, .theme-aero.lite .sb > .i:has(svg) svg, .theme-aero.lite .trow .m > .i svg, .theme-aero.lite .thr .t > .i svg { color: var(--on-one); filter: none; }
 .theme-aero.lite .rate .i, .theme-aero.lite .let { color: var(--ink); }
 .theme-aero.lite .graph .l { stroke: var(--ink); }
 /* часы и календарь */
@@ -60,18 +63,18 @@ body.theme-aero.lite { --onsh: none; }
 .theme-aero .cd.now i { background: var(--gel), var(--accent); box-shadow: 0 1px 2px rgba(0, 45, 90, .4); text-shadow: var(--onsh); }
 .theme-aero .cday .cnum { font-weight: 300; font-size: 54px; }
 /* погода: небо */
-.theme-aero .tile[data-tip=weather] {
+.theme-aero .tile[data-id=weather] {
   --text: #fff; --dim: rgba(255, 255, 255, .92); --sec: #fff; --dig: #fff; --edge: rgba(255, 255, 255, .45); color: #fff;
   background: linear-gradient(180deg, rgba(255, 255, 255, .34) 0, rgba(255, 255, 255, .1) 22px, transparent 23px), radial-gradient(circle at 92% 0, rgba(255, 255, 255, .4), transparent 130px), linear-gradient(180deg, #0b5cb0, #1f7cc8);
 }
-.theme-aero .tile[data-tip=weather] .wx, .theme-aero .wdays { text-shadow: 0 1px 2px rgba(0, 40, 90, .55); }
+.theme-aero .tile[data-id=weather] .wx, .theme-aero .wdays { text-shadow: 0 1px 2px rgba(0, 40, 90, .55); }
 .theme-aero .wx .wi, .theme-aero .wday .di { color: #fff; filter: drop-shadow(0 1px 2px rgba(0, 40, 90, .5)); }
 .theme-aero .wx .num { font-weight: 300; font-size: 46px; }
 /* вид «Строки»: один общий лист */
 .theme-aero .look-rows .grid { background: var(--sheet); box-shadow: var(--rim); border-radius: var(--r); padding: 4px 10px 0; overflow: hidden; }
 .theme-aero .look-rows .tile { background: none; box-shadow: none; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; margin-bottom: -1px; }
-.theme-aero .look-rows .tile[data-tip=weather] { --dig: initial; --text: #08304f; --dim: #2f5d7c; --sec: #e0301e; --edge: rgba(0, 74, 128, .2); background: none; color: var(--text); }
-.theme-aero.mono .look-rows .tile[data-tip=weather] { --dig: var(--ink); }
+.theme-aero .look-rows .tile[data-id=weather] { --dig: initial; --text: #08304f; --dim: #2f5d7c; --sec: #e0301e; --edge: rgba(0, 74, 128, .2); background: none; color: var(--text); }
+.theme-aero.mono .look-rows .tile[data-id=weather] { --dig: var(--ink); }
 .theme-aero .look-rows .wx, .theme-aero .look-rows .wdays { text-shadow: none !important; }
 .theme-aero .look-rows .wx .wi, .theme-aero .look-rows .wday .di { color: var(--ink); filter: none; }
 .theme-aero .look-rows .tile.alarm { background: color-mix(in srgb, var(--hot) 20%, transparent) !important; border-radius: 10px; }
@@ -84,8 +87,8 @@ body.theme-aero.lite { --onsh: none; }
 .theme-aero .strip { border-radius: 24px; padding: 6px 12px; }
 .theme-aero .strip::before { background: linear-gradient(180deg, rgba(255, 255, 255, .92) 0, rgba(255, 255, 255, .7) 49%, rgba(214, 240, 253, .62) 50%, rgba(255, 255, 255, .78) 100%), linear-gradient(90deg, #52b8ef, #8ee0f5 55%, #a6e05a); }
 .theme-aero .sb { border-radius: 14px; }
-/* меню и подсказка */
-.theme-aero #tip { border-radius: 14px; overflow: hidden; background: linear-gradient(180deg, rgba(255, 255, 255, .95) 0, rgba(255, 255, 255, .84) 26px, rgba(240, 250, 255, .8) 27px, rgba(255, 255, 255, .88) 100%), linear-gradient(160deg, #4fb4ee, #9be3f2 60%, #a9e25c); box-shadow: inset 0 0 0 1px rgba(0, 70, 130, .5), inset 0 0 0 2px rgba(255, 255, 255, .85); }
+/* меню */
+.theme-aero #pop { border-radius: 14px; overflow: hidden; background: linear-gradient(180deg, rgba(255, 255, 255, .95) 0, rgba(255, 255, 255, .84) 26px, rgba(240, 250, 255, .8) 27px, rgba(255, 255, 255, .88) 100%), linear-gradient(160deg, #4fb4ee, #9be3f2 60%, #a9e25c); box-shadow: inset 0 0 0 1px rgba(0, 70, 130, .5), inset 0 0 0 2px rgba(255, 255, 255, .85); }
 .theme-aero .mi { border-radius: 10px; }
 .theme-aero .mi:hover { background: var(--gel), var(--accent); color: var(--on-accent); text-shadow: var(--onsh); }
 .theme-aero .mi:hover .i, .theme-aero .mi:hover .ck { color: var(--on-accent); }

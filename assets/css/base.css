@@ -48,9 +48,13 @@ body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 /* разноцветный: шкалы и кольца показателей меняют цвет по заполненности. Ширина градиента = вся шкала. */
 body { --grad: linear-gradient(90deg, var(--ok), var(--warm) 62%, var(--hot)); }
 :where(body:not(.mono):not(.theme-terminal)) :is([data-m=cpu], [data-m=gpu], [data-m=mem], [data-m=disks]) { --fillbg: var(--grad) left / 100cqw 100% no-repeat; }
-body:not(.mono):not(.theme-terminal) [data-m] .ring .fg { stroke: var(--fill, var(--h)); }
+body:not(.mono):not(.theme-terminal) [data-m]:not(.tinted) .ring .fg { stroke: var(--fill, var(--h)); }
 body:not(.mono):not(.theme-terminal) [data-m] .cl:is(.lv-warm) .ring .fg { stroke: var(--warm); }
 body:not(.mono):not(.theme-terminal) [data-m] .cl:is(.lv-hot) .ring .fg { stroke: var(--hot); }
+/* свой цвет плитки (класс tinted и переменные ставит paintTile) */
+.tinted .rec [data-m] { --dig: inherit; --okdig: inherit; }
+body .tinted.tinted .chead, body .tinted.tinted .cday b, body .tinted.tinted .wx .wi, body .tinted.tinted .wday .di { color: var(--dig); }
+body .tinted.tinted .cd.now i { background: var(--h); color: var(--on-accent); }
 .s-ok { color: var(--okdig, var(--ok)) !important; }
 .s-warm { color: var(--warm) !important; }
 .s-hot { color: var(--hot) !important; }

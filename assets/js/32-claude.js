@@ -19,15 +19,10 @@ function resetText(l) {
   if (l.reset * 1000 - Date.now() < 864e5) return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: !CFG.clock24 });
   return ruDate(d, { weekday: 'short' }) + ' ' + d.getDate() + '.' + two(d.getMonth() + 1);
 }
-function spanText(sec) { // «2 ч 17 мин»
-  var d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
-  return d ? d + ' д ' + h + ' ч' : h ? h + ' ч ' + m + ' мин' : Math.max(m, 1) + ' мин';
-}
 function tokParts(n) {
   if (n >= 999500) return [(n / 1e6).toFixed(n >= 1e7 ? 0 : 1), 'млн'];
   return n >= 1000 ? [Math.round(n / 1000), 'тыс'] : [n, ''];
 }
-function tokText(n) { return tokParts(n).join(' ').trim(); }
 function todayTokens(c) { var d = c.days || []; return d.length ? d[d.length - 1].tokens : 0; }
 
 // Столбики за неделю, последний = сегодня.
@@ -39,7 +34,7 @@ function dayBars(days) {
 }
 
 TILE_BUILD.claude = function () {
-  var el = mk('<div class="tile cla" data-m="claude" data-tip="claude">' + head('claude', badge() + '<span class="cst"><i></i><span class="cn"></span><span class="cw"></span></span>') +
+  var el = mk('<div class="tile cla" data-m="claude">' + head('claude', badge() + '<span class="cst"><i></i><span class="cn"></span><span class="cw"></span></span>') +
     '<div class="cls"></div><div class="cweek"><div class="ct"><span class="num"></span><span class="cap">токенов сегодня</span></div><div class="cbars"></div></div>' +
     '<div class="foot"><span class="ft0">&nbsp;</span><span class="ft1"></span></div></div>');
   var box = $('.cls', el), built = [], kinds = '', bars = '';

@@ -2,25 +2,25 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>tip</title>
+<title>menu</title>
 <style>/*{{CSS}}*/</style>
 </head>
 <body class="theme-glass">
-<div id="tip"></div>
+<div id="pop"></div>
 <script>
 (function () {
   var post = function (m) { window.chrome.webview.postMessage(m); };
-  var tip = document.getElementById('tip');
+  var pop = document.getElementById('pop');
   // Go присылает {html, cls, glass, scale}; страница сообщает размер, Go ставит окно на место.
-  window.__tip = function (o) {
+  window.__show = function (o) {
     document.body.className = o.cls;
     document.body.style.setProperty('--glass', o.glass / 100);
     Object.keys(o.vars || {}).forEach(function (k) {
       if (o.vars[k]) document.body.style.setProperty(k, o.vars[k]); else document.body.style.removeProperty(k);
     });
-    tip.style.zoom = o.scale / 100;
-    tip.innerHTML = o.html;
-    var r = tip.getBoundingClientRect();
+    pop.style.zoom = o.scale / 100;
+    pop.innerHTML = o.html;
+    var r = pop.getBoundingClientRect();
     post('size:' + Math.ceil(r.width) + ',' + Math.ceil(r.height));
   };
   // Меню: нажатия уходят в Go, Esc закрывает.

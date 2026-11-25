@@ -32,31 +32,40 @@ function rgbOf(hex) { var n = parseInt(hex.slice(1), 16); return [n >> 16, (n >>
 function lumOf(hex) { var c = rgbOf(hex); return (c[0] * 299 + c[1] * 587 + c[2] * 114) / 1000; }
 function mixTo(hex, to, k) { return '#' + rgbOf(hex).map(function (v) { return (256 + Math.round(v + (to - v) * k)).toString(16).slice(1); }).join(''); }
 function accentOn(hex) { return lumOf(hex) > 150 ? '#1a1408' : '#fff'; } // цвет текста поверх акцента
-// Выбранный руками цвет текущей темы ('' = разноцветный или цвет темы). Слишком тёмный на тёмной теме подсветляется.
-function ownColor() {
-  var c = CFG.mono && CFG.tints[CFG.theme] || '', y = c && lumOf(c);
-  return c && CFG.theme !== 'aero' && y < 105 ? mixTo(c, 255, (105 - y) / (255 - y)) : c;
-}
+// Слишком тёмный цвет на тёмной теме подсветляется.
+function fitColor(c) { var y = c && lumOf(c); return c && CFG.theme !== 'aero' && y < 105 ? mixTo(c, 255, (105 - y) / (255 - y)) : c; }
 // Он же для цифр и подписей: на светлой Aero светлый цвет темнее.
-function ownInk() {
-  var c = ownColor(), y = c && lumOf(c);
-  return c && CFG.theme === 'aero' && y > 115 ? mixTo(c, 0, 1 - 115 / y) : c;
-}
+function inkColor(c) { c = fitColor(c); var y = c && lumOf(c); return c && CFG.theme === 'aero' && y > 115 ? mixTo(c, 0, 1 - 115 / y) : c; }
+// Выбранный руками общий цвет текущей темы ('' = разноцветный или цвет темы).
+function ownColor() { return fitColor(CFG.mono && CFG.tints[CFG.theme] || ''); }
+function ownInk() { return inkColor(CFG.mono && CFG.tints[CFG.theme] || ''); }
 // Переменные своего цвета, пустые снимаются.
 function ownVars() {
   var c = ownColor(), on = c && accentOn(c);
   return { '--one': c, '--accent': c, '--on-one': on, '--on-accent': on, '--ink': ownInk() };
 }
-// Плотность подложки и свой цвет. Одинаково для виджета, подсказки и настроек.
+// Плотность подложки и свой цвет. Одинаково для виджета, меню и настроек.
 function setThemeVars(style, density) {
   style.setProperty('--glass', density / 100);
   var v = ownVars();
   Object.keys(v).forEach(function (k) { if (v[k]) style.setProperty(k, v[k]); else style.removeProperty(k); });
 }
 
+// Свой цвет отдельной плитки (общий для всех режимов и тем). Общий «один цвет» его перебивает.
+var TILE_TINTS = ['#ffffff', '#6fb1ff', '#c09bff', '#ff8fc4', '#ff7a6b', '#ffa94d', '#ffd257', '#5fe0a0'];
+function paintTile(el) {
+  var c = !CFG.mono && CFG.tileColors[colorKey(el.getAttribute('data-id'))] || '', h = fitColor(c), ink = inkColor(c);
+  var v = { '--h': h, '--on-accent': h && accentOn(h) };
+  if (!el.classList.contains('trow')) { // в списке настроек красится только значок
+    v['--dig'] = v['--okdig'] = v['--sec'] = ink; v['--accent'] = h; v['--fillbg'] = h && 'initial';
+  }
+  el.classList.toggle('tinted', !!c);
+  Object.keys(v).forEach(function (k) { if (v[k]) el.style.setProperty(k, v[k]); else el.style.removeProperty(k); });
+}
+
 function defaults() {
   return {
-    ver: 2, theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tints: {},
+    ver: 2, theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, tints: {}, tileColors: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
@@ -90,13 +99,14 @@ function mergeCfg(saved) {
   var hex = function (v) { return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : ''; };
   if (saved.tints) Object.keys(THEMES).forEach(function (k) { if (hex(saved.tints[k])) c.tints[k] = hex(saved.tints[k]); });
   else if (hex(saved.accent)) c.tints.glass = hex(saved.accent); // старые настройки: цвет был только у Стекла
+  if (saved.tileColors) TILE_IDS.forEach(function (k) { if (hex(saved.tileColors[k])) c.tileColors[k] = hex(saved.tileColors[k]); });
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
   return c;
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
-// Классы и переменные страницы: общие для виджета, подсказки и меню.
+// Классы и переменные страницы: общие для виджета и меню.
 function bodyClass() { return 'theme-' + CFG.theme + (CFG.mono ? ' mono' : '') + (ownColor() ? ' own' + (accentOn(ownColor()) === '#fff' ? '' : ' lite') : ''); }
 // Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
 function weatherOn() { return ['full', 'column', 'strip'].some(function (m) { return isOn(m, 'weather'); }); }
@@ -136,7 +146,6 @@ function clockText(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', 
 var HN = 60;
 var HIST = { cpu: [], gpu: [], mem: [], down: [], up: [] };
 function pushHist(k, v) { var a = HIST[k]; a.push(v); if (a.length > HN) a.shift(); }
-function avg(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : 0; }
 var REC = { cpuLoad: 0, cpuTemp: null, gpuLoad: 0, gpuTemp: null, mem: 0, down: 0 };
 function updateRecords(s) {
   var mx = function (k, v) { if (v != null && (REC[k] == null || v > REC[k])) REC[k] = v; };

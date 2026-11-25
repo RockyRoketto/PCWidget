@@ -14,12 +14,12 @@ function applyBody() {
   setThemeVars(document.body.style, CFG.glass);
   rootEl.style.zoom = CFG.scale / 100;
   rootEl.classList.toggle('loading', !dataReady);
+  $$('[data-id]', rootEl).forEach(paintTile);
   postOnce('style', CFG.theme); // размытие, углы и прозрачность окна
 }
 
 // Перестраивает виджет.
 function layout() {
-  hideTip(true);
   var old = view && view.el;
   view = CFG.mode === 'full' ? buildFull() : buildCompact(CFG.compact === 'strip');
   if (old) rootEl.replaceChild(view.el, old); else rootEl.insertBefore(view.el, rootEl.firstChild);
@@ -62,12 +62,11 @@ window.__stats = function (s) {
   updateRecords(s);
   if (!view || (!dataReady && !checkReady(s, now))) return;
   refresh(now);
-  if (Tip.row) showTip();
 };
 window.__sys = function (sys) { SYS = sys; TOPMOST = sys.topmost; };
 
 // Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
-var LIGHT = { glass: 1, tints: 1, thr: 1, notify: 1, city: 1, theme: 1, mono: 1, scale: 1 };
+var LIGHT = { glass: 1, tints: 1, tileColors: 1, thr: 1, notify: 1, city: 1, theme: 1, mono: 1, scale: 1 };
 function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
 window.__cfg = function (c) {
   var old = CFG;

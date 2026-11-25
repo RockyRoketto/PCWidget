@@ -11,6 +11,9 @@ var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'down', 'up
 var MINI_OFF = { clock: 1, weather: 1, calendar: 1, ping: 1, space: 1, claude: 1, claudew: 1, uptime: 1 };
 var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', down: 'Сеть: приём', up: 'Сеть: отдача', ping: 'Пинг', disk: 'Диски: скорость', space: 'Диск: занято места', claude: 'Claude: 5 часов', claudew: 'Claude: неделя', uptime: 'ПК включён' };
 
+var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks', claudew: 'claude' }; // строка колонки -> плитка
+function colorKey(id) { return MINI_TINT[id] || id; }
+
 function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['disks'], ['claude'], ['procs'], ['records', 'uptime']]; }
 function defaultHide() { var h = {}; Object.keys(OPT_OFF).forEach(function (id) { h[id] = 1; }); return h; }
 function defaultMini() { return MINI_IDS.map(function (id) { return { id: id, on: !MINI_OFF[id] }; }); }

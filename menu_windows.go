@@ -7,7 +7,7 @@ import (
 )
 
 // Своё меню (правая кнопка и трей). Разметку собирает страница виджета (assets/js/55-menu.js),
-// показывает окно подсказки: на время меню оно становится активным и закрывается кликом мимо.
+// показывает окно из popup_windows.go: на время меню оно становится активным и закрывается кликом мимо.
 // Пока страницы не готовы, работает системное меню (showNativeMenu).
 
 const (
@@ -49,7 +49,7 @@ func sendSys() {
 
 // showMenu показывает меню у курсора.
 func showMenu() {
-	if tip.cr == nil || !tip.ready || app.cr == nil || !app.ready {
+	if popup.cr == nil || !popup.ready || app.cr == nil || !app.ready {
 		showNativeMenu()
 		return
 	}
@@ -60,18 +60,17 @@ func showMenu() {
 
 func requestMenu() { app.cr.Eval("window.__menu(" + sysInfo() + ")") }
 
-// showMenuHTML принимает разметку меню от страницы и отдаёт её окну подсказки.
+// showMenuHTML принимает разметку меню от страницы и отдаёт её окну меню.
 func showMenuHTML(raw string) {
 	var r struct {
 		Theme string `json:"theme"`
 	}
-	if tip.cr == nil || json.Unmarshal([]byte(raw), &r) != nil {
+	if popup.cr == nil || json.Unmarshal([]byte(raw), &r) != nil {
 		return
 	}
-	tip.want = false
 	menu.open = true
-	setStyleFor(tip.hwnd, r.Theme)
-	tip.cr.Eval("window.__tip(" + raw + ")")
+	setStyleFor(popup.hwnd, r.Theme)
+	popup.cr.Eval("window.__show(" + raw + ")")
 }
 
 // placeMenu ставит меню у курсора; если не влезает, раскрывает в другую сторону.
@@ -83,18 +82,18 @@ func placeMenu() {
 	if r, _, _ := pGetDpiForMonitor.Call(mon, 0, uintptr(unsafe.Pointer(&dx)), uintptr(unsafe.Pointer(&dy))); r != 0 || dx == 0 {
 		dx = 96
 	}
-	w, h := (tip.w*int(dx)+48)/96, (tip.h*int(dx)+48)/96
+	w, h := (popup.w*int(dx)+48)/96, (popup.h*int(dx)+48)/96
 	x, y := popupPos(int(menu.at.X), int(menu.at.Y), w, h, mi.work)
-	pSetWindowPos.Call(tip.hwnd, hwndTopmost, uintptr(x), uintptr(y), uintptr(w), uintptr(h), swpNoActivate|swpShowWindow)
-	tip.cr.Resize()
+	pSetWindowPos.Call(popup.hwnd, hwndTopmost, uintptr(x), uintptr(y), uintptr(w), uintptr(h), swpNoActivate|swpShowWindow)
+	popup.cr.Resize()
 	if menu.placed {
 		return
 	}
 	menu.placed = true
-	tip.cr.Show()
-	setExStyle(tip.hwnd, wsExNoActivate, false)
-	forceForeground(tip.hwnd)
-	tip.cr.Focus()
+	popup.cr.Show()
+	setExStyle(popup.hwnd, wsExNoActivate, false)
+	forceForeground(popup.hwnd)
+	popup.cr.Focus()
 }
 
 func closeMenu() {
@@ -102,8 +101,8 @@ func closeMenu() {
 		return
 	}
 	menu.open, menu.placed = false, false
-	pShowWindow.Call(tip.hwnd, swHide)
-	setExStyle(tip.hwnd, wsExNoActivate, true)
+	pShowWindow.Call(popup.hwnd, swHide)
+	setExStyle(popup.hwnd, wsExNoActivate, true)
 }
 
 // onMenuCmd выполняет пункт меню. Режим и тема меняются, не закрывая меню.

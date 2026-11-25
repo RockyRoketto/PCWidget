@@ -36,9 +36,9 @@ func buildPage() (string, error) {
 	return page, nil
 }
 
-// buildTipPage собирает страницу окна подсказки: те же стили, что у виджета.
-func buildTipPage() (string, error) {
-	idx, err := assetsFS.ReadFile("assets/tip.html")
+// buildPopupPage собирает страницу окна меню: те же стили, что у виджета.
+func buildPopupPage() (string, error) {
+	idx, err := assetsFS.ReadFile("assets/popup.html")
 	if err != nil {
 		return "", err
 	}

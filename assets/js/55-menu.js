@@ -1,6 +1,6 @@
 'use strict';
-// Меню правой кнопки и трея. Страница собирает разметку, показывает её окно подсказки (tip_windows.go),
-// оно же присылает нажатия: команды data-cmd обрабатывает Go, остальное возвращается сюда через __cmd.
+// Меню правой кнопки и трея. Страница собирает разметку, показывает её отдельное окно (popup_windows.go),
+// оно присылает нажатия: команды data-cmd обрабатывает Go, остальное возвращается сюда через __cmd.
 
 function menuHTML() {
   var seg = Object.keys(MODES).map(function (m) {
@@ -20,8 +20,11 @@ function menuHTML() {
     item('eye', SYS.visible === false ? 'Показать' : 'Скрыть в трей', 'toggle') + item('power', 'Выход', 'exit') + '</div>';
 }
 
+// Что нужно окну меню, чтобы выглядеть как виджет.
+function menuPayload(html) { return { html: html, theme: CFG.theme, cls: bodyClass(), glass: CFG.glass, vars: ownVars(), scale: CFG.scale }; }
+
 // Go просит меню и заодно сообщает состояние системы.
 window.__menu = function (sys) {
   SYS = sys; TOPMOST = sys.topmost;
-  post('menuhtml:' + JSON.stringify(tipPayload(menuHTML())));
+  post('menuhtml:' + JSON.stringify(menuPayload(menuHTML())));
 };

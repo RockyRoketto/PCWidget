@@ -77,8 +77,6 @@
 @container (max-width: 219px) {
   .theme-terminal .till { display: none; }
 }
-/* подсказка */
-.tipbox .cbars { height: 44px; margin: 6px 0 4px; }
 /* ===== процессы рядом с другой плиткой: вкладки своей строкой ===== */
 @container (max-width: 219px) {
   .prt .th { flex-wrap: wrap; row-gap: 6px; }

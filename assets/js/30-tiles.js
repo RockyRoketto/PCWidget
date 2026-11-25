@@ -28,7 +28,7 @@ function ring() {
 // CPU и GPU: загрузка и температура крупно, график, строка деталей.
 function bigTile(id, details) {
   var thrKey = id + 'Temp';
-  var el = mk('<div class="tile bigt" data-m="' + id + '" data-tip="' + id + '">' + head(id, badge()) + '<div class="duo">' + ring() +
+  var el = mk('<div class="tile bigt" data-m="' + id + '">' + head(id, badge()) + '<div class="duo">' + ring() +
     '<div class="big"><span class="num temp"></span><span class="num load"><span class="v">0</span><small>%</small></span></div>' +
     '<div class="side"><span></span><span></span></div>' + bar('lbar') + graphSvg() + '<div class="foot"><span>&nbsp;</span><span></span></div></div></div>');
   var v = $('.v', el), t = $('.temp', el), g = $('.graph', el), rg = $('.ring', el), lb = $('.lbar', el);
@@ -64,7 +64,7 @@ var TILE_BUILD = {
   calendar: function () { return faceTile(calendarFace(), CFG.calView === 'month'); },
 
   weather: function () {
-    var el = mk('<div class="tile mid wxt" data-tip="weather"><div class="wx"><span class="wi"></span><span class="num">0°</span>' +
+    var el = mk('<div class="tile mid wxt"><div class="wx"><span class="wi"></span><span class="num">0°</span>' +
       '<div class="wt"><b class="wc"></b><span class="wd"></span><span class="wf"></span></div></div><div class="wdays"></div></div>');
     var days = '';
     function t(v) { return String(Math.round(v)).replace('-', '−') + '°'; }
@@ -98,7 +98,7 @@ var TILE_BUILD = {
   },
 
   mem: function () {
-    var el = mk('<div class="tile mem" data-m="mem" data-tip="mem">' + head('mem', badge() + '<span class="gb"></span><span class="num memv">0<small>%</small></span>') + bar() + '<div class="mring"><div class="mtxt"><span class="num mu"></span><span class="mof"></span></div>' +
+    var el = mk('<div class="tile mem" data-m="mem">' + head('mem', badge() + '<span class="gb"></span><span class="num memv">0<small>%</small></span>') + bar() + '<div class="mring"><div class="mtxt"><span class="num mu"></span><span class="mof"></span></div>' +
       '<div class="mr">' + ring() + '<span class="num mp">0<small>%</small></span></div></div><div class="cap sub">&nbsp;</div></div>');
     return {
       el: el,
@@ -117,7 +117,7 @@ var TILE_BUILD = {
 
   net: function () {
     var r = function (ic, k) { return '<div class="rate r-' + ic + '">' + I(ic) + '<span class="num ' + k + '">0</span><small class="' + k + 'u">КБ/с</small></div>'; };
-    var el = mk('<div class="tile net" data-m="net" data-tip="net">' + head('net', '<span class="ls s-hot"></span><span class="pg"></span>') +
+    var el = mk('<div class="tile net" data-m="net">' + head('net', '<span class="ls s-hot"></span><span class="pg"></span>') +
       '<div class="rates">' + r('down', 'dn') + r('up', 'up') + '</div>' + netSvg() + '<div class="foot"><span>&nbsp;</span><span></span></div></div>');
     var ft = $$('.foot span', el);
     return {
@@ -139,7 +139,7 @@ var TILE_BUILD = {
 
   disks: function () {
     var row = function (n) { return mk('<div class="dr"><div class="dl1"><b class="ltr">' + esc(n) + '</b><span class="io"></span><span class="fr">&nbsp;</span></div>' + bar() + ring() + '</div>'); };
-    var el = mk('<div class="tile dsk" data-m="disks" data-tip="disks">' + head('disks', badge()) + '<div class="rows"></div></div>');
+    var el = mk('<div class="tile dsk" data-m="disks">' + head('disks', badge()) + '<div class="rows"></div></div>');
     var rows = $('.rows', el), built = {}, stub = row('C');
     rows.appendChild(stub);
     var io = function (t, v) { return '<span class="' + (v > 102400 ? 'on' : '') + '"><span>' + t + '</span><span>' + rateText(v) + '</span></span>'; };
@@ -190,7 +190,7 @@ var TILE_BUILD = {
   },
 
   records: function () {
-    var el = mk('<div class="tile" data-tip="records"><div class="cap">' + TILE_NAMES.records + '</div><div class="rec">&nbsp;</div></div>');
+    var el = mk('<div class="tile"><div class="cap">' + TILE_NAMES.records + '</div><div class="rec">&nbsp;</div></div>');
     var cell = function (n, temp, load, thr) {
       if (temp != null) return '<span><small>' + n + '</small><span class="s-' + level(temp, thr) + '">' + Math.round(temp) + '°</span></span>';
       return load ? '<span data-m="' + n.toLowerCase() + '"><small>' + n + '</small>' + Math.round(load) + '%</span>' : '';
