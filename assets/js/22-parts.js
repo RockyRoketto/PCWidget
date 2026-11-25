@@ -83,15 +83,22 @@ function fillViz(kind) {
     }
   };
 }
-// Каждая заливка знает, где она на виджете: градиент один на всех. Зовётся после раскладки.
+// Цвет градиента в точке t (0..1), точки стоят на 0, 48% и 100%.
+function palAt(stops, t) {
+  var k = t < .48 ? t / .48 : (t - .48) / .52, a = rgbOf(stops[t < .48 ? 0 : 1]), b = rgbOf(stops[t < .48 ? 1 : 2]);
+  return '#' + a.map(function (v, i) { return (256 + Math.round(v + (b[i] - v) * clamp(k, 0, 1))).toString(16).slice(1); }).join('');
+}
+// Каждая заливка сплошная: её цвет — точка общего на весь виджет градиента (155°) в центре её карточки.
+// Соседние карточки получают соседние оттенки. Зовётся после раскладки.
 function placeFills(root) {
   if (CFG.theme !== 'fill' || !root.isConnected) return;
-  var z = CFG.scale / 100, R = root.getBoundingClientRect();
+  var R = root.getBoundingClientRect(), st = palStops(), dx = Math.sin(155 * Math.PI / 180), dy = -Math.cos(155 * Math.PI / 180);
+  var L = Math.abs(R.width * dx) + Math.abs(R.height * dy) || 1;
   $$('.fill', root).forEach(function (f) {
-    var r = f.getBoundingClientRect();
+    var host = f.parentNode, r = host.getBoundingClientRect();
     if (!r.width) return;
-    f.style.setProperty('--W', R.width / z + 'px'); f.style.setProperty('--H', R.height / z + 'px');
-    f.style.setProperty('--X', (R.left - r.left) / z + 'px'); f.style.setProperty('--Y', (R.top - r.top) / z + 'px');
+    var cx = r.left + r.width / 2 - R.left - R.width / 2, cy = r.top + r.height / 2 - R.top - R.height / 2;
+    f.style.setProperty('--solid', palAt(st, clamp((cx * dx + cy * dy) / L + .5, 0, 1)));
   });
 }
 

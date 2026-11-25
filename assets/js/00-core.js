@@ -70,10 +70,8 @@ var TILE_TINTS = ['#7cc4ff', '#c3b1ff', '#f6a8d0', '#ff8a7a', '#ffb35c', '#ffd85
 function paintTile(el) {
   var c = CFG.tileColors[colorKey(el.getAttribute('data-id'))] || '', h = fitColor(c);
   el.classList.toggle('tinted', !!c);
-  if (h) {
-    el.style.setProperty('--a', h);
-    el.style.setProperty('--aur', gradOf([mixTo(c, 255, .3), c, mixTo(c, 0, .35)]));
-  } else { el.style.removeProperty('--a'); el.style.removeProperty('--aur'); }
+  if (h) { el.style.setProperty('--a', h); el.style.setProperty('--tint', c); }
+  else { el.style.removeProperty('--a'); el.style.removeProperty('--tint'); }
 }
 
 function defaults() {
