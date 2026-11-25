@@ -11,7 +11,6 @@ body.theme-aero {
   --gel: linear-gradient(180deg, rgba(255, 255, 255, .6) 0, rgba(255, 255, 255, .22) 49%, rgba(0, 0, 0, .06) 50%, rgba(255, 255, 255, .25) 100%);
   --r: 12px; --barh: 11px; --nw: 600; --font: "Segoe UI", system-ui, sans-serif;
 }
-body.theme-aero.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--accent); --net: var(--accent); --disk: var(--accent); --claude: var(--accent); }
 /* панель со сценой */
 .theme-aero .full, .theme-aero .col, .theme-aero .strip { isolation: isolate; border-radius: 24px; } /* поле 12 + скругление плитки 12: углы идут параллельно */
 .theme-aero .full::before, .theme-aero .col::before, .theme-aero .strip::before {
@@ -56,7 +55,7 @@ body.theme-aero.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--
 .theme-aero .cday .cnum { font-weight: 300; font-size: 54px; }
 /* погода: небо */
 .theme-aero .tile[data-tip=weather] {
-  --text: #fff; --dim: rgba(255, 255, 255, .92); --sec: #fff; --edge: rgba(255, 255, 255, .45); color: #fff;
+  --text: #fff; --dim: rgba(255, 255, 255, .92); --sec: #fff; --dig: #fff; --edge: rgba(255, 255, 255, .45); color: #fff;
   background: linear-gradient(180deg, rgba(255, 255, 255, .34) 0, rgba(255, 255, 255, .1) 22px, transparent 23px), radial-gradient(circle at 92% 0, rgba(255, 255, 255, .4), transparent 130px), linear-gradient(180deg, #0b5cb0, #1f7cc8);
 }
 .theme-aero .tile[data-tip=weather] .wx, .theme-aero .wdays { text-shadow: 0 1px 2px rgba(0, 40, 90, .55); }
@@ -65,7 +64,8 @@ body.theme-aero.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--
 /* вид «Строки»: один общий лист */
 .theme-aero .look-rows .grid { background: var(--sheet); box-shadow: var(--rim); border-radius: var(--r); padding: 4px 10px 0; overflow: hidden; }
 .theme-aero .look-rows .tile { background: none; box-shadow: none; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; margin-bottom: -1px; }
-.theme-aero .look-rows .tile[data-tip=weather] { --text: #08304f; --dim: #2f5d7c; --sec: #e0301e; --edge: rgba(0, 74, 128, .2); background: none; color: var(--text); }
+.theme-aero .look-rows .tile[data-tip=weather] { --dig: initial; --text: #08304f; --dim: #2f5d7c; --sec: #e0301e; --edge: rgba(0, 74, 128, .2); background: none; color: var(--text); }
+.theme-aero.mono .look-rows .tile[data-tip=weather] { --dig: var(--one); }
 .theme-aero .look-rows .wx, .theme-aero .look-rows .wdays { text-shadow: none !important; }
 .theme-aero .look-rows .wx .wi, .theme-aero .look-rows .wday .di { color: var(--accent); filter: none; }
 .theme-aero .look-rows .tile.alarm { background: color-mix(in srgb, var(--hot) 20%, transparent) !important; border-radius: 10px; }

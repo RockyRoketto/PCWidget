@@ -9,7 +9,11 @@
   --r: 8px; --barh: 6px; --nw: 650;
   --font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
 }
-body.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--accent); --net: var(--accent); --disk: var(--accent); --claude: var(--accent); }
+/* Цвет цифр (--dig). «Свой у каждого»: цвет показателя, у плиток без показателя цвет текста. «Один»: везде --one темы;
+   «тепло» и «горячо» остаются жёлтым и красным. Графики, шкалы и иконки красит --h, настройка их не трогает. */
+body { --one: var(--accent); }
+body.mono, body.mono [data-m] { --dig: var(--one); --okdig: var(--one); }
+#set { --okdig: var(--ok); }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body {
@@ -26,12 +30,12 @@ body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .ico { width: 100%; height: 100%; display: block; }
 .i { width: 16px; height: 16px; flex: none; display: inline-block; }
-[data-m=cpu] { --h: var(--cpu); }
-[data-m=gpu] { --h: var(--gpu); }
-[data-m=mem] { --h: var(--mem); }
-[data-m=net] { --h: var(--net); }
-[data-m=disks] { --h: var(--disk); }
-.s-ok { color: var(--ok) !important; }
+[data-m=cpu] { --h: var(--cpu); --dig: var(--cpu); }
+[data-m=gpu] { --h: var(--gpu); --dig: var(--gpu); }
+[data-m=mem] { --h: var(--mem); --dig: var(--mem); }
+[data-m=net] { --h: var(--net); --dig: var(--net); }
+[data-m=disks] { --h: var(--disk); --dig: var(--disk); }
+.s-ok { color: var(--okdig, var(--ok)) !important; }
 .s-warm { color: var(--warm) !important; }
 .s-hot { color: var(--hot) !important; }
 .btn { background: var(--accent); color: var(--on-accent); font-weight: 650; border-radius: 7px; padding: 4px 13px; }

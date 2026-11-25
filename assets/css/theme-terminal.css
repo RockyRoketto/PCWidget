@@ -1,12 +1,13 @@
 /* Тема «Терминал»: чёрный фон, зелёный моноширинный текст, шкалы из блоков, лёгкая растровая сетка. */
 body.theme-terminal {
   --text: #7dffa0; --dim: #3fbf66; --accent: #4dff7c; --on-accent: #00220b;
-  --cpu: #4dff7c; --gpu: #4dff7c; --mem: #4dff7c; --net: #4dff7c; --disk: #4dff7c; --claude: #4dff7c;
+  --cpu: #5ad7ff; --gpu: #c9a0ff; --mem: #ff8fd6; --net: #52f0d0; --disk: #cfe3d4; --claude: #ffab70; /* только цифры, остальное зелёное */
   --ok: #4dff7c; --warm: #ffd84d; --hot: #ff5a4d;
   --bg: #020a04; --tile: transparent; --edge: #14552a; --track: #0f3a1c; --ctl: #0a2412; --pop: #06170b;
   --r: 0px; --barh: 8px; --nw: 500; --font: "Cascadia Mono", Consolas, "Courier New", monospace;
   font-size: 12px;
 }
+.theme-terminal [data-m] { --h: var(--accent); }
 .theme-terminal #root::after, .theme-terminal #set::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 5;
   background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px);

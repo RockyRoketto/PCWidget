@@ -17,7 +17,7 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 /* перекидные */
 .flip { --gap: 6px; --w: min(112px, calc((100cqw - (var(--n) - 1) * var(--gap)) / var(--n))); --ch: calc(var(--w) * .9); display: flex; justify-content: center; gap: var(--gap); }
 .flip + .cap { text-align: center; margin-top: 5px; }
-.fc { position: relative; width: var(--w); height: var(--ch); perspective: 320px; font-size: calc(var(--w) * .7); font-weight: 600; color: var(--text); letter-spacing: -.02em; }
+.fc { position: relative; width: var(--w); height: var(--ch); perspective: 320px; font-size: calc(var(--w) * .7); font-weight: 600; color: var(--dig, var(--text)); letter-spacing: -.02em; }
 .fh { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; text-align: center; }
 .fh span { position: absolute; left: 0; right: 0; height: var(--ch); line-height: var(--ch); }
 .fh.t { top: 0; background: var(--flip); border-radius: calc(var(--w) * .1) calc(var(--w) * .1) 0 0; transform-origin: 50% 100%; }
@@ -39,7 +39,7 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 .theme-terminal .fh { border-radius: 0; }
 /* стрелки */
 .dial { display: block; overflow: visible; width: min(100%, 224px); aspect-ratio: 1; margin: 0 auto; font-family: var(--font); }
-.dial text { text-anchor: middle; dominant-baseline: central; fill: var(--text); }
+.dial text { text-anchor: middle; dominant-baseline: central; fill: var(--dig, var(--text)); }
 .hn { font-size: 24px; font-weight: 400; letter-spacing: -.03em; }
 .mn { font-size: 10px; font-weight: 400; opacity: .75; }
 .tk { stroke: var(--text); stroke-width: 1; opacity: .5; }
@@ -68,7 +68,7 @@ body.theme-terminal { --flip: #0c3018; --flip2: #082411; }
 .cd.now i { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .theme-terminal .cd i { border-radius: 0; }
 .cday { display: flex; align-items: center; gap: 12px; }
-.cday .cnum { font-size: 46px; line-height: 1; color: var(--accent); }
+.cday .cnum { font-size: 46px; line-height: 1; color: var(--dig, var(--accent)); }
 .cday div { min-width: 0; }
 .cday b { font-size: 15px; font-weight: 650; display: block; }
 .cday div span { font-size: 12px; color: var(--dim); white-space: nowrap; }

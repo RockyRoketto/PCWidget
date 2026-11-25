@@ -180,7 +180,7 @@ var TILE_BUILD = {
     var el = mk('<div class="tile" data-tip="records"><div class="cap">' + TILE_NAMES.records + '</div><div class="rec">&nbsp;</div></div>');
     var cell = function (n, temp, load, thr) {
       if (temp != null) return '<span><small>' + n + '</small><span class="s-' + level(temp, thr) + '">' + Math.round(temp) + '°</span></span>';
-      return load ? '<span><small>' + n + '</small>' + Math.round(load) + '%</span>' : '';
+      return load ? '<span data-m="' + n.toLowerCase() + '"><small>' + n + '</small>' + Math.round(load) + '%</span>' : '';
     };
     return { el: el, update: function () { $('.rec', el).innerHTML = cell('CPU', REC.cpuTemp, REC.cpuLoad, CFG.thr.cpuTemp) + cell('GPU', REC.gpuTemp, REC.gpuLoad, CFG.thr.gpuTemp); } };
   },

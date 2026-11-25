@@ -23,5 +23,5 @@
 .tipbox hr { border: 0; border-top: 1px solid var(--track); margin: 6px 0; }
 .kv { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
 .kv > span { color: var(--dim); }
-.kv > b { font-weight: 600; white-space: nowrap; }
+.kv > b { color: var(--dig, var(--text)); font-weight: 600; white-space: nowrap; }
 .tipbox .graph { width: 100%; margin: 6px 0 2px; height: 42px; }

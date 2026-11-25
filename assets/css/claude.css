@@ -1,5 +1,5 @@
 /* Плитка Claude: блоки лимитов, столбики за неделю, состояние чатов. */
-[data-m=claude] { --h: var(--claude); }
+[data-m=claude] { --h: var(--claude); --dig: var(--claude); }
 .cla { display: flex; flex-direction: column; }
 .cst { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--dim); }
 .cst i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }

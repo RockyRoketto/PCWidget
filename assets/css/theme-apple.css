@@ -1,7 +1,7 @@
 /* Тема «Apple»: окно прозрачно, каждая плитка — отдельная карточка с крупным скруглением, системные цвета iOS,
    иконки на цветных плашках. Карточки рисует страница, поэтому края гладкие. Плотность карточек зависит от --glass. */
 body.theme-apple {
-  --text: #fff; --dim: rgba(235, 235, 245, .64); --accent: #0a84ff; --on-accent: #fff;
+  --text: #fff; --dim: rgba(235, 235, 245, .64); --accent: #0a84ff; --on-accent: #fff; --one: #fff;
   --cpu: #409cff; --gpu: #c66bf5; --mem: #ff5577; --net: #5ac8e8; --disk: #aeaeb2; --claude: #ff9a62;
   --ok: #30d158; --warm: #ffd60a; --hot: #ff453a; --sec: #ff9f0a; --flip: #3a3a3c; --flip2: #2f2f31;
   --card: rgba(28, 28, 30, calc(.62 + .38 * var(--glass, .76)));
@@ -10,7 +10,6 @@ body.theme-apple {
   --bg: transparent; --tile: transparent; --edge: rgba(84, 84, 88, .6); --track: rgba(120, 120, 128, .36); --ctl: rgba(120, 120, 128, .24); --pop: #3a3a3c;
   --r: 20px; --barh: 7px; --nw: 600; --font: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
 }
-body.theme-apple.mono { --cpu: #fff; --gpu: #fff; --mem: #fff; --net: #fff; --disk: #fff; --claude: #fff; }
 /* карточки: плитки, колонка, полоска, меню, подсказка, окно настроек */
 .theme-apple .tile, .theme-apple .col, .theme-apple .strip, .theme-apple #tip, .theme-apple #set { background: var(--sheen), var(--card); box-shadow: var(--rim); }
 /* тревога: под красным остаётся карточка */
@@ -27,14 +26,13 @@ body.theme-apple.mono { --cpu: #fff; --gpu: #fff; --mem: #fff; --net: #fff; --di
   width: 22px; height: 22px; padding: 3.5px; border-radius: 6.5px; color: #fff;
   background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0)), var(--h, #8e8e93);
 }
-.theme-apple.mono .th > .i, .theme-apple.mono .cr > .i, .theme-apple.mono .sb > .i, .theme-apple.mono .tipbox h3 .i, .theme-apple.mono .trow .i, .theme-apple.mono .thr .i { --h: #636366; }
 .theme-apple .alarm .badge { color: #fff; }
 /* часы и календарь */
 .theme-apple .clk { font-weight: 300; font-size: 38px; letter-spacing: -.03em; }
 .theme-apple .chead { color: var(--hot); }
 .theme-apple .we { color: var(--dim); }
 .theme-apple .cd.now i { background: var(--hot); color: #fff; }
-.theme-apple .cday .cnum { color: var(--text); font-weight: 300; font-size: 54px; }
+.theme-apple .cday .cnum { color: var(--dig, var(--text)); font-weight: 300; font-size: 54px; }
 .theme-apple .cday b { color: var(--hot); }
 .theme-apple .hn { font-weight: 500; }
 /* погода: небо */

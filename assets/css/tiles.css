@@ -6,13 +6,13 @@
 .th .i { color: var(--h, var(--dim)); }
 .th .sp { flex: 1; }
 .th b { color: var(--text); font-weight: 600; }
-.num { font-weight: var(--nw); line-height: 1.1; letter-spacing: -.015em; color: var(--h); }
+.num { font-weight: var(--nw); line-height: 1.1; letter-spacing: -.015em; color: var(--dig, var(--text)); }
 .num small { font-size: max(11.5px, .5em); font-weight: 500; margin-left: 1px; opacity: .85; letter-spacing: 0; }
 .big { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-top: 3px; }
 .big .load { font-size: 33px; }
 .big .temp { font-size: 25px; }
 .foot { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; color: var(--dim); white-space: nowrap; }
-.foot b { color: var(--text); font-weight: 600; }
+.foot b { color: var(--dig, var(--text)); font-weight: 600; }
 .graph { display: block; width: calc(100% + 24px); height: 30px; margin: 3px -12px 5px; }
 .graph path { vector-effect: non-scaling-stroke; }
 .graph .l { fill: none; stroke: var(--h); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
@@ -31,18 +31,18 @@
   .duo .foot { grid-column: span 2; }
 }
 /* часы, погода */
-.clk { font-size: 31px; color: var(--text); margin-top: -1px; }
+.clk { font-size: 31px; margin-top: -1px; }
 .cap { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wx { display: flex; align-items: center; gap: 10px; }
 .wx .wi { width: 54px; height: 54px; margin-left: -5px; color: var(--accent); flex: none; }
 .wx .wi svg { width: 100%; height: 100%; display: block; }
-.wx .num { font-size: 44px; line-height: 1; color: var(--text); flex: none; }
+.wx .num { font-size: 44px; line-height: 1; flex: none; }
 .wx .wt { flex: 1; min-width: 0; text-align: right; font-size: 12px; line-height: 1.4; color: var(--dim); }
 .wx .wt > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wx .wc { font-size: 14px; font-weight: 650; color: var(--text); }
 .wx .wd { white-space: normal !important; display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.25; }
 .wx .wf { display: flex; flex-wrap: wrap; justify-content: flex-end; column-gap: 8px; }
-.wx .wf b { color: var(--text); font-weight: 600; }
+.wx .wf b { color: var(--dig, var(--text)); font-weight: 600; }
 .wx .wf i { font-style: normal; margin-right: 1px; }
 @container (max-width: 279px) {
   .wx { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 0; }
@@ -59,7 +59,7 @@
 .wday.now .dn { color: var(--sec, #ff4f6d); font-weight: 600; }
 .wday .di { width: 22px; height: 22px; color: var(--accent); }
 .wday .di svg { width: 100%; height: 100%; display: block; }
-.wday b { font-size: 14px; font-weight: 650; line-height: 1.25; }
+.wday b { color: var(--dig, var(--text)); font-size: 14px; font-weight: 650; line-height: 1.25; }
 .wday .dl { color: var(--dim); }
 @container (min-width: 280px) {
   .wdays:not(:empty) { display: flex; }
@@ -101,7 +101,7 @@
 .dl1 { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; font-size: 12px; color: var(--dim); white-space: nowrap; }
 .dl1 .ltr { font-weight: 700; font-size: 16px; line-height: 1.2; color: var(--text); }
 .dl1 .fr { margin-left: auto; }
-.dl1 .fr b { font-size: 15px; font-weight: 650; color: var(--text); }
+.dl1 .fr b { font-size: 15px; font-weight: 650; color: var(--dig); }
 .io { display: inline-flex; gap: 10px; }
 .io > span { display: inline-flex; gap: 4px; }
 .io .on { color: var(--text); }
@@ -117,8 +117,9 @@
 .pi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--p); background: var(--h); opacity: .22; transition: width .5s; border-radius: inherit; }
 .pi span, .pi b { position: relative; }
 .pi span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pi b { font-weight: 650; white-space: nowrap; }
+.pi b { color: var(--dig); font-weight: 650; white-space: nowrap; }
 /* нижние */
+.rec, .rec [data-m] { color: var(--dig, var(--text)); }
 .rec { display: flex; gap: 14px; font-size: 15px; font-weight: 650; margin-top: 1px; white-space: nowrap; }
 .rec small { font-size: 12px; font-weight: 400; color: var(--dim); margin-right: 4px; }
 /* ===== вид «Кольца» ===== */
@@ -134,7 +135,7 @@
 .look-ring .big .temp { grid-row: 1; grid-column: 2; align-self: start; font-size: 25px; margin-top: 4px; }
 .look-ring .side { display: grid; grid-row: 1; grid-column: 2; align-self: end; font-size: 12px; color: var(--dim); line-height: 1.35; white-space: nowrap; }
 .side { display: none; }
-.side b { color: var(--text); font-weight: 600; }
+.side b { color: var(--dig, var(--text)); font-weight: 600; }
 @container (max-width: 219px) {
   .look-ring .duo { grid-template-columns: 64px 1fr; }
   .look-ring .ring { width: 64px; height: 64px; }
