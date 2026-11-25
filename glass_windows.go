@@ -22,7 +22,7 @@ type dwmBlurBehind struct {
 func setStyle(theme string) { app.style = theme; setStyleFor(app.hwnd, theme) }
 
 // setStyleFor: Стекло — размытие (accent acrylic) и системное скругление; Терминал — прямые углы;
-// Apple — само окно полностью прозрачно, скруглённые карточки рисует страница.
+// Apple и Aero — само окно полностью прозрачно, скруглённые карточки и панель рисует страница.
 // Не получилось размытие — окно остаётся просто полупрозрачным (тема рисует тёмную подложку сама).
 func setStyleFor(h uintptr, theme string) {
 	on := theme == "glass"
@@ -45,7 +45,7 @@ func setStyleFor(h uintptr, theme string) {
 		pDwmExtendFrame.Call(h, uintptr(unsafe.Pointer(&m)))
 		pDwmSetWindowAttribute.Call(h, 38, uintptr(unsafe.Pointer(&bt)), 4)
 	}
-	setClear(h, theme == "apple")
+	setClear(h, theme == "apple" || theme == "aero")
 	ap := accentPolicy{state: 0}
 	if on {
 		ap = accentPolicy{state: 4, flags: 2, gradientColor: 0x101B1513} // ACRYLICBLURBEHIND, AABBGGRR; плотность рисует страница (--glass)

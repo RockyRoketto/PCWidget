@@ -14,7 +14,7 @@
 .tgrid .trow.open { grid-column: 1 / -1; }
 .tgrid .trow .m { min-height: 32px; gap: 6px; }
 .tgrid .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.c3 .tcard { flex-direction: column; gap: 6px; padding: 8px 4px 6px; justify-content: center; }
+.c4 .tcard { flex-direction: column; gap: 6px; padding: 8px 4px 6px; justify-content: center; }
 .tints { display: flex; gap: 9px; align-items: center; }
 .tint { position: relative; width: 26px; height: 26px; flex: none; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .22); cursor: pointer; }
 .tint.on { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
@@ -24,6 +24,7 @@
 .lab b { color: var(--text); font-weight: 600; }
 .cards { display: grid; gap: 7px; }
 .c3 { grid-template-columns: repeat(3, 1fr); }
+.c4 { grid-template-columns: repeat(4, 1fr); }
 .c2 { grid-template-columns: repeat(2, 1fr); }
 .card { display: grid; justify-items: center; gap: 6px; padding: 8px 6px 6px; border: 1px solid var(--edge); background: var(--tile); border-radius: var(--r); font-size: 12px; color: var(--dim); }
 .card:hover { color: var(--text); }

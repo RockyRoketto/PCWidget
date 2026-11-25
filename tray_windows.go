@@ -32,8 +32,8 @@ const (
 
 // Порядок совпадает с ключами в странице (assets/js/00-core.js).
 var (
-	themeKeys = []string{"glass", "apple", "terminal"}
-	themeText = []string{"Стекло", "Apple", "Терминал"}
+	themeKeys = []string{"glass", "apple", "aero", "terminal"}
+	themeText = []string{"Стекло", "Apple", "Frutiger Aero", "Терминал"}
 	modeKeys  = []string{"full", "column", "strip"}
 	modeText  = []string{"Полный", "Колонка", "Полоска"}
 )

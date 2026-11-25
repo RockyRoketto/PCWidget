@@ -12,6 +12,7 @@ function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 var THEMES = {
   glass: ['Стекло', '#3a4256', ['#6fb1ff', '#c09bff', '#ff8fc4']],
   apple: ['Apple', '#1c1c1e', ['#0a84ff', '#bf5af2', '#ff375f']],
+  aero: ['Aero', '#3fa9ea', ['#a6e33c', '#ffffff', '#c9f3ff']],
   terminal: ['Терминал', '#020a04', ['#4dff7c', '#4dff7c', '#4dff7c']]
 };
 var LOOKS = { graph: 'Графики', ring: 'Кольца', rows: 'Строки' };

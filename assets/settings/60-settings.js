@@ -52,9 +52,10 @@ function tilesHint(m) {
 function densityRow(text) {
   return label(text, CFG.glass + '%') + '<input class="rng" type="range" min="20" max="95" value="' + CFG.glass + '" data-glass aria-label="' + text + '">';
 }
-// Стекло: акцентный цвет и плотность подложки; Apple: только плотность карточек.
+// Стекло: акцентный цвет и плотность подложки; Apple и Aero: только плотность.
 function glassBlock() {
   if (CFG.theme === 'apple') return densityRow('Плотность карточек');
+  if (CFG.theme === 'aero') return densityRow('Плотность фона');
   if (CFG.theme !== 'glass') return '';
   var own = !!CFG.accent && ACCENTS.indexOf(CFG.accent) < 0;
   return label('Цвет') + '<div class="tints"><button class="tint multi' + (CFG.accent ? '' : ' on') + '" data-accent="" title="Цветной: у каждого показателя свой" aria-label="Цветной"></button>' + ACCENTS.map(function (c) {
@@ -68,7 +69,7 @@ function glassBlock() {
 var SET_BODY = {
   look: function () {
     return label('Режим') + modeCards() +
-      label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
+      label('Тема') + '<div class="cards c4">' + Object.keys(THEMES).map(function (k) {
         var t = THEMES[k];
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '"><span class="sw4" style="background:' + t[1] + '">' +
           t[2].map(function (c, i) { return '<i style="background:' + c + ';width:' + [90, 60, 75][i] + '%"></i>'; }).join('') + '</span>' + t[0] + '</button>'; }).join('') + '</div>' + glassBlock() +
@@ -91,7 +92,7 @@ var SET_BODY = {
       var r = THR_ROWS[k], v = CFG.thr[k];
       return '<div class="thr" data-m="' + r[0] + '"><div class="t">' + I(r[0]) + '<span>' + r[1] + '</span><b>' + v + r[2] + '</b></div><div class="zone" style="--t:' + zonePos(v) + '%"><div class="tr"></div>' +
         '<div class="now" data-now="' + k + '" hidden></div><input type="range" min="50" max="100" value="' + v + '" data-thr="' + k + '" aria-label="' + r[1] + '"></div></div>';
-    }).join('') + '<p class="hint">Светлая черта: значение сейчас. Тревога включается через 3 секунды выше порога.</p><div style="height:8px"></div>' +
+    }).join('') + '<p class="hint">Черта: значение сейчас. Тревога включается через 3 секунды выше порога.</p><div style="height:8px"></div>' +
       setRow('Уведомления Windows', 'При включении тревоги', toggle('notify', CFG.notify, 'Уведомления Windows'));
   },
   sys: function () {
