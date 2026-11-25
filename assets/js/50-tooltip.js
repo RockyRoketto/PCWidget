@@ -30,7 +30,7 @@ var TIPS = {
   },
   net: function (s) {
     var n = s.net; if (!n) return '';
-    return tipTitle('net', 'Сеть', 'Сплошная линия: приём, пунктир: отдача') + kv('Приём', rateText(n.down)) + kv('Отдача', rateText(n.up)) +
+    return tipTitle('net', 'Сеть', 'График: вверх приём, вниз отдача') + kv('Приём', rateText(n.down)) + kv('Отдача', rateText(n.up)) +
       (n.ping != null ? kv('Пинг', Math.round(n.ping) + ' мс', pingLevel(n.ping)) : '') +
       (n.loss != null ? kv('Потери', Math.round(n.loss) + '%', n.loss ? 'hot' : 'ok') : '') +
       kv('Сегодня', '↓ ' + sizeText(n.dayDown) + '  ↑ ' + sizeText(n.dayUp)) + kv('Месяц', '↓ ' + sizeText(n.monthDown) + '  ↑ ' + sizeText(n.monthUp));

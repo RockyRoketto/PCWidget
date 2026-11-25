@@ -38,7 +38,7 @@ function defaults() {
     theme: 'glass', look: 'graph', mode: 'full', compact: 'column', mono: false, scale: 100, glass: 76, accent: '',
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini(), strip: defaultMini() },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90 },
-    notify: false, city: '', clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
+    notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
   };
 }
 
@@ -60,7 +60,7 @@ function mergeCfg(saved) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
   ['mono', 'notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
-  ['clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
+  ['wxDays', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
   if (CALS[saved.calView]) c.calView = saved.calView;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
@@ -122,6 +122,17 @@ function areaPath(arr, max) {
   return [p, p + 'L100,30L' + x0 + ',30Z'];
 }
 function graphSvg(extra) { return '<svg class="graph" viewBox="0 0 100 30" preserveAspectRatio="none"><path class="a"/><path class="l"/>' + (extra || '') + '</svg>'; }
+// График сети: приём вверх от середины, отдача вниз, шкала общая.
+function netSvg() { return '<svg class="graph" viewBox="0 0 100 30" preserveAspectRatio="none"><path class="ax" d="M0,15H100"/><path class="a d"/><path class="a u"/><path class="l d"/><path class="l u"/></svg>'; }
+function drawNet(svg, down, up, max) {
+  var st = 100 / (HN - 1);
+  [['.d', down, -1], ['.u', up, 1]].forEach(function (g) {
+    var arr = g[1], x0 = 100 - (arr.length - 1) * st, p = '';
+    if (arr.length > 1) p = 'M' + arr.map(function (v, i) { return (x0 + i * st).toFixed(1) + ',' + (15 + g[2] * Math.min(v / max, 1) * 14).toFixed(1); }).join('L');
+    $('.l' + g[0], svg).setAttribute('d', p);
+    $('.a' + g[0], svg).setAttribute('d', p && p + 'L100,15L' + x0.toFixed(1) + ',15Z');
+  });
+}
 function drawGraph(svg, arr, max) {
   var d = areaPath(arr, max);
   $('.l', svg).setAttribute('d', d[0]); $('.a', svg).setAttribute('d', d[1]);

@@ -56,24 +56,28 @@ var TILE_BUILD = {
   calendar: function () { return faceTile(calendarFace(), CFG.calView === 'month'); },
 
   weather: function () {
-    var el = mk('<div class="tile mid" data-tip="weather"><div class="wx"><div class="wl"><span class="num">0°</span><div class="wt"><div class="cap wd1"></div><div class="cap wd2"></div></div></div><span class="wi"></span></div><div class="wdays"></div></div>');
+    var el = mk('<div class="tile mid wxt" data-tip="weather"><div class="wx"><span class="wi"></span><span class="num">0°</span>' +
+      '<div class="wt"><b class="wc"></b><span class="wd"></span><span class="wf"></span></div></div><div class="wdays"></div></div>');
     var days = '';
-    function t(v) { return Math.round(v) + '°'; }
+    function t(v) { return String(Math.round(v)).replace('-', '−') + '°'; }
+    function dayHtml(d, i) {
+      var p = d.date.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
+      return '<div class="wday' + (i ? '' : ' now') + '"><span class="dn">' + ruDate(dt, { weekday: 'short' }) + '</span><span class="di">' + (ICONS[d.icon] || '') + '</span><b>' + t(d.max) + '</b><span class="dl">' + t(d.min) + '</span></div>';
+    }
     return {
       el: el,
       update: function (s) {
         var w = s.weather; el.hidden = !w; if (!w) return;
+        var list = w.days || [], now = list[0];
         $('.wi', el).innerHTML = ICONS[w.icon] || '';
         $('.num', el).textContent = t(w.temp);
-        $('.wd1', el).textContent = (w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) + ', ' : '') + 'ощущается ' + t(w.feels);
-        $('.wd2', el).textContent = w.city;
-        var key = JSON.stringify(w.days || []);
+        $('.wc', el).textContent = w.city;
+        $('.wd', el).textContent = w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) : '';
+        $('.wf', el).innerHTML = '<span>Ощущается <b>' + t(w.feels) + '</b></span>' + (now ? '<span><i>↑</i><b>' + t(now.max) + '</b> <i>↓</i><b>' + t(now.min) + '</b></span>' : '');
+        var key = CFG.wxDays && list.length ? JSON.stringify(list) : '';
         if (key === days) return;
         days = key;
-        $('.wdays', el).innerHTML = (w.days || []).map(function (d, i) {
-          var p = d.date.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
-          return '<div class="wday' + (i ? '' : ' now') + '"><span class="dn">' + ruDate(dt, { weekday: 'short' }) + '</span><span class="di">' + (ICONS[d.icon] || '') + '</span><b>' + t(d.max) + '</b><span class="dl">' + t(d.min) + '</span></div>';
-        }).join('');
+        $('.wdays', el).innerHTML = key ? list.map(dayHtml).join('') : '';
       }
     };
   },
@@ -100,9 +104,9 @@ var TILE_BUILD = {
   },
 
   net: function () {
-    var r = function (ic, k) { return '<div class="rate">' + I(ic) + '<span class="num ' + k + '">0</span><small class="' + k + 'u">КБ/с</small></div>'; };
+    var r = function (ic, k) { return '<div class="rate r-' + ic + '">' + I(ic) + '<span class="num ' + k + '">0</span><small class="' + k + 'u">КБ/с</small></div>'; };
     var el = mk('<div class="tile net" data-m="net" data-tip="net">' + head('net', '<span class="ls s-hot"></span><span class="pg"></span>') +
-      '<div class="rates">' + r('down', 'dn') + r('up', 'up') + '</div>' + graphSvg('<path class="u"/>') + '<div class="foot"><span>&nbsp;</span><span></span></div></div>');
+      '<div class="rates">' + r('down', 'dn') + r('up', 'up') + '</div>' + netSvg() + '<div class="foot"><span>&nbsp;</span><span></span></div></div>');
     var ft = $$('.foot span', el);
     return {
       el: el,
@@ -114,17 +118,16 @@ var TILE_BUILD = {
         $('.ls', el).innerHTML = n.loss ? '<span class="lw">потери </span>' + Math.round(n.loss) + '%' : '';
         // корень сжимает разброс: приём и отдача видны на одной шкале
         var q = Math.sqrt, mx = q(Math.max.apply(null, HIST.down.concat(HIST.up, [102400])));
-        drawGraph($('.graph', el), HIST.down.map(q), mx);
-        $('path.u', el).setAttribute('d', areaPath(HIST.up.map(q), mx)[0]);
+        drawNet($('.graph', el), HIST.down.map(q), HIST.up.map(q), mx);
         var d = sizeParts(n.dayDown + n.dayUp), m = sizeParts(n.monthDown + n.monthUp);
-        ft[0].innerHTML = 'Сегодня ' + unit(d[0], d[1]); ft[1].innerHTML = 'Месяц ' + unit(m[0], m[1]);
+        ft[0].innerHTML = '<span>Сегодня</span> <span>' + unit(d[0], d[1]) + '</span>'; ft[1].innerHTML = 'Месяц ' + unit(m[0], m[1]);
       }
     };
   },
 
   disks: function () {
-    var row = function (n) { return mk('<div class="dr"><span class="ltr">' + esc(n) + '</span>' + bar() + '<div class="foot"><span class="fr">&nbsp;</span><span class="io"></span></div></div>'); };
-    var el = mk('<div class="tile" data-m="disks" data-tip="disks">' + head('disks', badge()) + '<div class="rows"></div></div>');
+    var row = function (n) { return mk('<div class="dr"><div class="dl1"><b class="ltr">' + esc(n) + '</b><span class="io"></span><span class="fr">&nbsp;</span></div>' + bar() + '</div>'); };
+    var el = mk('<div class="tile dsk" data-m="disks" data-tip="disks">' + head('disks', badge()) + '<div class="rows"></div></div>');
     var rows = $('.rows', el), built = {}, stub = row('C');
     rows.appendChild(stub);
     var io = function (t, v) { return '<span class="' + (v > 102400 ? 'on' : '') + '"><span>' + t + '</span><span>' + rateText(v) + '</span></span>'; };

@@ -61,7 +61,7 @@ body.theme-aero.mono { --cpu: var(--accent); --gpu: var(--accent); --mem: var(--
 }
 .theme-aero .tile[data-tip=weather] .wx, .theme-aero .wdays { text-shadow: 0 1px 2px rgba(0, 40, 90, .55); }
 .theme-aero .wx .wi, .theme-aero .wday .di { color: #fff; filter: drop-shadow(0 1px 2px rgba(0, 40, 90, .5)); }
-.theme-aero .wx .num { font-weight: 300; font-size: 44px; }
+.theme-aero .wx .num { font-weight: 300; font-size: 46px; }
 /* вид «Строки»: один общий лист */
 .theme-aero .look-rows .grid { background: var(--sheet); box-shadow: var(--rim); border-radius: var(--r); padding: 4px 10px 0; overflow: hidden; }
 .theme-aero .look-rows .tile { background: none; box-shadow: none; border-bottom-color: var(--edge); border-radius: 0; padding: 9px 4px; margin-bottom: -1px; }

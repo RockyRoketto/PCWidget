@@ -40,7 +40,7 @@ body.theme-apple.mono { --cpu: #fff; --gpu: #fff; --mem: #fff; --net: #fff; --di
 /* погода: небо */
 .theme-apple .tile[data-tip=weather] { --dim: rgba(255, 255, 255, .78); --sec: #fff; --edge: rgba(255, 255, 255, .22); background: linear-gradient(180deg, #245ba6, #5b97d2); }
 .theme-apple .wx .wi, .theme-apple .wday .di { color: #fff; }
-.theme-apple .wx .num { font-weight: 300; font-size: 44px; }
+.theme-apple .wx .num { font-weight: 300; font-size: 46px; }
 /* кольца толще */
 .theme-apple .ring circle { stroke-width: 4.6; r: 14.5px; }
 .theme-apple .ring .bg { stroke: color-mix(in srgb, var(--h) 24%, transparent); }
