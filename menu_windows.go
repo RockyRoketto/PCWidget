@@ -123,12 +123,12 @@ func closeMenu() {
 	setExStyle(popup.hwnd, wsExNoActivate, true)
 }
 
-// onMenuCmd выполняет пункт меню. Режим и тема меняются, не закрывая меню.
+// onMenuCmd выполняет пункт меню. Режим, тема и профиль меняются, не закрывая меню.
 func onMenuCmd(c string) {
 	if !menu.open {
 		return
 	}
-	if strings.HasPrefix(c, "mode:") || strings.HasPrefix(c, "theme:") {
+	if strings.HasPrefix(c, "mode:") || strings.HasPrefix(c, "theme:") || strings.HasPrefix(c, "profile:") {
 		sendCmd(c)
 		requestMenu()
 		return

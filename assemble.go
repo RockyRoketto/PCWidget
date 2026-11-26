@@ -60,7 +60,7 @@ func buildSettingsPage() (string, error) {
 		return "", err
 	}
 	js := ""
-	for _, g := range []string{"assets/js/00-core.js", "assets/js/05-layout.js", "assets/js/10-icons.js", "assets/settings/*.js"} {
+	for _, g := range []string{"assets/js/00-core.js", "assets/js/05-layout.js", "assets/js/07-profiles.js", "assets/js/10-icons.js", "assets/settings/*.js"} {
 		part, err := concatGlob(g)
 		if err != nil {
 			return "", err

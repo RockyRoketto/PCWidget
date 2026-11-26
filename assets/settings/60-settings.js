@@ -123,7 +123,8 @@ var SET_BODY = {
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>' +
       label('Оформление') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone) +
       colorBlock() + densityBlock() +
-      label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale);
+      label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale) +
+      profBlock(); // 62-profiles.js
   },
   tiles: function () {
     var m = curMode();
@@ -169,6 +170,7 @@ function buildSettings() {
     paintRows();
     placePop();
     update();
+    profFocus(body);
   }
   // Всплывающее окно плитки: цвет и её параметры. Под карточкой, а если снизу не влезает — над ней.
   function placePop() {
@@ -182,7 +184,11 @@ function buildSettings() {
     pop.style.top = (below + pop.offsetHeight <= body.scrollTop + body.clientHeight || above < body.scrollTop ? below : above) + 'px';
     update();
   }
-  function closePop() { if (setState.open) { setState.open = ''; placePop(); return true; } return false; }
+  function closePop() {
+    if (setState.open) { setState.open = ''; placePop(); return true; }
+    if (profCancel()) { render(); return true; } // Esc отменяет правку имени профиля
+    return false;
+  }
   // живые части: черта текущего значения и состояние города
   function update() {
     $$('[data-now]', body).forEach(function (n) {
@@ -213,9 +219,11 @@ function buildSettings() {
     if (setState.open && !e.target.closest('.tpop') && !e.target.closest('[data-open]')) closePop(); // щелчок мимо закрывает окно плитки
     var b = e.target.closest('button'); if (!b) return;
     var d = b.dataset;
+    if (!d.prof && profCancel() && !d.tab) render();
     if (d.sys !== 'reset' && setState.sure) { setState.sure = false; if (!d.tab) render(); }
     if (b.hasAttribute('data-done')) post('close');
     else if (d.tab) { setState.tab = d.tab; render(true); post('tab:' + d.tab); }
+    else if (d.prof) { profClick(b); render(); }
     else if (d.open) { setState.open = setState.open === d.open ? '' : d.open; placePop(); }
     else if (d.sys === 'reset') { if (setState.sure) { setState.sure = false; CFG = defaults(); changed(); } else setState.sure = true; render(); }
     else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
@@ -231,7 +239,8 @@ function buildSettings() {
   });
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
-    if (t.hasAttribute('data-city')) applyCity(t.value);
+    if (t.hasAttribute('data-profname')) { if (profCommit(t)) render(); }
+    else if (t.hasAttribute('data-city')) applyCity(t.value);
     else if (t.hasAttribute('data-tariff')) { var tf = Number(String(t.value).replace(',', '.')); CFG.tariff = isFinite(tf) && tf > 0 && tf <= 1000 ? Math.round(tf * 100) / 100 : 0; saveCfg(); }
     else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-accc') || t.hasAttribute('data-tcc')) saveCfg();
     else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }
