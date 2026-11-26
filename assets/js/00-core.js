@@ -8,8 +8,8 @@ function mk(html) { var d = document.createElement('div'); d.innerHTML = html.tr
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
-// Три темы с одной раскладкой: меняется материал и индикатор (кривая и полоса, деления, заливка).
-var THEMES = { sheet: 'Лист', gauge: 'Прибор', fill: 'Заливка' };
+// Темы с одной раскладкой: меняется материал и индикатор (кривая и полоса, деления, заливка, сегменты).
+var THEMES = { sheet: 'Лист', gauge: 'Прибор', fill: 'Заливка', lcd: 'ЖК-табло' };
 var TONES = { auto: 'Как в Windows', dark: 'Тёмная', light: 'Светлая' };
 var MODES = { full: 'Панель', wide: 'Широкая', column: 'Колонка', strip: 'Полоска', square: 'Квадрат' };
 var GRID_MODES = { full: 1, wide: 1 };
@@ -53,9 +53,9 @@ function palStops() {
 }
 function gradOf(stops) { return 'linear-gradient(155deg,' + stops[0] + ',' + stops[1] + ' 48%,' + stops[2] + ')'; }
 // Переменные страницы: плотность, акцент, градиент. Одинаково для виджета, меню и настроек.
-// У «Прибора» свой цвет шкал, у «Заливки» акцент берётся из середины градиента.
+// У «Прибора» и «ЖК-табло» свой цвет шкал, у «Заливки» акцент берётся из середины градиента.
 function themeVars() {
-  var a = CFG.theme === 'gauge' ? (isLight() ? '#2f5d5c' : '#e9dfc3') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
+  var a = CFG.theme === 'gauge' ? (isLight() ? '#2f5d5c' : '#e9dfc3') : CFG.theme === 'lcd' ? (isLight() ? '#1b2617' : '#9fd6ff') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
   return { '--glass': CFG.glass / 100, '--accent': a, '--on-accent': accentOn(a), '--pal': gradOf(palStops()) };
 }
 function setThemeVars(style, density) {
@@ -79,7 +79,7 @@ function defaults() {
     ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
-    notify: false, antiburn: false, updates: true, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
+    notify: false, antiburn: false, updates: true, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0
   };
 }
 
@@ -117,6 +117,7 @@ function mergeCfg(saved) {
   if (saved.thin) Object.keys(THIN_OK).forEach(function (k) { if (saved.thin[k]) c.thin[k] = 1; });
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
+  var tf = Number(saved.tariff); if (isFinite(tf) && tf > 0 && tf <= 1000) c.tariff = Math.round(tf * 100) / 100;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
   return c;
 }
@@ -145,6 +146,14 @@ function sizeParts(bytes) {
 }
 function sizeText(bytes) { return sizeParts(bytes).join(' '); }
 function gbParts(gb) { return gb >= 1000 ? [dec(gb / 1024, 1), 'ТБ'] : [String(Math.round(gb)), 'ГБ']; }
+// Энергия: Вт·ч до тысячи, дальше кВт·ч; стоимость по тарифу за кВт·ч (0 = не показывать).
+function whParts(wh) { return wh < 1000 ? [String(Math.round(wh)), 'Вт·ч'] : [dec(wh / 1000, wh < 10000 ? 2 : 1), 'кВт·ч']; }
+function costText(wh) {
+  if (!CFG.tariff) return '';
+  var r = CFG.tariff * wh / 1000;
+  return (r < 10 ? dec(r, 1) : String(Math.round(r))) + ' ₽';
+}
+function energyText(wh) { var c = costText(wh); return whParts(wh).join(' ') + (c ? ' · ' + c : ''); }
 function uptimeText(sec) {
   var d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
   return d ? d + ' д ' + h + ' ч' : h ? h + ' ч ' + m + ' мин' : m + ' мин';
@@ -157,7 +166,7 @@ function clockText(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', 
 
 // ---- история для графиков и рекорды сессии ----
 var HN = 60;
-var HIST = { cpu: [], gpu: [], mem: [], down: [], up: [] };
+var HIST = { cpu: [], gpu: [], mem: [], down: [], up: [], pow: [] };
 function pushHist(k, v) { var a = HIST[k]; a.push(v); if (a.length > HN) a.shift(); }
 var REC = { cpuLoad: 0, cpuTemp: null, gpuLoad: 0, gpuTemp: null, mem: 0, down: 0, up: 0 };
 function updateRecords(s) {

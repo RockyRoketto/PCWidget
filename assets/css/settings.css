@@ -1,6 +1,6 @@
 /* Окно настроек. Размер окна постоянный; вкладки помещаются целиком, прокрутка появляется, только когда раскрыта плитка. */
 #set { height: 100vh; background: var(--sheet); }
-.theme-fill #set, .theme-gauge #set { background: var(--pop); border-radius: 14px; overflow: hidden; }
+.theme-fill #set, .theme-gauge #set, .theme-lcd #set { background: var(--pop); border-radius: 14px; overflow: hidden; }
 .set { height: 100%; display: flex; flex-direction: column; }
 .sh { display: flex; align-items: center; gap: 8px; padding: 10px 10px 6px 18px; font-size: 15px; font-weight: 650; }
 .sh span { flex: 1; }
@@ -11,7 +11,7 @@
 .stabs button.on { color: var(--text); border-bottom-color: var(--accent); }
 .stabs button.on .i { color: var(--accent); }
 .sbody { flex: 1; min-height: 0; overflow: hidden auto; scrollbar-width: thin; scrollbar-color: var(--track) transparent; padding: 2px 18px 12px; }
-.c3 .tcard { flex-direction: column; gap: 6px; padding: 8px 4px 6px; justify-content: center; }
+.cards .tcard { flex-direction: column; gap: 6px; padding: 8px 4px 6px; justify-content: center; }
 .c5 { grid-template-columns: repeat(5, 1fr); gap: 5px; }
 .c5 .card { padding: 6px 2px 5px; font-size: 11px; }
 .c5 .card svg { height: 22px; }
@@ -96,3 +96,4 @@
 .how { margin: 8px 0 8px; }
 .lnk { color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
 .lnk:hover { color: var(--text); }
+.txt.num-in { width: 84px; flex: none; text-align: right; }

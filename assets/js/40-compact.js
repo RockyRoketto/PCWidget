@@ -29,6 +29,8 @@ var CSPEC = {
   gpu: { g: 'load', m: 'gpu', bar: 1, n: 'GPU', alarm: function () { return Alarm.isOn('gpuTemp'); }, get: loadCell('gpu', 'gpuTemp') },
   mem: { g: 'load', m: 'mem', bar: 1, n: 'RAM', alarm: function () { return Alarm.isOn('mem'); },
     get: function (s) { return s.mem && { v: Math.round(s.mem.pct), u: '%', pct: s.mem.pct, sm: Math.round(s.mem.usedGB) + ' ГБ', mark: CFG.thr.mem }; } },
+  energy: { g: 'load', m: 'energy', n: function () { return ICONS.energy; }, icon: true,
+    get: function (s) { var e = s.energy; return e && { v: Math.round(e.power), u: 'Вт', sm: costText(e.dayWh) || whParts(e.dayWh).join(' ') }; } },
   down: { g: 'net', m: 'net', n: '↓', get: function (s) { return s.net && rateCell(s.net.down); } },
   up: { g: 'net', m: 'net', n: '↑', get: function (s) { return s.net && rateCell(s.net.up); } },
   ping: { g: 'net', m: 'net', n: 'Пинг', get: function (s) { return s.net && s.net.ping != null ? { v: Math.round(s.net.ping), u: 'мс', lv: pingLevel(s.net.ping) } : null; } },
@@ -86,10 +88,10 @@ function buildCompact(mode) {
     var name = typeof it.sp.n === 'function' ? it.sp.n(s) : it.sp.n;
     put(it.n, name);
     it.n.classList.toggle('ico', !!it.sp.icon);
-    put(it.v, d.v + (d.u ? '<small>' + d.u + '</small>' : ''));
+    put(it.v, segs(d.v) + (d.u ? '<small>' + d.u + '</small>' : ''));
     var temp = d.t != null, lv = temp ? level(d.t, d.thr) : d.lv || '';
     it.v.className = 'num v' + (!temp && d.lv ? ' ' + d.lv : '');
-    put(it.s, temp ? Math.round(d.t) + '°' : mode === 'strip' ? '' : d.sm || '');
+    put(it.s, temp ? segs(Math.round(d.t)) + '°' : mode === 'strip' ? '' : d.sm || '');
     it.s.className = 's' + (temp ? ' num t ' + lv : '');
     setLv(it.el, lv);
     if (it.vz) it.vz.set({ pct: d.pct || 0, mark: d.mark });

@@ -87,6 +87,7 @@ window.__stats = function (s) {
   if (s.gpu) pushHist('gpu', s.gpu.load);
   if (s.mem) pushHist('mem', s.mem.pct);
   if (s.net) { pushHist('down', s.net.down); pushHist('up', s.net.up); }
+  if (s.energy) pushHist('pow', s.energy.power);
   updateRecords(s);
   burnTick(now);
   if (!view || (!dataReady && !checkReady(s, now))) return;

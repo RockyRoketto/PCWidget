@@ -11,6 +11,7 @@ type collector struct {
 	gpu     *gpuReader
 	ping    *pinger
 	traffic *traffic
+	energy  *energy
 	lastSav time.Time
 	sensors *sensorHub
 }
@@ -26,7 +27,7 @@ var claude = startClaude()
 
 func newCollector() *collector {
 	hub = startSensors()
-	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), sensors: hub}
+	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), energy: loadEnergy(), sensors: hub}
 }
 
 func (c *collector) collect() Stats {
@@ -62,8 +63,22 @@ func (c *collector) collect() Stats {
 		n.Ping, n.Loss = c.ping.get()
 		s.Net = n
 	}
+	var cpuW, gpuW *float64
+	if s.CPU != nil {
+		cpuW = s.CPU.Power
+	}
+	if s.GPU != nil {
+		gpuW = s.GPU.Power
+	}
+	if w, ok := powerSum(cpuW, gpuW); ok {
+		c.energy.add(now, w)
+		s.Energy = c.energy.stat(w)
+	} else {
+		c.energy.pause()
+	}
 	if now.Sub(c.lastSav) > 30*time.Second {
 		c.traffic.save()
+		c.energy.save()
 		c.lastSav = now
 	}
 	return s
@@ -72,5 +87,6 @@ func (c *collector) collect() Stats {
 // close сохраняет накопленное при выходе.
 func (c *collector) close() {
 	c.traffic.save()
+	c.energy.save()
 	c.sensors.close()
 }

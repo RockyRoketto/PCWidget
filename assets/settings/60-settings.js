@@ -31,6 +31,10 @@ var TILE_OPTS = {
   calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>' +
     (GRID_MODES[curMode()] ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
+  energy: function () {
+    return '<div class="ol">Тариф, ₽ за кВт·ч<input class="txt num-in" type="number" min="0" max="1000" step="0.01" data-tariff value="' + (CFG.tariff || '') + '" placeholder="0" aria-label="Тариф, рублей за киловатт-час"></div>' +
+      '<div class="hint">Считаются только процессор и видеокарта: весь ПК от розетки берёт больше. Пусто — без стоимости.</div>';
+  },
   procs: function () { return !GRID_MODES[curMode()] ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
 };
 TILE_OPTS.claude = function () { return thinOpt('claude') + '<div data-cl>' + claudeOpts() + '</div>'; };
@@ -115,7 +119,7 @@ function aboutRows() {
 
 var SET_BODY = {
   look: function () {
-    return label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
+    return label('Тема') + '<div class="cards c4">' + Object.keys(THEMES).map(function (k) {
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>' +
       label('Оформление') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone) +
       colorBlock() + densityBlock() +
@@ -227,6 +231,7 @@ function buildSettings() {
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
     if (t.hasAttribute('data-city')) applyCity(t.value);
+    else if (t.hasAttribute('data-tariff')) { var tf = Number(String(t.value).replace(',', '.')); CFG.tariff = isFinite(tf) && tf > 0 && tf <= 1000 ? Math.round(tf * 100) / 100 : 0; saveCfg(); }
     else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-accc') || t.hasAttribute('data-tcc')) saveCfg();
     else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }
     else if (k === 'autostart') { SYS.autostart = t.checked; post('sys:autostart:' + (t.checked ? 1 : 0)); }

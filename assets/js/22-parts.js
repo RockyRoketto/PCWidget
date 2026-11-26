@@ -8,6 +8,7 @@ function makeViz(kind) {
   var t = CFG.theme;
   if (t === 'fill') return fillViz(kind);
   if (t === 'gauge') return kind === 'net' ? histViz() : tickViz(kind === 'run');
+  if (t === 'lcd') return kind === 'graph' || kind === 'net' ? histViz() : tickViz(kind === 'run');
   if (kind === 'graph' || kind === 'net') return lineViz();
   var el = mk('<div class="bar' + (kind === 'run' ? ' thin' : '') + '"><i></i></div>'), i = el.firstChild;
   return { el: el, set: function (o) { i.style.width = clamp(o.pct, 0, 100) + '%'; } };
@@ -118,8 +119,8 @@ function makeCell(o) {
     el: el,
     name: function (t) { put(nm, t); },
     aux: function (t) { put(ax, t || ''); },
-    big: function (val, unit, lv) { put(v, val + (unit ? '<small>' + unit + '</small>' : '')); v.className = 'num v' + (lv ? ' ' + lv : ''); },
-    side: function (val, unit) { v2.hidden = val == null; if (val != null) put(v2, val + (unit ? '<small>' + unit + '</small>' : '')); },
+    big: function (val, unit, lv) { put(v, segs(val) + (unit ? '<small>' + unit + '</small>' : '')); v.className = 'num v' + (lv ? ' ' + lv : ''); },
+    side: function (val, unit) { v2.hidden = val == null; if (val != null) put(v2, segs(val) + (unit ? '<small>' + unit + '</small>' : '')); },
     note: function (t) { put(c2, t || ''); },
     cap: function (t) { if (cp) put(cp, t || ''); },
     viz: function (d) { if (vz) vz.set(d); },
@@ -148,4 +149,15 @@ function makeLines(box) {
     });
   };
 }
-function unitHtml(v, u) { return v + '<small>' + u + '</small>'; }
+function unitHtml(v, u) { return segs(v) + '<small>' + u + '</small>'; }
+
+// ЖК-табло: цифры и минус из семи сегментов (a b c d e f g), несветящиеся видны бледно. Теги не трогаются.
+var SEG7 = { 0: 'abcdef', 1: 'bc', 2: 'abdeg', 3: 'abcdg', 4: 'bcfg', 5: 'acdfg', 6: 'acdefg', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg', '−': 'g', '-': 'g' };
+var SEG7_HTML = {};
+Object.keys(SEG7).forEach(function (ch) {
+  SEG7_HTML[ch] = '<span class="g7">' + 'abcdefg'.split('').map(function (x) { return SEG7[ch].indexOf(x) >= 0 ? '<i class="on"></i>' : '<i></i>'; }).join('') + '</span>';
+});
+function segs(v) {
+  var h = String(v);
+  return CFG.theme !== 'lcd' ? h : h.replace(/(<[^>]*>|&[a-z]+;)|([0-9−-])/g, function (m, tag, ch) { return tag || SEG7_HTML[ch]; });
+}

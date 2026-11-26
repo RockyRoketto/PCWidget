@@ -81,7 +81,7 @@ var TILE_BUILD = {
         var w = s.weather; el.hidden = !w; if (!w) return;
         var list = w.days || [], now = list[0], desc = w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) : '';
         var k = CFG.wxDays && list.length > 1 && wide(el) ? JSON.stringify(list) : '', text = desc + (now && wide(el) ? (desc ? ', ' : '') + 'от ' + t(now.min) + ' до ' + t(now.max) : ''); // в узкой только описание
-        put(tv, t(w.temp)); put(city, esc(w.city)); put(dsc, esc(text)); put(ic, ICONS[w.icon] || '');
+        put(tv, segs(t(w.temp))); put(city, esc(w.city)); put(dsc, esc(text)); put(ic, ICONS[w.icon] || '');
         put(feel, (wide(el) ? 'ощущается ' : 'ощ. ') + t(w.feels)); feel.title = 'Ощущается ' + t(w.feels);
         if (k !== key) { key = k; days.innerHTML = k ? list.map(dayHtml).join('') : ''; }
         el.classList.toggle('has-days', !!key);
@@ -133,6 +133,28 @@ var TILE_BUILD = {
           one.aux(ping || 'сегодня ' + day.join(' '));
           lines([{ n: '↓', v: unitHtml(a[0], a[1]), pct: q(n.down / mx) * 100 }, { n: '↑', v: unitHtml(b[0], b[1]), pct: q(n.up / mx) * 100 }]);
         }
+      }
+    };
+  },
+
+  // Энергия: мощность CPU и GPU сейчас, история, набежало за день и месяц, стоимость по тарифу.
+  energy: function () {
+    var el = tileBox('energy'), c = makeCell({ kind: 'graph', name: 'Энергия' });
+    el.appendChild(c.el);
+    return {
+      el: el, span: function () { return 2; },
+      update: function (s) {
+        var e = s.energy; el.hidden = !e; if (!e) return;
+        var cpu = s.cpu && s.cpu.power, gpu = s.gpu && s.gpu.power, mx = Math.max.apply(null, HIST.pow.concat([100]));
+        c.big(Math.round(e.power), 'Вт'); c.side(null);
+        if (wide(el)) {
+          c.aux([cpu != null ? 'CPU ' + Math.round(cpu) + ' Вт' : '', gpu != null ? 'GPU ' + Math.round(gpu) + ' Вт' : ''].filter(Boolean).join(' · '));
+          c.note('сегодня ' + energyText(e.dayWh) + '<br>месяц ' + energyText(e.monthWh));
+        } else {
+          c.aux(whParts(e.dayWh).join(' '));
+          c.note('сегодня' + (CFG.tariff ? '<br>' + costText(e.dayWh) : ''));
+        }
+        c.viz({ hist: HIST.pow, max: Math.ceil(mx / 50) * 50, pct: clamp(e.power / mx * 100, 0, 100) });
       }
     };
   },

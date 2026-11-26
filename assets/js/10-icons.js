@@ -15,6 +15,7 @@ var ICONS = (function () {
     down: w('<path d="M10 3.5v11M5.5 10.5 10 15l4.5-4.5M4 17.5h12"/>'),
     up: w('<path d="M10 16.5v-11M5.5 9.5 10 5l4.5 4.5M4 2.5h12"/>'),
     net: w('<path d="M7 3v13M3.5 12.5 7 16l3.5-3.5M13 17V4M9.5 7.5 13 4l3.5 3.5"/>'),
+    energy: w('<path d="M11 2.5 4.5 11H10l-1 6.5L15.5 9H10z"/>'),
     procs: w('<path d="M3 5h14M3 10h14M3 15h9"/>'),
     records: w('<path d="M2.5 15 7 9l3.5 3.5L17 4.5M13 4.5h4v4"/>'),
     uptime: w('<path d="M10 3v6M6 5.2a6 6 0 1 0 8 0"/>'),

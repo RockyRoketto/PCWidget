@@ -14,6 +14,7 @@ type Stats struct {
 	// WeatherState: "" (выключена), loading, ok, notfound, error — для подсказки у поля города.
 	WeatherState string      `json:"weatherState,omitempty"`
 	Claude       *ClaudeStat `json:"claude,omitempty"`
+	Energy       *EnergyStat `json:"energy,omitempty"`
 	Uptime       int64       `json:"uptime"` // секунды с запуска системы
 	Idle         int64       `json:"idle"`   // секунды без мыши и клавиатуры
 }
