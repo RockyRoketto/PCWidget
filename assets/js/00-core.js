@@ -13,7 +13,18 @@ var THEMES = { sheet: 'Лист', gauge: 'Прибор', fill: 'Заливка',
 var TONES = { auto: 'Как в Windows', dark: 'Тёмная', light: 'Светлая' };
 var MODES = { full: 'Панель', wide: 'Широкая', column: 'Колонка', strip: 'Полоска', square: 'Квадрат' };
 var GRID_MODES = { full: 1, wide: 1 };
-var CLOCKS = { digital: 'Цифры', flip: 'Перекидные', analog: 'Стрелки' };
+var CLOCKS = { digital: 'Цифры', analog: 'Стрелки' };
+// Свои варианты часов у каждой темы: вариант 0 общий (обычные цифры, классический циферблат), 1 и 2 — из списка темы.
+var CLOCK_VARS = {
+  sheet: { a: ['Минимал', 'Кольцо'], d: ['Тонкие', 'Полоса дня'] },
+  gauge: { a: ['Прибор', 'Хронограф'], d: ['Барабаны', 'Шкала'] },
+  fill: { a: ['Сектор', 'Плотный'], d: ['Налив', 'Уровни'] },
+  lcd: { a: ['Ана-диги', 'Точки'], d: ['Сегменты', 'Наручные'] },
+  osc: { a: ['Луч', 'Вектор'], d: ['Экран', 'Развёртка'] },
+  bp: { a: ['Деталь', 'Угломер'], d: ['Штамп', 'Размер'] },
+  pixel: { a: ['Круг', 'Блоки'], d: ['3×5', 'Полоса'] }
+};
+function clockVars(view, theme) { var v = CLOCK_VARS[theme || CFG.theme] || CLOCK_VARS.sheet; return [view === 'analog' ? 'Классика' : 'Обычные'].concat(view === 'analog' ? v.a : v.d); }
 var CALS = { day: 'День', week: 'Неделя', month: 'Месяц' };
 var SCALES = [90, 100, 115, 130];
 // Акцент «Листа»: из Windows или свой. Градиенты «Заливки»: три точки, первая сверху слева.
@@ -81,7 +92,7 @@ function defaults() {
     ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false, memMap: false, gpuFan: false,
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
-    notify: false, antiburn: false, updates: true, city: '', wxDays: true, wxAnim: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
+    notify: false, antiburn: false, updates: true, city: '', wxDays: true, wxAnim: true, clock24: true, clockSec: false, clockView: 'digital', clockA: 0, clockD: 0, clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
     profiles: []
   };
 }
@@ -112,6 +123,7 @@ function mergeCfg(saved) {
   c.updates = saved.updates !== false;
   ['wxDays', 'wxAnim', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
+  ['clockA', 'clockD'].forEach(function (k) { if ([0, 1, 2].indexOf(saved[k]) >= 0) c[k] = saved[k]; });
   if (CALS[saved.calView]) c.calView = saved.calView;
   if (SCALES.indexOf(saved.scale) >= 0) c.scale = saved.scale;
   if (!old && saved.glass >= 20 && saved.glass <= 95) c.glass = Math.round(saved.glass);

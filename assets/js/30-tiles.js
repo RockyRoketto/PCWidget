@@ -59,7 +59,7 @@ function digitalTile() {
     update: function (s) { tick(); c.cap(CFG.hide.uptime && s.uptime != null ? 'ПК включён ' + uptimeText(s.uptime) : ''); }
   };
 }
-// Часы стрелками, перекидные и календарь: лицо из 25-faces.js.
+// Часы стрелками, виды часов тем и календарь: лицо из 25-faces.js.
 function faceTile(id, f, span) {
   var el = tileBox(id), cb = mk('<div class="cb face-cb"></div>');
   cb.appendChild(f.el); el.appendChild(cb);
@@ -68,8 +68,9 @@ function faceTile(id, f, span) {
 
 var TILE_BUILD = {
   clock: function () {
-    if (CFG.clockView === 'digital' || thinOn('clock')) return digitalTile(); // стрелки в один модуль не помещаются
-    return faceTile('clock', clockFace(), CFG.clockView === 'analog' ? 3 : 2);
+    var ana = CFG.clockView === 'analog';
+    if (thinOn('clock') || !ana && !CFG.clockD) return digitalTile(); // стрелки и виды тем в один модуль не помещаются
+    return faceTile('clock', clockFace(), ana ? 3 : 2);
   },
   calendar: function () { return faceTile('calendar', calendarFace(), CFG.calView === 'month' ? 3 : 2); },
 

@@ -24,9 +24,13 @@ var SET_TABS = { look: ['look', 'Вид'], tiles: ['tiles', 'Плитки'], ala
 var TILE_OPTS = {
   clock: function () {
     var strip = curMode() === 'strip', hands = !strip && CFG.clockView === 'analog'; // в полоске часы всегда цифрами
-    return (strip ? '' : segment('clockView', Object.keys(CLOCKS).map(function (k) { return [k, CLOCKS[k]]; }), CFG.clockView)) + (hands ?
-      '<div class="two"><label class="ol">Секундная стрелка' + toggle('clockHand', CFG.clockHand, 'Секундная стрелка') + '</label><label class="ol">Дата' + toggle('clockDate', CFG.clockDate, 'Дата на циферблате') + '</label></div>' :
-      '<div class="two"><label class="ol">24 часа' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label><label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label></div>');
+    var vk = hands ? 'clockA' : 'clockD', plain = !strip && !hands && !CFG.clockD;
+    return (strip ? '' : segment('clockView', Object.keys(CLOCKS).map(function (k) { return [k, CLOCKS[k]]; }), CFG.clockView) +
+      segment(vk, clockVars(CFG.clockView).map(function (n, i) { return [i, n]; }), CFG[vk])) + (hands ?
+      '<div class="two"><label class="ol">Секундная стрелка' + toggle('clockHand', CFG.clockHand, 'Секундная стрелка') + '</label>' +
+        (CFG.clockA ? '' : '<label class="ol">Дата' + toggle('clockDate', CFG.clockDate, 'Дата на циферблате') + '</label>') + '</div>' :
+      '<div class="two"><label class="ol">24 часа' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label>' +
+        (plain || strip ? '<label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label>' : '') + '</div>');
   },
   calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>' +
@@ -257,6 +261,7 @@ function buildSettings() {
     else if (d.k === 'theme' || d.k === 'tone') { CFG[d.k] = d.v; changed(); render(); }
     else if (d.k && d.k.indexOf('thin:') === 0) { var tid = d.k.slice(5); if (d.v === '1') CFG.thin[tid] = 1; else delete CFG.thin[tid]; changed(); pick(b); }
     else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
+    else if (d.k === 'clockA' || d.k === 'clockD') { CFG[d.k] = Number(d.v); changed(); render(); }
     else if (d.k) { CFG[d.k] = /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
   el.addEventListener('change', function (e) {

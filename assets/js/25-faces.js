@@ -1,5 +1,5 @@
 'use strict';
-// Лица часов (цифры, перекидные, стрелки) и календаря (день, неделя, месяц): одни и те же в плитках и в колонке.
+// Лица часов (цифры, стрелки; свои варианты тем — 25b..25d) и календаря (день, неделя, месяц): одни и те же в плитках и в колонке.
 // Лицо: { el, tick() }. tick зовётся раз в секунду и трогает DOM, только если что-то изменилось.
 
 function two(n) { return (n < 10 ? '0' : '') + n; }
@@ -16,46 +16,6 @@ function digitalFace() {
       if (t === last) return;
       last = t;
       if (CFG.theme === 'pixel') $('.clk', el).innerHTML = segs(t); else $('.clk', el).textContent = t;
-      $('.cap', el).textContent = ruDate(d, { weekday: 'short', day: 'numeric', month: 'long' });
-    }
-  };
-}
-
-// ---- перекидные ----
-// Карточка: верх (уже новое), низ (пока старое) и два листка: верхний падает со старым, нижний ложится с новым.
-function flipCard() {
-  var el = mk('<div class="fc"><div class="fh t"><span></span></div><div class="fh b"><span></span></div><div class="fh t leaf"><span></span></div><div class="fh b leaf"><span></span></div></div>');
-  var s = $$('span', el), cur = null; // верх, низ, верхний листок, нижний листок
-  function settle() { el.classList.remove('go'); s.forEach(function (x) { x.textContent = cur; }); }
-  s[3].parentNode.addEventListener('animationend', settle);
-  return {
-    el: el,
-    set: function (v) {
-      if (v === cur) return;
-      var first = cur === null;
-      if (!first) settle();
-      cur = v;
-      if (first) return settle();
-      s[0].textContent = s[3].textContent = v;
-      void el.offsetWidth; // перезапуск анимации
-      el.classList.add('go');
-    }
-  };
-}
-function flipFace() {
-  var n = CFG.clockSec ? 3 : 2, cards = [], last = '';
-  var el = mk('<div class="face"><div class="flip" style="--n:' + n + '"></div><div class="cap">&nbsp;</div></div>');
-  for (var i = 0; i < n; i++) { cards.push(flipCard()); $('.flip', el).appendChild(cards[i].el); }
-  return {
-    el: el,
-    tick: function () {
-      var d = new Date(), h = d.getHours(), key = [h, d.getMinutes(), CFG.clockSec ? d.getSeconds() : ''].join();
-      if (key === last) return;
-      last = key;
-      cards[0].set(CFG.clock24 ? two(h) : String(h % 12 || 12));
-      cards[1].set(two(d.getMinutes()));
-      if (cards[2]) cards[2].set(two(d.getSeconds()));
-      if (!CFG.clock24) cards[0].el.setAttribute('data-ap', h < 12 ? 'AM' : 'PM');
       $('.cap', el).textContent = ruDate(d, { weekday: 'short', day: 'numeric', month: 'long' });
     }
   };
@@ -105,7 +65,10 @@ function analogFace() {
     }
   };
 }
-function clockFace() { return (CFG.clockView === 'flip' ? flipFace : CFG.clockView === 'analog' ? analogFace : digitalFace)(); }
+function clockFace() {
+  if (CFG.clockView === 'analog') return CFG.clockA ? themedAnalog(CFG.clockA) : analogFace();
+  return CFG.clockD ? themedDigital(CFG.clockD) : digitalFace();
+}
 
 // ---- календарь ----
 var WDAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'];

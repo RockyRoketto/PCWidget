@@ -19,7 +19,7 @@ function shortUptime(sec) {
 
 // n — название, g — группа (между группами в колонке тонкая черта), face — лицо часов или календаря в колонке.
 var CSPEC = {
-  clock: { g: 'time', n: function () { return ruDate(new Date(), { weekday: 'short', day: 'numeric' }); }, clock: true, face: function () { return CFG.clockView === 'digital' ? null : clockFace(); },
+  clock: { g: 'time', n: function () { return ruDate(new Date(), { weekday: 'short', day: 'numeric' }); }, clock: true, face: function () { return CFG.clockView === 'digital' && !CFG.clockD ? null : clockFace(); },
     get: function () { return { v: clockText(new Date()) }; } },
   weather: { g: 'time', n: function (s) { return s.weather ? ICONS[s.weather.icon] || '' : ''; }, icon: true,
     get: function (s) { var w = s.weather; return w && { v: Math.round(w.temp) + '°', sm: 'ощ. ' + Math.round(w.feels) + '°' }; } },
