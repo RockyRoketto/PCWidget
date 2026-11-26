@@ -4,7 +4,7 @@
 
 [Русский](README.md) · **English**
 
-**Version 1.2**
+**Version 1.3**
 
 ## [⬇ Download widget.exe](https://github.com/RockyRoketto/PCWidget/releases/latest/download/widget.exe)
 
@@ -19,12 +19,15 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 ## Features
 
 - **Tiles:** CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime. Optional clock, calendar, weather, energy, focus timer and Claude Code limits.
-- **Themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient), LCD (segmented digits). Each comes in light, dark and "follow Windows". Any tile can have its own color.
+- **Themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient), LCD (segmented digits), Oscilloscope, Blueprint, Pixels. Each comes in light, dark and "follow Windows". Any tile can have its own color.
 - **Modes:** Panel, Wide, Column, Strip, Square. Dragged to the left or right screen edge, the widget turns into a column.
-- **Layout:** drag tiles with the mouse, hide them, make them half or full width.
+- **Layout:** drag tiles with the mouse, hide them, make them half or full width; some can also be thin.
 - **Alerts:** temperature and usage thresholds, optional Windows notifications.
-- **Hover charts:** rest the mouse on the CPU, GPU, memory, network or energy tile to see 10 minutes or an hour with minimum, average and maximum.
+- **Hover details:** rest the mouse on a tile. CPU, GPU, memory, network, energy and disks have charts (10 minutes or an hour with minimum, average and maximum); the other tiles show a card with details.
 - **Game mode:** FPS, 1% low and frame time over a windowed or borderless game (Ctrl+Shift+F). Nothing is injected into the game; exclusive fullscreen cannot be overlaid.
+- **Game summary:** after a game, a card with FPS, 1% low, stutters, peak temperatures and energy used; it can be saved as an image.
+- **Clock, calendar, weather:** several clock and calendar faces matching each theme, an animated weather background (can be turned off).
+- **More in tiles:** optional per-thread CPU bars, a memory map by process and a GPU fan icon.
 - **Energy:** CPU and GPU consumption in Wh per day and month, with the cost at your tariff. Other PC parts are not counted.
 - **Focus:** a pomodoro timer with sound and a notification.
 - **Profiles:** up to six appearance sets, transferable as a file.
