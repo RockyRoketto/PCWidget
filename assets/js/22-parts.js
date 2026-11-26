@@ -96,7 +96,10 @@ function fillViz(kind) {
   }
   if (kind === 'level') {
     var e = mk('<div class="fill"><i class="lvl"></i></div>'), li = e.firstChild;
-    return { el: e, bg: true, set: function (o) { li.style.height = 'calc(' + clamp(o.pct, 0, 100) + '% + 8px)'; } };
+    return { el: e, bg: true, set: function (o) {
+      li.style.height = 'calc(' + clamp(o.pct, 0, 100) + '% + 8px)';
+      li.style.setProperty('--p', clamp(o.pct, 0, 100) + '%'); // тонкая плитка заливается вбок
+    } };
   }
   var el = mk('<div class="fill"><i class="area"></i></div>'), ar = el.firstChild;
   return {

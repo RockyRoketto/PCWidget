@@ -77,3 +77,22 @@
 .tile[data-h="1"]:not(.w2) > .one.lines .ln > .w { font-size: 16px; }
 .tile[data-h="1"]:not(.w2) > .one.lines .ln > .w small { font-size: 10px; margin-left: 1px; }
 .tile[data-h="1"] > .two .hd .ax { display: none; }
+/* тонкие диски: во всю ширину помещаются четыре */
+.tile[data-h="1"][data-m=disks] .hd .ax { display: none; }
+.tile.w2[data-h="1"][data-m=disks] .cb.lines .ln:nth-child(-n+4) { display: flex; }
+/* тонкие часы: в половинке только время по центру */
+.tile[data-h="1"][data-m=clock] .cp { display: none; }
+.tile[data-h="1"][data-m=clock] .cb.cb.cb .md .v { font-size: 24px; line-height: 28px; }
+.tile[data-h="1"][data-m=clock]:not(.w2) .cb > .hd { display: none; }
+.tile[data-h="1"][data-m=clock]:not(.w2) .cb > .md { margin-inline: auto; }
+/* тонкая погода: температура, город, значок в одну строку */
+.tile[data-h="1"] .cb.wx > .wtop { flex: 1; align-items: center; gap: 8px; }
+.tile[data-h="1"] .cb.wx .wl { flex: 1; flex-direction: row; justify-content: flex-start; align-items: center; gap: 8px; }
+.tile[data-h="1"] .cb.wx .wl .v { font-size: 24px; line-height: 28px; }
+.tile[data-h="1"] .cb.wx .wr { justify-content: center; }
+.tile[data-h="1"] .cb.wx .wr .wi { width: 24px; height: 24px; }
+.tile[data-h="1"] .cb.wx :is(.wdesc, .wfeel), .tile[data-h="1"] .cb.wx .wdays { display: none; }
+/* у «Прибора» и «ЖК-табло» столбики плотные: в тонкой они только узкой полосой под цифрами */
+:is(.theme-gauge, .theme-lcd) .tile[data-h="1"] .cb > .hist { height: 9px; bottom: 3px; left: 12px; width: calc(100% - 24px); }
+/* моноширинное название в тонкой налезает на число */
+.theme-lcd .tile[data-h="1"] .hd .nm { font-family: Bahnschrift, "Segoe UI", sans-serif; font-stretch: 87%; letter-spacing: 0; }

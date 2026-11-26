@@ -43,6 +43,15 @@ function thinOpt(id) {
   return GRID_MODES[curMode()] ? '<div class="ol">Высота<span style="width:150px">' + segment('thin:' + id, [[0, 'Обычная'], [1, 'Тонкая']], CFG.thin[id] ? 1 : 0) + '</span></div>' : '';
 }
 TILE_OPTS.net = function () { return thinOpt('net'); };
+TILE_OPTS.disks = function () { return thinOpt('disks'); };
+// Остальным высота добавляется к их параметрам.
+['clock', 'weather', 'energy'].forEach(function (id) {
+  var own = TILE_OPTS[id];
+  TILE_OPTS[id] = function () {
+    var note = id === 'clock' && GRID_MODES[curMode()] && CFG.thin.clock && CFG.clockView !== 'digital' ? '<div class="hint">Тонкие часы всегда цифрами</div>' : '';
+    return thinOpt(id) + note + own();
+  };
+});
 function boolOpt(key, name) { return '<label class="ol">' + name + toggle(key, CFG[key], name) + '</label>'; }
 // У памяти вместо шкалы может быть карта процессов, у GPU — значок вентилятора (он есть и в Колонке).
 TILE_OPTS.mem = function () {

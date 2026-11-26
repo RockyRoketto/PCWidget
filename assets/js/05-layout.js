@@ -3,11 +3,11 @@
 // Полный режим: CFG.rows — ряды из одной или двух плиток, CFG.hide — скрытые плитки (место в рядах за ними остаётся).
 // Колонка и полоска: свои списки CFG.mini.column и CFG.mini.strip: [{ id, on }].
 // GAP в ряду — пустая половина: плитку оттащили к краю, и она стала короткой.
-// CFG.thin — плитки высотой в один модуль (тонкие); тонкой плитка видна, только если соседка по ряду тоже в модуль.
+// CFG.thin — плитки высотой в один модуль (тонкие); рядом с высокой соседкой тонкая стоит у верха ряда.
 
 var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'energy', 'disks', 'claude', 'procs', 'records', 'uptime', 'focus'];
 var GAP = '_';
-var THIN_OK = { cpu: 1, gpu: 1, mem: 1, net: 1, claude: 1 };
+var THIN_OK = { clock: 1, weather: 1, cpu: 1, gpu: 1, mem: 1, net: 1, energy: 1, disks: 1, claude: 1 };
 var OPT_OFF = { clock: 1, weather: 1, calendar: 1, claude: 1, energy: 1, focus: 1 };  // по умолчанию выключены
 var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', energy: 'Энергия', disks: 'Диски', claude: 'Claude', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён', focus: 'Фокус' };
 var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'energy', 'down', 'up', 'ping', 'disk', 'space', 'claude', 'claudew', 'uptime', 'focus'];

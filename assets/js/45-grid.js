@@ -9,7 +9,8 @@ function editButton() { return mk('<button class="ed" data-nodrag data-e="x" tit
 function emptyNote() { return mk('<div class="empty">Пусто. Правая кнопка мыши: «Изменить плитки»</div>'); }
 
 // Раскладка: две видимые плитки ряда стоят рядом, одна растягивается. Высота в модулях 52px:
-// плитки одного ряда (в Широкой — двух соседних рядов) тянутся до самой высокой, поэтому дыр нет.
+// плитки одного ряда (в Широкой — двух соседних рядов) тянутся до самой высокой. Исключение — тонкая по выбору:
+// она остаётся в один модуль, под ней пусто.
 var packSig = '';
 function repack(root) {
   var cols = CFG.mode === 'wide' ? 4 : 2, units = [];
@@ -39,8 +40,10 @@ function repack(root) {
         var c = per / u.length, st = x.b.el.style;
         st.gridColumn = 'span ' + c; st.gridRow = 'span ' + h;
         x.b.el.classList.toggle('first', li === 0);
-        x.b.el.setAttribute('data-h', h); // лица часов и календаря, тонкие плитки подстраиваются под высоту
-        sig.push(x.id + c + h);
+        var low = h > 1 && thinOn(x.id) && x.b.span && x.b.span() === 1, own = low ? 1 : h;
+        st.alignSelf = low ? 'start' : ''; st.height = low ? '52px' : '';
+        x.b.el.setAttribute('data-h', own); // лица часов и календаря, тонкие плитки подстраиваются под высоту
+        sig.push(x.id + c + h + own);
       });
     });
   });

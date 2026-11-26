@@ -6,7 +6,7 @@
 
 function tileBox(id, m) { return mk('<div class="tile" data-m="' + (m || id) + '"></div>'); }
 function wide(el) { return el.classList.contains('w2'); }
-// Тонкая: высота в модуль. Плитка рисуется тонкой, только если и ряд вышел в модуль (data-h, 45-grid.js).
+// Тонкая: высота в модуль (data-h ставит раскладка, 45-grid.js).
 function thinOn(id) { return !!(THIN_OK[id] && CFG.thin[id]); }
 function thinNow(el) { return el.getAttribute('data-h') === '1'; }
 function cpuDetails(d) { return [d.freq != null ? dec(d.freq / 1000, 1) + ' ГГц' : '', d.power != null ? Math.round(d.power) + ' Вт' : ''].filter(Boolean).join(' · '); }
@@ -55,7 +55,7 @@ function digitalTile() {
     c.side(null);
   }
   return {
-    el: el, span: function () { return 2; }, tick: tick,
+    el: el, span: function () { return thinOn('clock') ? 1 : 2; }, tick: tick,
     update: function (s) { tick(); c.cap(CFG.hide.uptime && s.uptime != null ? 'ПК включён ' + uptimeText(s.uptime) : ''); }
   };
 }
@@ -68,7 +68,7 @@ function faceTile(id, f, span) {
 
 var TILE_BUILD = {
   clock: function () {
-    if (CFG.clockView === 'digital') return digitalTile();
+    if (CFG.clockView === 'digital' || thinOn('clock')) return digitalTile(); // стрелки в один модуль не помещаются
     return faceTile('clock', clockFace(), CFG.clockView === 'analog' ? 3 : 2);
   },
   calendar: function () { return faceTile('calendar', calendarFace(), CFG.calView === 'month' ? 3 : 2); },
@@ -88,11 +88,11 @@ var TILE_BUILD = {
     }
     var o = {
       el: el,
-      span: function () { return wide(el) && CFG.wxDays && key ? 3 : 2; },
+      span: function () { return thinOn('weather') ? 1 : wide(el) && CFG.wxDays && key ? 3 : 2; },
       update: function (s) {
         var w = s.weather; el.hidden = !w; if (!w) return;
         var list = w.days || [], now = list[0], desc = w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) : '';
-        var k = CFG.wxDays && list.length > 1 && wide(el) ? JSON.stringify(list) : '', text = desc + (now && wide(el) ? (desc ? ', ' : '') + 'от ' + t(now.min) + ' до ' + t(now.max) : ''); // в узкой только описание
+        var k = CFG.wxDays && !thinOn('weather') && list.length > 1 && wide(el) ? JSON.stringify(list) : '', text = desc + (now && wide(el) ? (desc ? ', ' : '') + 'от ' + t(now.min) + ' до ' + t(now.max) : ''); // в узкой только описание
         put(tv, segs(t(w.temp))); put(city, esc(w.city)); put(dsc, esc(text)); put(ic, ICONS[w.icon] || '');
         put(feel, (wide(el) ? 'ощущается ' : 'ощ. ') + t(w.feels)); feel.title = 'Ощущается ' + t(w.feels);
         if (k !== key) { key = k; days.innerHTML = k ? list.map(dayHtml).join('') : ''; }
@@ -166,7 +166,7 @@ var TILE_BUILD = {
     var el = tileBox('energy'), c = makeCell({ kind: 'graph', name: 'Энергия' });
     el.appendChild(c.el);
     return {
-      el: el, span: function () { return 2; },
+      el: el, span: function () { return thinOn('energy') ? 1 : 2; },
       update: function (s) {
         var e = s.energy; el.hidden = !e; if (!e) return;
         var cpu = s.cpu && s.cpu.power, gpu = s.gpu && s.gpu.power, mx = Math.max.apply(null, HIST.pow.concat([100]));
@@ -189,10 +189,11 @@ var TILE_BUILD = {
     var lines = makeLines(box);
     function io(d) { return d.read == null ? '' : 'чт ' + rateText(d.read) + ' · зп ' + rateText(d.write); }
     return {
-      el: el, span: function () { return n <= 3 ? 2 : n <= 6 ? 3 : 4; },
+      el: el, span: function () { return thinOn('disks') ? 1 : n <= 3 ? 2 : n <= 6 ? 3 : 4; },
       update: function (s) {
         var list = s.disks || [], al = false; el.hidden = !list.length; n = list.length;
         c.aux('свободно');
+        c.el.classList.toggle('one', thinNow(el) && !wide(el)); // тонкая половинка: только строки, без шапки
         lines(list.map(function (d) {
           var on = Alarm.isOn('disk:' + d.name), f = gbParts(d.freeGB); al = al || on;
           return { n: esc(d.name.replace(':', '')), m: wide(el) ? io(d) : '', v: unitHtml(f[0], f[1]), pct: d.usedPct, mark: CFG.thr.disk, lv: on ? 'hot' : level(d.usedPct, CFG.thr.disk) };

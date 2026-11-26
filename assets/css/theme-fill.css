@@ -24,6 +24,9 @@ body.theme-fill.tone-light {
 .theme-fill .fill i.area { inset: 0; }
 .theme-fill .fill i.lvl { left: 0; right: 0; bottom: 0; transition: height .5s; }
 .theme-fill .fill i.run { left: 0; top: 0; bottom: 0; transition: width .5s; }
+/* тонкая: уровень идёт слева направо, снизу вверх в один модуль его не видно */
+.theme-fill .tile[data-h="1"] .fill i.lvl { top: 0; right: auto; height: auto !important; width: calc(var(--p, 0%) + 8px); background: linear-gradient(90deg, color-mix(in srgb, var(--c) var(--top), transparent), color-mix(in srgb, var(--c) var(--bot), transparent)); transition: width .5s; }
+.theme-fill .tile[data-h="1"] :is(.is-hot, .alarm) .fill i.lvl, .theme-fill .tile[data-h="1"] .is-warm:not(.tinted, .tinted *) .fill i.lvl { background: var(--aur); }
 /* столбики по потокам стоят под цифрами, а не за ними: цвет карточки, цифрам возвращается цвет тепла */
 .theme-fill .cores { min-height: 14px; }
 .theme-fill .cb:has(> .cores) { gap: 2px; }
