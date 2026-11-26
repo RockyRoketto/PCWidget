@@ -49,7 +49,7 @@ var setState = { tab: 'look', open: '', sure: false };
 function colorOpts(key) {
   var cur = CFG.tileColors[key] || '', own = cur && TILE_TINTS.indexOf(cur) < 0;
   var b = function (v, name, cls) { return '<button class="tint sm' + (cls || '') + (cur === v ? ' on' : '') + '" data-tc="' + v + '" title="' + name + '" aria-label="' + name + '"' + (v ? ' style="background:' + v + '"' : '') + '></button>'; };
-  return '<div class="lab">Цвет плитки</div><div class="tints sm" data-for="' + key + '">' + b('', 'Цвет темы', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
+  return '<div class="tints sm" data-for="' + key + '">' + b('', 'Цвет темы', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
     '<label class="tint sm custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + cur + '"' : '') + '><input type="color" data-tcc value="' + (cur || TILE_TINTS[1]) + '" aria-label="Свой цвет"></label></div>';
 }
 function modeCards() {
@@ -112,11 +112,11 @@ var SET_BODY = {
     var m = curMode();
     return label('Режим') + modeCards() + tilesHint(m) + '<div class="tgrid">' +
       modeIds(m).map(function (id) {
-        var o = colorOpts(colorKey(id)) + (TILE_OPTS[id] ? TILE_OPTS[id]() : ''), on = isOn(m, id), name = tileName(m, id);
-        return '<div class="trow' + (on ? '' : ' off') + (setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + colorKey(id) + '">' +
+        var on = isOn(m, id), name = tileName(m, id);
+        return '<div class="trow' + (on ? '' : ' off') + '" data-id="' + id + '" data-m="' + colorKey(id) + '">' +
           '<div class="m"><button class="tb" data-open="' + id + '" title="Цвет и параметры">' + I(id === 'space' ? 'disk' : id) +
-          '<span class="nm" title="' + name + '">' + name + '</span><i class="cdot"></i></button>' + toggle('tile:' + id, on, name) + '</div><div class="opts">' + o + '</div></div>';
-      }).join('') + '</div>';
+          '<span class="nm" title="' + name + '">' + name + '</span><i class="cdot"></i></button>' + toggle('tile:' + id, on, name) + '</div></div>';
+      }).join('') + '</div><div class="tpop" hidden></div>';
   },
   alarm: function () {
     return Object.keys(THR_ROWS).filter(function (k) { return k !== 'claude' || claudeOn(); }).map(function (k) {
@@ -147,8 +147,22 @@ function buildSettings() {
     body.scrollTop = st;
     colorMarks(body);
     paintRows();
+    placePop();
     update();
   }
+  // Всплывающее окно плитки: цвет и её параметры. Под карточкой, а если снизу не влезает — над ней.
+  function placePop() {
+    var pop = $('.tpop', body); if (!pop) return;
+    var id = setState.open, row = id ? $('.trow[data-id="' + id + '"]', body) : null;
+    $$('.trow', body).forEach(function (r) { r.classList.toggle('open', r === row); });
+    if (!row) { pop.hidden = true; pop.innerHTML = ''; setState.open = ''; return; }
+    pop.innerHTML = colorOpts(colorKey(id)) + (TILE_OPTS[id] ? TILE_OPTS[id]() : '');
+    pop.hidden = false;
+    var below = row.offsetTop + row.offsetHeight + 4, above = row.offsetTop - pop.offsetHeight - 4;
+    pop.style.top = (below + pop.offsetHeight <= body.scrollTop + body.clientHeight || above < body.scrollTop ? below : above) + 'px';
+    update();
+  }
+  function closePop() { if (setState.open) { setState.open = ''; placePop(); return true; } return false; }
   // живые части: черта текущего значения и состояние города
   function update() {
     $$('[data-now]', body).forEach(function (n) {
@@ -176,15 +190,13 @@ function buildSettings() {
     if (val) val.textContent = b.dataset.v + '%';
   }
   el.addEventListener('click', function (e) {
+    if (setState.open && !e.target.closest('.tpop') && !e.target.closest('[data-open]')) closePop(); // щелчок мимо закрывает окно плитки
     var b = e.target.closest('button'); if (!b) return;
     var d = b.dataset;
     if (d.sys !== 'reset' && setState.sure) { setState.sure = false; if (!d.tab) render(); }
     if (b.hasAttribute('data-done')) post('close');
     else if (d.tab) { setState.tab = d.tab; render(true); post('tab:' + d.tab); }
-    else if (d.open) {
-      setState.open = setState.open === d.open ? '' : d.open;
-      $$('.trow', body).forEach(function (r) { r.classList.toggle('open', r.dataset.id === setState.open); if (r.dataset.id === setState.open) r.scrollIntoView({ block: 'nearest' }); });
-    }
+    else if (d.open) { setState.open = setState.open === d.open ? '' : d.open; placePop(); }
     else if (d.sys === 'reset') { if (setState.sure) { setState.sure = false; CFG = defaults(); changed(); } else setState.sure = true; render(); }
     else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
     else if (d.sys) post('sys:' + d.sys);
@@ -205,8 +217,8 @@ function buildSettings() {
     else if (k && k.indexOf('tile:') === 0) {
       var id = k.slice(5), row = t.closest('.trow');
       setOn(curMode(), id, t.checked); row.classList.toggle('off', !t.checked); changed();
-      if (id === 'weather' && t.checked && !CFG.city) { setState.open = id; row.classList.add('open'); } // погоде нужен город: сразу раскрываем
-      if (id === 'claude' && t.checked && SYS.claude === 'off' && !(S && S.claude && S.claude.limits)) { setState.open = id; row.classList.add('open'); }
+      if (id === 'weather' && t.checked && !CFG.city) { setState.open = id; placePop(); } // погоде нужен город: сразу открываем
+      if (id === 'claude' && t.checked && SYS.claude === 'off' && !(S && S.claude && S.claude.limits)) { setState.open = id; placePop(); }
       update();
     } else if (k) { CFG[k] = t.checked; changed(); }
   });
@@ -224,5 +236,5 @@ function buildSettings() {
     } else if (t.hasAttribute('data-city')) cityTyped(t);
   });
   render(true);
-  return { el: el, update: update, render: render };
+  return { el: el, update: update, render: render, closePop: closePop };
 }

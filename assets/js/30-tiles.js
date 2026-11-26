@@ -58,9 +58,14 @@ var TILE_BUILD = {
   },
   calendar: function () { return faceTile('calendar', calendarFace(), CFG.calView === 'month' ? 3 : 2); },
 
+  // Погода: слева крупно температура, ниже город и описание; справа крупно иконка и «ощущается». Прогноз во всю ширину.
   weather: function () {
-    var el = tileBox('weather'), c = makeCell({ cap: true }), days = mk('<div class="wdays"></div>'), key = '';
-    c.el.appendChild(days); el.appendChild(c.el);
+    var el = tileBox('weather'), key = '';
+    var c = mk('<div class="cb wx"><div class="wtop"><div class="wl"><span class="num v"></span><div class="wtx"><b class="wcity"></b><span class="wdesc"></span></div></div>' +
+      '<div class="wr"><span class="wi"></span><span class="wfeel"></span></div></div><div class="wdays"></div></div>');
+    var q = function (x) { return $(x, c); }, tv = q('.v'), city = q('.wcity'), dsc = q('.wdesc'), ic = q('.wi'), feel = q('.wfeel'), days = q('.wdays');
+    var put = function (n, html) { if (n.__h !== html) { n.__h = html; n.innerHTML = html; } };
+    el.appendChild(c);
     function t(v) { return String(Math.round(v)).replace('-', '−') + '°'; }
     function dayHtml(d, i) {
       var p = d.date.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
@@ -72,12 +77,9 @@ var TILE_BUILD = {
       update: function (s) {
         var w = s.weather; el.hidden = !w; if (!w) return;
         var list = w.days || [], now = list[0], desc = w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) : '';
-        c.name(esc(w.city)); c.aux('ощущается ' + t(w.feels));
-        c.big(t(w.temp)); c.side(null);
-        var k = CFG.wxDays && list.length > 1 ? JSON.stringify(list) : '', text = desc + (now ? (desc ? ', ' : '') + 'от ' + t(now.min) + ' до ' + t(now.max) : '');
-        // с прогнозом описание встаёт рядом с иконкой: внизу место занято днями
-        c.note((wide(el) && k ? '<span class="wdesc">' + esc(text) + '</span>' : '') + '<span class="wi">' + (ICONS[w.icon] || '') + '</span>');
-        c.cap(wide(el) && k ? '' : text);
+        var k = CFG.wxDays && list.length > 1 && wide(el) ? JSON.stringify(list) : '', text = desc + (now && wide(el) ? (desc ? ', ' : '') + 'от ' + t(now.min) + ' до ' + t(now.max) : ''); // в узкой только описание
+        put(tv, t(w.temp)); put(city, esc(w.city)); put(dsc, esc(text)); put(ic, ICONS[w.icon] || '');
+        put(feel, (wide(el) ? 'ощущается ' : 'ощ. ') + t(w.feels)); feel.title = 'Ощущается ' + t(w.feels);
         if (k !== key) { key = k; days.innerHTML = k ? list.map(dayHtml).join('') : ''; }
         el.classList.toggle('has-days', !!key);
       }

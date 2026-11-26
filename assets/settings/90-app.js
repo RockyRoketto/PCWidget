@@ -48,7 +48,7 @@ document.addEventListener('mousedown', function (e) {
   if (e.button === 0 && !e.target.closest('[data-nodrag]')) post('drag');
 });
 document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') post('close');
+  if (e.key === 'Escape') { if (!(settings && settings.closePop())) post('close'); }
   else if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur();
 });
 document.addEventListener('contextmenu', function (e) { e.preventDefault(); });

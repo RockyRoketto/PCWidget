@@ -27,11 +27,11 @@ body.theme-fill.tone-light {
 .theme-fill .fill i.lvl { left: 0; right: 0; bottom: 0; transition: height .5s; }
 .theme-fill .fill i.run { left: 0; top: 0; bottom: 0; transition: width .5s; }
 /* цифры крупные и внизу */
-.theme-fill .cb > .md { margin-block: auto 0; }
+.theme-fill .cb > .md, .theme-fill .cb.has-vz > .md { margin-block: auto 0; }
 .theme-fill .md .v { font-size: 44px; line-height: 44px; letter-spacing: -.03em; }
 .theme-fill .md .v2 { font-size: 26px; line-height: 44px; }
 .theme-fill .md .v small, .theme-fill .md .v2 small { font-size: 14px; color: inherit; opacity: .78; }
-.theme-fill .md .c2 { color: inherit; opacity: .82; }
+.theme-fill .md .c2 { color: inherit; opacity: .82; margin-bottom: 8px; }
 .theme-fill .cb.sec .md .v { font-size: 34px; }
 .theme-fill .cr .v small { color: inherit; opacity: .78; }
 .theme-fill .ln { padding: 0 8px; margin: 0 -4px; border-radius: 7px; background: var(--track); overflow: hidden; }

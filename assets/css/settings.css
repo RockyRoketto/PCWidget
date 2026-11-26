@@ -73,7 +73,7 @@
 /* Плитки: каждая — своя карточка, две колонки. Щелчок по карточке раскрывает цвет и параметры во всю ширину. */
 .tgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
 .trow { border-radius: 8px; background: var(--ctl); border: 1px solid transparent; min-width: 0; }
-.trow.open { grid-column: 1 / -1; border-color: var(--edge); }
+.trow.open { border-color: var(--accent); }
 .trow .m { display: flex; align-items: center; gap: 6px; height: 34px; padding-right: 7px; }
 .trow .tb { flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: 7px; padding-left: 9px; text-align: left; border-radius: 8px; }
 .trow .tb:hover .nm { color: var(--text); }
@@ -85,9 +85,14 @@
 .trow.tinted .cdot { background: var(--tint); }
 .trow .sw { transform: scale(.85); transform-origin: right center; }
 .trow.off .nm, .trow.off .tb > .i, .trow.off .cdot { opacity: .45; }
-.opts { display: none; padding: 0 10px 10px; }
-.open .opts { display: grid; gap: 8px; }
-.opts > .lab:first-child { margin: 2px 0 -2px; }
+/* окно плитки поверх списка */
+.sbody { position: relative; }
+.tpop { position: absolute; left: 18px; right: 18px; z-index: 5; display: grid; gap: 8px; padding: 10px; border-radius: 10px;
+  background: var(--pop); border: 1px solid var(--edge); box-shadow: 0 10px 28px rgba(0, 0, 0, .38); }
+.tpop .tints.sm { gap: 6px; }
+.tpop .tint.sm { width: 20px; height: 20px; }
+.tpop .two { gap: 16px; }
+.tpop .hint { margin: -4px 0 0; }
 .how { margin: 8px 0 8px; }
 .lnk { color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
 .lnk:hover { color: var(--text); }

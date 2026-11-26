@@ -14,7 +14,8 @@
 .md { display: flex; align-items: baseline; gap: 6px; margin-block: auto; white-space: nowrap; min-width: 0; }
 .md .v { font-size: 34px; line-height: 36px; font-weight: var(--vw); letter-spacing: -.02em; flex: none; }
 .md .v2 { font-size: 22px; line-height: 36px; font-weight: var(--vw2); margin-left: auto; }
-.md .c2 { margin-left: auto; font-size: 11px; line-height: 14px; color: var(--dim); text-align: right; min-width: 0; overflow: hidden; }
+/* подпись справа: нижняя строка на линии главного числа */
+.md .c2 { margin-left: auto; align-self: flex-end; margin-bottom: 6px; font-size: 11px; line-height: 14px; color: var(--dim); text-align: right; min-width: 0; overflow: hidden; }
 .md .c2:empty { display: none; }
 .md .v2:not([hidden]) + .c2 { margin-left: 0; }
 .cp { color: var(--dim); font-size: 11px; line-height: 14px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -54,21 +55,28 @@
 .dot.wait { background: var(--warm); }
 .nm small { font-weight: 400; color: var(--dim); }
 
-/* погода: иконка вместо второго числа, прогноз во всю ширину */
-.wi { display: block; width: 34px; height: 34px; color: var(--text); }
+/* погода: температура и иконка самые крупные, город и описание под температурой, «ощущается» под иконкой */
+.cb.wx { gap: 8px; }
+.wtop { display: flex; justify-content: space-between; gap: 10px; flex: 1; min-height: 0; }
+.wl { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+.wx .wl .v { font-size: 48px; line-height: 44px; font-weight: var(--vw); letter-spacing: -.03em; }
+.wtx { display: grid; gap: 1px; min-width: 0; white-space: nowrap; }
+.wcity { font-weight: 600; color: var(--lab); overflow: hidden; text-overflow: ellipsis; }
+.wtx .wdesc { font-size: 11px; line-height: 14px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
+.wr { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; flex: none; }
+.wi { display: block; width: 48px; height: 48px; color: var(--text); }
 .wi svg { width: 100%; height: 100%; display: block; }
+.wfeel { font-size: 11px; line-height: 14px; color: var(--dim); white-space: nowrap; }
 .wdays { display: none; }
-.tile.w2.has-days .wdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: auto; }
-.md .c2:has(.wi) { display: flex; align-items: center; gap: 10px; align-self: center; }
-.wdesc { max-width: 150px; white-space: normal; text-align: right; }
-.wday { display: grid; justify-items: center; gap: 1px; padding: 3px 0; border-radius: 7px; }
+.tile.w2.has-days .wdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; flex: none; }
+.wday { display: grid; justify-items: center; gap: 0; padding: 2px 0; border-radius: 7px; }
 .wday.now { background: var(--ctl); }
-.wday .dn { color: var(--dim); font-size: 11px; text-transform: capitalize; }
+.wday .dn { color: var(--dim); font-size: 11px; line-height: 13px; text-transform: capitalize; }
 .wday.now .dn { color: var(--text); font-weight: 600; }
-.wday .di { width: 18px; height: 18px; }
+.wday .di { width: 16px; height: 16px; }
 .wday .di svg { width: 100%; height: 100%; display: block; }
-.wday b { font: var(--vw2) 14px/18px var(--vf); }
-.wday .dl { color: var(--dim); font-size: 11px; line-height: 13px; }
+.wday b { font: var(--vw2) 14px/16px var(--vf); }
+.wday .dl { color: var(--dim); font-size: 11px; line-height: 12px; }
 
 .empty { padding: 12px; font-size: 12px; color: var(--dim); text-align: center; width: 160px; }
 /* часы цифрами с секундами или AM/PM не влезают в 34px */
