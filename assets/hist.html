@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>hist</title>
+<style>/*{{CSS}}*/</style>
+</head>
+<body class="theme-sheet tone-dark">
+<div id="hcard"></div>
+<script>
+(function () {
+  var post = function (m) { window.chrome.webview.postMessage(m); };
+  var box = document.getElementById('hcard'), over = false;
+  // Go присылает {html, cls, vars, scale} от страницы виджета (95-hover.js) или null; страница сообщает размер.
+  window.__show = function (o) {
+    if (!o) { box.innerHTML = ''; over = false; return; }
+    document.body.className = o.cls;
+    Object.keys(o.vars || {}).forEach(function (k) {
+      if (o.vars[k]) document.body.style.setProperty(k, o.vars[k]); else document.body.style.removeProperty(k);
+    });
+    box.style.zoom = o.scale / 100;
+    box.innerHTML = o.html;
+    var r = box.getBoundingClientRect();
+    post('size:' + Math.ceil(r.width) + ',' + Math.ceil(r.height));
+  };
+  // Переключатель периода; мышь над карточкой держит её открытой.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-r]');
+    if (b) post('range:' + b.getAttribute('data-r'));
+  });
+  var setOver = function (v) { if (over !== v) { over = v; post('over:' + (v ? 1 : 0)); } };
+  document.addEventListener('mouseover', function () { setOver(true); });
+  document.addEventListener('mouseout', function (e) { if (!e.relatedTarget) setOver(false); });
+  document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  post('ready');
+})();
+</script>
+</body>
+</html>

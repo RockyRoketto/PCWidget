@@ -1,0 +1,55 @@
+/* Карточка подробного графика (assets/hist.html, разметку собирает 95-hover.js). Материал — как у плиток темы. */
+#hcard { display: inline-block; background: var(--pop); border-radius: max(var(--R), 10px); overflow: hidden; }
+#hcard:empty { display: none; }
+.theme-sheet #hcard { border-radius: 0; }
+.hc { width: 288px; padding: 10px; display: grid; gap: 8px; }
+.hc-hd { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; }
+.hc-nm { font-size: 13px; font-weight: 600; color: var(--lab); }
+.hc-seg { display: flex; gap: 2px; padding: 2px; background: var(--ctl); border-radius: 7px; }
+.hc-seg button { padding: 2px 9px; border-radius: 5px; font-size: 11px; color: var(--dim); }
+.hc-seg button.on { background: var(--track); color: var(--text); font-weight: 600; }
+.hc-s { background: var(--tile2); border-radius: var(--r); padding: 8px 10px 7px; box-shadow: inset 0 0 0 1px var(--rim, transparent); }
+.hc-tt { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+.hc-n { color: var(--lab); font-size: 12px; }
+.hc-v { font-size: 18px; line-height: 20px; }
+.hc-ch { position: relative; height: 64px; }
+.hc-g { display: block; width: 100%; height: 100%; overflow: visible; }
+.hc-g path { vector-effect: non-scaling-stroke; }
+.hc-g .gl { stroke: var(--hair); stroke-width: 1; }
+.hc-g .ln { fill: none; stroke: var(--a); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.hc-g .ar { fill: var(--a); opacity: .16; }
+.hc-g .cl { fill: var(--a); }
+.hc-g .warm { fill: var(--warm); } .hc-g .hot { fill: var(--hot); }
+.hc-g .thr { stroke: var(--hot); stroke-width: 1; stroke-dasharray: 4 3; }
+.hc-y, .hc-tl { position: absolute; font-size: 10px; line-height: 12px; color: var(--dim); pointer-events: none; }
+.hc-y { left: 0; top: -1px; }
+.hc-tl { right: 0; transform: translateY(-100%); color: var(--hot); padding-bottom: 1px; }
+.hc-x { display: flex; justify-content: space-between; font-size: 10px; line-height: 14px; color: var(--dim); margin-top: 2px; }
+.hc-st { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 4px; margin-top: 4px; padding-top: 5px; border-top: 1px solid var(--hair); font-size: 11px; color: var(--dim); }
+.hc-st span { white-space: nowrap; } .hc-st span:nth-child(2) { text-align: center; } .hc-st span:nth-child(3) { text-align: right; }
+.hc-st b { font-size: 13px; font-weight: 600; color: var(--text); margin-left: 2px; }
+
+/* Прибор: панель с окошками, столбики узким шрифтом, сетка — деления */
+.theme-gauge #hcard { border-radius: var(--R); box-shadow: inset 0 0 0 1px var(--edge); background: var(--sheet); }
+.theme-gauge .hc-s { border-radius: var(--r); }
+.theme-gauge .hc-g .gl { stroke-dasharray: 1 4; }
+.theme-gauge .hc-nm, .theme-gauge .hc-n { text-transform: uppercase; letter-spacing: .05em; font-size: 11px; }
+.theme-gauge .hc-v, .theme-gauge .hc-st b { font-stretch: 87%; }
+/* ЖК-табло: тёмная рамка и стекло, сегменты */
+.theme-lcd #hcard { background: var(--sheet); border-radius: var(--R); }
+.theme-lcd .hc-nm { color: #e9ece4; text-transform: uppercase; letter-spacing: .08em; }
+.theme-lcd .hc-seg { background: rgba(255, 255, 255, .08); }
+.theme-lcd .hc-seg button { color: rgba(233, 236, 228, .6); }
+.theme-lcd .hc-seg button.on { background: rgba(255, 255, 255, .16); color: #e9ece4; }
+.theme-lcd .hc-s { box-shadow: inset 0 1px 3px var(--glass-in); border-radius: var(--r2); }
+.theme-lcd .hc-n { text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+.theme-lcd .hc-g rect.on { fill: var(--a); }
+.theme-lcd .hc-g rect.off { fill: var(--a); opacity: var(--ghost); }
+.theme-lcd .hc-g rect.on.warm { fill: var(--warm); } .theme-lcd .hc-g rect.on.hot { fill: var(--hot); }
+.theme-lcd .hc-g .gl { stroke: none; }
+.theme-lcd .hc-v { font-size: 20px; }
+/* Заливка: карточки с крупным радиусом, рельеф градиентом */
+.theme-fill #hcard { border-radius: var(--r); }
+.theme-fill .hc-s { border-radius: var(--r2); }
+.theme-fill .hc-g .ar { opacity: .9; }
+.theme-fill .hc-v { font-weight: 600; font-size: 20px; }
