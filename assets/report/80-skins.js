@@ -33,6 +33,10 @@ var SKINS = {
   bp: {
     dark: { bg: '#1b4f8f', tile: 'rgba(255,255,255,.04)', rim: 'rgba(214,231,251,.45)', grid: 'rgba(255,255,255,.08)', text: '#f2f7ff', dim: 'rgba(214,231,251,.7)', track: 'rgba(214,231,251,.22)', ok: '#b6f0cd', warm: '#ffd36b', hot: '#ff7a6b' },
     light: { bg: '#f7f9fc', tile: 'rgba(42,95,168,.03)', rim: 'rgba(42,95,168,.45)', grid: 'rgba(42,95,168,.08)', text: '#143a6b', dim: 'rgba(20,58,107,.66)', track: 'rgba(42,95,168,.2)', ok: '#17804a', warm: '#a85f00', hot: '#d0281d' }
+  },
+  pixel: {
+    dark: { bg: '#120e1c', tile: '#241c35', px: '#45365f', hl: '#5a4880', text: '#f6eef6', dim: '#a898bd', track: '#33294a', ok: '#5fe3bf', warm: '#ffd36e', hot: '#ff6f9f' },
+    light: { bg: '#e8d5e0', tile: '#fff6ef', px: '#d2b4c8', hl: '#ffffff', text: '#5b4a5f', dim: '#9a8499', track: '#f0e0e6', ok: '#5fc4ad', warm: '#f0b85a', hot: '#f2799b' }
   }
 };
 
@@ -51,8 +55,8 @@ function skinFor(ui, accent) {
   var k = Object.assign({ id: id, light: tone === 'light' }, tone === 'light' ? ON_LIGHT : ON_DARK, SKINS[id][tone]);
   k.head = k.head || k.text; k.mute = k.mute || k.dim;
   k.accent = themeVars()['--accent'];
-  k.font = id === 'gauge' ? GAUGE : id === 'lcd' || id === 'osc' || id === 'bp' ? MONO : SANS;
-  k.R = id === 'gauge' || id === 'lcd' || id === 'osc' ? 4 : id === 'bp' ? 0 : id === 'fill' ? 16 : 10;
+  k.font = id === 'gauge' ? GAUGE : id === 'lcd' || id === 'osc' || id === 'bp' || id === 'pixel' ? MONO : SANS;
+  k.R = id === 'gauge' || id === 'lcd' || id === 'osc' ? 4 : id === 'bp' || id === 'pixel' ? 0 : id === 'fill' ? 16 : 10;
   if (id === 'fill') k.stops = palStops().map(function (c) { return k.mix ? mixTo(c, 255, k.mix) : c; });
   return k;
 }
@@ -68,6 +72,7 @@ function palAt(k, x) {
 
 // Ячейка темы. fillFrom — с какой высоты «Заливка» красит карточку (доля), без него карточка нейтральная.
 function cell(g, k, x, y, w, h, fillFrom) {
+  if (k.id === 'pixel') return pxCell(g, k, x, y, w, h);
   box(g, x, y, w, h, k.R, k.tile);
   if (k.rim) { g.strokeStyle = k.rim; g.lineWidth = 1; g.beginPath(); g.roundRect(x + .5, y + .5, w - 1, h - 1, k.R); g.stroke(); }
   if (k.id === 'fill' && fillFrom != null) {
@@ -94,6 +99,27 @@ function cell(g, k, x, y, w, h, fillFrom) {
   }
 }
 
+// Пиксели: рамка в «пиксель» 2px со срезанными углами, верхняя кромка — блик.
+function pxCell(g, k, x, y, w, h) {
+  var p = 2;
+  g.fillStyle = k.tile; g.fillRect(x + p, y + p, w - 2 * p, h - 2 * p);
+  g.fillStyle = k.px;
+  g.fillRect(x, y + p, p, h - 2 * p); g.fillRect(x + w - p, y + p, p, h - 2 * p); g.fillRect(x + p, y + h - p, w - 2 * p, p);
+  [[x + p, y + p], [x + w - 2 * p, y + p], [x + p, y + h - 2 * p], [x + w - 2 * p, y + h - 2 * p]].forEach(function (c) { g.fillRect(c[0], c[1], p, p); });
+  g.fillStyle = k.hl; g.fillRect(x + p, y, w - 2 * p, p);
+}
+// Пиксели: знаки шрифтом 3×5 (PX5 из 21b-pixel.js), пиксель — em/7.
+function pxText(g, s, x, base, em, color) {
+  var u = Math.max(1, Math.round(em / 7)), at = x;
+  g.fillStyle = color;
+  String(s).split('').forEach(function (ch) {
+    var rows = PX5[ch];
+    if (!rows) { at += u * 2; return; }
+    rows.forEach(function (r, ry) { for (var i = 0; i < r.length; i++) if (r[i] === '1') g.fillRect(at + i * u, base - (5 - ry) * u, u, u); });
+    at += (rows[0].length + 1) * u;
+  });
+}
+
 function text(g, k, s, x, y, size, color, opt) {
   opt = opt || {};
   g.font = (opt.weight || 400) + ' ' + size + 'px ' + (opt.font || k.font);
@@ -102,13 +128,13 @@ function text(g, k, s, x, y, size, color, opt) {
 }
 // Заголовок: на «ЖК-табло» и «Осциллографе» заглавными вразрядку.
 function title(g, k, s, x, y, size, color, opt) {
-  var lcd = k.id === 'lcd' || k.id === 'osc';
+  var lcd = k.id === 'lcd' || k.id === 'osc' || k.id === 'pixel';
   if (lcd) g.letterSpacing = '.8px';
   text(g, k, lcd || k.id === 'gauge' ? s.toUpperCase() : s, x, y, lcd || k.id === 'gauge' ? size - 1 : size, color, opt);
   g.letterSpacing = '0px';
 }
 // Мелкие подписи: моноширинный в ячейку не влезает, у «ЖК-табло» они узким шрифтом.
-function small(k) { return k.id === 'lcd' || k.id === 'osc' || k.id === 'bp' ? GAUGE : k.font; }
+function small(k) { return k.id === 'lcd' || k.id === 'osc' || k.id === 'bp' || k.id === 'pixel' ? GAUGE : k.font; }
 
 // Семисегментная цифра: сегменты a b c d e f g по порядку, несветящиеся видны бледно.
 var SEG7 = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abfgcd' };
@@ -137,6 +163,7 @@ function segments(g, k, s, x, base, em, color) {
 // Главное число ячейки в манере темы.
 function number(g, k, s, x, y, color, max) {
   if (k.id === 'lcd') segments(g, k, s, x, y + 1, 26, color);
+  else if (k.id === 'pixel') pxText(g, s, x, y, 26, color);
   else text(g, k, s, x, y, k.id === 'fill' ? 24 : 22, color, { weight: k.id === 'fill' ? 600 : 400, max: max });
 }
 
@@ -144,7 +171,7 @@ function number(g, k, s, x, y, color, max) {
 function bar(g, k, parts, x, y, w, h) {
   var total = parts.reduce(function (a, p) { return a + p[0]; }, 0) || 1;
   var shown = parts.filter(function (p) { return p[0] > 0; });
-  if (k.id === 'gauge' || k.id === 'lcd' || k.id === 'osc') {
+  if (k.id === 'gauge' || k.id === 'lcd' || k.id === 'osc' || k.id === 'pixel') {
     var n = Math.floor((w + 2) / 5), sum = 0, j = 0;
     for (var i = 0; i < n; i++) {
       var pos = (i + .5) / n * total;

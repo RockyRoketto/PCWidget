@@ -15,7 +15,7 @@ function digitalFace() {
       var d = new Date(), t = clockText(d);
       if (t === last) return;
       last = t;
-      $('.clk', el).textContent = t;
+      if (CFG.theme === 'pixel') $('.clk', el).innerHTML = segs(t); else $('.clk', el).textContent = t;
       $('.cap', el).textContent = ruDate(d, { weekday: 'short', day: 'numeric', month: 'long' });
     }
   };

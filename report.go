@@ -24,7 +24,7 @@ func buildReportPage() (string, error) {
 		return "", err
 	}
 	js := ""
-	for _, g := range []string{"assets/js/00-core.js", "assets/report/*.js"} {
+	for _, g := range []string{"assets/js/00-core.js", "assets/js/21b-pixel.js", "assets/report/*.js"} {
 		part, err := concatGlob(g)
 		if err != nil {
 			return "", err

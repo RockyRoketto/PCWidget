@@ -2,7 +2,8 @@
 // Части плиток. Анатомия одна на всё: шапка (название и подробность), главное число, индикатор внизу.
 // Индикатор у каждой темы свой, место у всех одно (столбики по потокам общие, форму правят темы):
 //   Лист — кривая (graph, net) или полоса (level);  Прибор — деления или столбики;  Заливка — фон ячейки;
-//   Осциллограф — луч на сетке или сегменты;  Чертёж — линия с выноской пика или размерная линия (21-viz2.js).
+//   Осциллограф — луч на сетке или сегменты;  Чертёж — линия с выноской пика или размерная линия (21-viz2.js);
+//   Пиксели — столбики из блоков (21b-pixel.js) или сегменты.
 
 // kind: graph (история 0..100), net (история скоростей), level (заполненность), run (тонкая полоса в строке),
 // cores (загрузка по потокам), map (карта памяти, 24-memmap.js).
@@ -14,6 +15,7 @@ function makeViz(kind) {
   if (t === 'gauge') return kind === 'net' ? histViz() : tickViz(kind === 'run');
   if (t === 'lcd') return kind === 'graph' || kind === 'net' ? histViz() : tickViz(kind === 'run');
   if (t === 'osc') return kind === 'graph' || kind === 'net' ? lineViz() : tickViz(kind === 'run');
+  if (t === 'pixel') return kind === 'graph' || kind === 'net' ? pxHistViz() : tickViz(kind === 'run');
   if (t === 'bp') return kind === 'graph' || kind === 'net' ? bpGraphViz(kind) : bpDimViz(kind === 'run');
   if (kind === 'graph' || kind === 'net') return lineViz();
   var el = mk('<div class="bar' + (kind === 'run' ? ' thin' : '') + '"><i></i></div>'), i = el.firstChild;
@@ -193,5 +195,6 @@ Object.keys(SEG7).forEach(function (ch) {
 });
 function segs(v) {
   var h = String(v);
+  if (CFG.theme === 'pixel') return pxDigits(h);
   return CFG.theme !== 'lcd' ? h : h.replace(/(<[^>]*>|&[a-z]+;)|([0-9−-])/g, function (m, tag, ch) { return tag || SEG7_HTML[ch]; });
 }

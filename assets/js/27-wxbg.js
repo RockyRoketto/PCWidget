@@ -3,7 +3,7 @@
 // Рисует <canvas> под содержимым плитки. Цвета берутся из темы: частицы — цвет текста (или --wx-p),
 // солнце — --warm (или --wx-sun), вспышка — --wx-fl, заливка — цвет карточки (--wx-f или --solid).
 // Как рисовать, задаёт тема в WX_STYLE: kind — набор форм (28-wxdraw.js — soft, 29-wxstyles.js — tick и fill,
-// 29b-wxlines.js — phos и line), matrix — вывести кадр точками матрицы (ЖК-табло, пиксельные темы), fps — частота кадров,
+// 29b-wxlines.js — phos и line, 29c-wxpixel.js — pix), matrix — вывести кадр точками матрицы (ЖК-табло, Пиксели), fps — частота кадров,
 // persist — доля, на которую гаснет прошлый кадр (след у движущегося, как на экране осциллографа).
 // Стоит, когда окно скрыто, идёт игра, плитка не видна, в Windows «уменьшить движение» или выключено (CFG.wxAnim).
 // Координаты внутри — в «единицах макета»: 2 единицы на CSS-пиксель, плитка около 420×300.
@@ -14,7 +14,11 @@ var WX_STYLE = {
   fill: { kind: 'fill' },                                    // заливка: залитые формы, уровень воды, сугроб
   lcd: { kind: 'soft', fps: 12, matrix: { cell: 7, gap: 2, lo: .06, hi: .5, ghost: true } }, // точки табло
   osc: { kind: 'phos', persist: .3 },                        // луч на экране: послесвечение вместо очистки кадра
-  bp: { kind: 'line' }                                       // чертёж: только контуры
+  bp: { kind: 'line' },                                      // чертёж: только контуры
+  // пиксели: крупные цветные клетки; use — какие цвета палитры (k.pal: текст, облака, дождь, солнце) берёт клетка
+  // в каждой погоде, иначе на краях форм проскакивают смешанные цвета
+  pixel: { kind: 'pix', fps: 10, matrix: { cell: 10, gap: 2, lo: .1, hi: .6, color: true,
+    use: { sun: [0, 3], cloud: [0, 1, 3], fog: [1], rain: [1, 2, 3], storm: [1, 2, 3], snow: [0, 1] } } }
 };
 var WX_KINDS = {};   // наборы форм: { kit(k), sky, night, cloud, fog, rain, snow } — чего нет, берётся из soft
 var WX_LIST = [], wxRaf = 0;
@@ -66,7 +70,10 @@ function wxKit(o) {
     base: dark ? .75 : .5, cla: dark ? .26 : .32, dka: dark ? .4 : .42, sa: dark ? .34 : .5
   };
   k.dot = wxDot(p);
-  if (style.matrix) { // табло одноцветное; тонкое не попадёт в точку — толще
+  if (style.matrix && style.matrix.color) { // цветная матрица: свои цвета облаков и дождя, клетка берёт ближайший из палитры
+    k.cl = wxRgb(host, 'var(--wx-cl, var(--dim))'); k.rain = wxRgb(host, 'var(--wx-rain, var(--a))');
+    k.pal = [p, k.cl, k.rain, k.sun].map(function (c) { return c.split(',').map(Number); });
+  } else if (style.matrix) { // табло одноцветное; тонкое не попадёт в точку — толще
     k.sun = p; k.fl = p; k.cla *= .6; k.dka *= .45; k.thick = 3;
     // Яркость точек — от контраста с фоном плитки: одинаково мягко и на светлом табло, и на тёмном с подсветкой
     // (светлые точки на тёмном при той же прозрачности режут глаз).
@@ -125,17 +132,36 @@ function wxFit(o) {
 
 // Кадр точками матрицы: сцену уменьшаем до сетки, клетка светится, если в ней набралось достаточно цвета.
 // Порог у соседних клеток разный (упорядоченный дизеринг 4×4): полупрозрачное — редкими точками, плотное — сплошь.
-// Несветящиеся точки видны бледно (ghost), как сегменты табло.
+// Несветящиеся точки видны бледно (ghost), как сегменты табло. Цветная (color) — клетка цвета ближайшего из палитры k.pal.
 var WX_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 function wxMatrix(o) {
   var m = o.kit.style.matrix, g = o.g, c = m.cell, s = c - m.gap, cols = o.cols, rows = o.rows;
   o.smg.clearRect(0, 0, cols, rows); o.smg.imageSmoothingQuality = 'high'; o.smg.drawImage(o.off, 0, 0, cols, rows);
   var d = o.smg.getImageData(0, 0, cols, rows).data, x, y;
   g.clearRect(0, 0, o.W, o.H);
+  if (m.color) return wxMatrixColor(o, d);
   if (m.ghost) { g.fillStyle = 'rgba(' + o.kit.p + ',' + o.kit.mGhost + ')'; for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) g.fillRect(x * c, y * c, s, s); }
   g.fillStyle = 'rgba(' + o.kit.p + ',' + o.kit.mOn + ')';
   for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) {
     var th = m.lo + (WX_BAYER[(x & 3) + ((y & 3) << 2)] + .5) / 16 * (m.hi - m.lo);
     if (d[(y * cols + x) * 4 + 3] > th * 255) g.fillRect(x * c, y * c, s, s);
   }
+}
+function wxMatrixColor(o, d) {
+  var m = o.kit.style.matrix, use = (m.use && m.use[o.st]) || [0], pal = use.map(function (j) { return o.kit.pal[j]; }), g = o.g, c = m.cell, s = c - m.gap, cols = o.cols, rows = o.rows, by = pal.map(function () { return []; });
+  for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) {
+    var i = (y * cols + x) * 4, th = m.lo + (WX_BAYER[(x & 3) + ((y & 3) << 2)] + .5) / 16 * (m.hi - m.lo);
+    if (d[i + 3] <= th * 255) continue;
+    var best = 0, bd = 1e9;
+    for (var j = 0; j < pal.length; j++) {
+      var dr = d[i] - pal[j][0], dg = d[i + 1] - pal[j][1], db = d[i + 2] - pal[j][2], e = dr * dr + dg * dg + db * db;
+      if (e < bd) { bd = e; best = j; }
+    }
+    by[best].push(x, y);
+  }
+  by.forEach(function (a, j) {
+    if (!a.length) return;
+    g.fillStyle = 'rgb(' + pal[j].join(',') + ')';
+    for (var q = 0; q < a.length; q += 2) g.fillRect(a[q] * c, a[q + 1] * c, s, s);
+  });
 }

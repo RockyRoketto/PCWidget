@@ -44,7 +44,7 @@ function chart(g, k, r, x, y, w, h) {
     g.beginPath(); g.moveTo(x, py(ms) + .5); g.lineTo(x + w, py(ms) + .5); g.stroke(); g.restore();
     text(g, k, num(ms, 0), x + w, py(ms) - 3, 10, k.dim, { align: 'right', font: small(k) });
   });
-  if (k.id === 'lcd') { // столбики из сегментов: горят до среднего, до худшего — бледно
+  if (k.id === 'lcd' || k.id === 'pixel') { // столбики из сегментов: горят до среднего, до худшего — бледно; у «Пикселей» цвет по высоте
     var cols = Math.floor(w / 6);
     for (var c = 0; c < cols; c++) {
       var a = Math.floor(c * n / cols), b = Math.max(a + 1, Math.floor((c + 1) * n / cols));
@@ -53,7 +53,7 @@ function chart(g, k, r, x, y, w, h) {
         var level = (q + 2) / h * top;
         if (level > Math.max(bad, avg, top / h * 4)) break;
         g.globalAlpha = level <= Math.max(avg, top / h * 4) || level > 50 ? 1 : .3; // фриз горит целиком выше черты
-        g.fillStyle = level > 50 ? k.hot : k.accent;
+        g.fillStyle = level > 50 ? k.hot : k.id === 'pixel' ? (level > 33.3 ? k.warm : k.ok) : k.accent;
         g.fillRect(x + c * 6, y + h - q - 3, 4, 3);
       }
     }
@@ -115,7 +115,7 @@ function dress(k) {
   s.setProperty('--text', k.head);
   s.setProperty('--mute', k.mute);
   s.setProperty('--btn', k.id === 'lcd' || k.id === 'osc' || !k.light ? 'rgba(255,255,255,.1)' : 'rgba(20,32,43,.09)');
-  s.setProperty('--r', (k.id === 'fill' ? 11 : k.id === 'sheet' ? 7 : k.id === 'bp' ? 0 : 4) + 'px');
+  s.setProperty('--r', (k.id === 'fill' ? 11 : k.id === 'sheet' ? 7 : k.id === 'bp' || k.id === 'pixel' ? 0 : 4) + 'px');
   s.setProperty('--font', k.font);
   // тёмный акцент на тёмной рамке не виден: у светлого «ЖК-табло» кнопка цвета стекла
   var a = k.id === 'lcd' && k.light ? k.tile : k.accent;

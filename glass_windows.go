@@ -30,7 +30,7 @@ func setStyle(style string) { app.style = style; setStyleFor(app.hwnd, style) }
 // parseStyle разбирает «тема:светлость»; неизвестная тема = Лист, светлость по умолчанию тёмная.
 func parseStyle(style string) (theme string, light bool) {
 	theme, tone, _ := strings.Cut(style, ":")
-	if theme != "gauge" && theme != "fill" && theme != "lcd" && theme != "osc" && theme != "bp" {
+	if theme != "gauge" && theme != "fill" && theme != "lcd" && theme != "osc" && theme != "bp" && theme != "pixel" {
 		theme = "sheet"
 	}
 	return theme, tone == "light"

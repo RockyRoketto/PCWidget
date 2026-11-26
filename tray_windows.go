@@ -34,15 +34,15 @@ const (
 	cmdGame      = 8
 	cmdExit      = 9
 	cmdLastGame  = 40
-	cmdTheme     = 10 // 10..15
+	cmdTheme     = 10 // 10..16
 	cmdMode      = 20 // 20..24
 	cmdProfile   = 30 // 30..35
 )
 
 // Порядок совпадает с ключами в странице (assets/js/00-core.js).
 var (
-	themeKeys = []string{"sheet", "gauge", "fill", "lcd", "osc", "bp"}
-	themeText = []string{"Лист", "Прибор", "Заливка", "ЖК-табло", "Осциллограф", "Чертёж"}
+	themeKeys = []string{"sheet", "gauge", "fill", "lcd", "osc", "bp", "pixel"}
+	themeText = []string{"Лист", "Прибор", "Заливка", "ЖК-табло", "Осциллограф", "Чертёж", "Пиксели"}
 	modeKeys  = []string{"full", "wide", "column", "strip", "square"}
 	modeText  = []string{"Панель", "Широкая", "Колонка", "Полоска", "Квадрат"}
 )

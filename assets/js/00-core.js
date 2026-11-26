@@ -9,7 +9,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
 // Темы с одной раскладкой: меняется материал и индикатор (кривая и полоса, деления, заливка, сегменты).
-var THEMES = { sheet: 'Лист', gauge: 'Прибор', fill: 'Заливка', lcd: 'ЖК-табло', osc: 'Осциллограф', bp: 'Чертёж' };
+var THEMES = { sheet: 'Лист', gauge: 'Прибор', fill: 'Заливка', lcd: 'ЖК-табло', osc: 'Осциллограф', bp: 'Чертёж', pixel: 'Пиксели' };
 var TONES = { auto: 'Как в Windows', dark: 'Тёмная', light: 'Светлая' };
 var MODES = { full: 'Панель', wide: 'Широкая', column: 'Колонка', strip: 'Полоска', square: 'Квадрат' };
 var GRID_MODES = { full: 1, wide: 1 };
@@ -53,10 +53,11 @@ function palStops() {
 }
 function gradOf(stops) { return 'linear-gradient(155deg,' + stops[0] + ',' + stops[1] + ' 48%,' + stops[2] + ')'; }
 // Переменные страницы: плотность, акцент, градиент. Одинаково для виджета, меню и настроек.
-// У «Прибора», «ЖК-табло», «Осциллографа» и «Чертежа» свой цвет шкал, у «Заливки» акцент берётся из середины градиента.
+// У «Прибора», «ЖК-табло», «Осциллографа», «Чертежа» и «Пикселей» свой цвет шкал, у «Заливки» акцент берётся из середины градиента.
 function themeVars() {
   var a = CFG.theme === 'gauge' ? (isLight() ? '#2f5d5c' : '#e9dfc3') : CFG.theme === 'lcd' ? (isLight() ? '#1b2617' : '#dbe9bd') :
-    CFG.theme === 'osc' ? (isLight() ? '#0b8a44' : '#5dff9a') : CFG.theme === 'bp' ? (isLight() ? '#1d56a8' : '#d6e7fb') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
+    CFG.theme === 'osc' ? (isLight() ? '#0b8a44' : '#5dff9a') : CFG.theme === 'bp' ? (isLight() ? '#1d56a8' : '#d6e7fb') :
+    CFG.theme === 'pixel' ? (isLight() ? '#7fb6f0' : '#7cc6ff') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
   return { '--glass': CFG.glass / 100, '--accent': a, '--on-accent': accentOn(a), '--pal': gradOf(palStops()) };
 }
 function setThemeVars(style, density) {

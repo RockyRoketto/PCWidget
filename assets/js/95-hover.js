@@ -98,13 +98,14 @@ function hvChart(a, lo, hi, thr) {
   var lv = function (v) { return thr == null ? '' : level(v, thr); };
   var grid = [.25, .5, .75].map(function (f) { return '<path class="gl" d="M0,' + (HV_H * f) + 'H' + HV_W + '"/>'; }).join('');
   var body = '';
-  if (t === 'gauge' || t === 'lcd') {
-    var n = t === 'lcd' ? 48 : 60, st = HV_W / n, bw = t === 'lcd' ? st - 1 : st - 1.2, b = hvBucket(a, n);
+  var seg = t === 'lcd' || t === 'pixel';
+  if (t === 'gauge' || seg) {
+    var n = seg ? 48 : 60, st = HV_W / n, bw = seg ? st - 1 : st - 1.2, b = hvBucket(a, n);
     b.forEach(function (v, i) {
       var x = (i * st).toFixed(1);
-      if (t === 'lcd') { // 8 сегментов в столбике, несветящиеся видны бледно
+      if (seg) { // 8 сегментов в столбике, несветящиеся видны бледно; у «Пикселей» цвет блока по высоте
         var on = v == null ? 0 : Math.max(1, Math.round(clamp((v - lo) / (hi - lo), 0, 1) * 8)), cls = v == null ? '' : lv(v);
-        for (var s = 0; s < 8; s++) body += '<rect class="' + (s < on ? 'on ' + cls : 'off') + '" x="' + x + '" y="' + (HV_H - (s + 1) * 8 + 1) + '" width="' + bw.toFixed(1) + '" height="6.5"/>';
+        for (var s = 0; s < 8; s++) body += '<rect class="' + (s < on ? 'on ' + (t === 'pixel' ? 'b' + PX_BANDS[s] + ' ' : '') + cls : 'off') + '" x="' + x + '" y="' + (HV_H - (s + 1) * 8 + 1) + '" width="' + bw.toFixed(1) + '" height="6.5"/>';
       } else if (v != null) {
         var top = Math.min(y(v), HV_H - 1.5);
         body += '<rect class="cl ' + lv(v) + '" x="' + x + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (HV_H - top).toFixed(1) + '"/>';

@@ -141,7 +141,7 @@ function aboutRows() {
 
 var SET_BODY = {
   look: function () {
-    return label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
+    return label('Тема') + '<div class="cards c4">' + Object.keys(THEMES).map(function (k) {
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>' +
       label('Оформление') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone) +
       colorBlock() + densityBlock() +

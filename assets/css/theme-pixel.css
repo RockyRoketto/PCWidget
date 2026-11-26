@@ -1,0 +1,90 @@
+/* Тема «Пиксели»: восьмибитная игра. Цифры пиксельным шрифтом 3×5 (px5 в 21b-pixel.js), подписи мелким моноширинным
+   заглавными. Плитки — рамка в один «пиксель» (--px) со срезанными углами и бликом сверху, без скруглений, теней и размытия.
+   Графики — столбики из блоков: мятный → жёлтый → розовый по высоте; шкалы — сегменты, память розовыми сегментами.
+   Анимации шагами. Тревога: рамка мигает розовым. Тёмная — «8 бит» на сливовом, светлая — пастель, оттенки одни. */
+body.theme-pixel {
+  --R: 0; --r: 0; --r2: 0; --vw: 400; --vw2: 400; --px: 2px;
+  --font: "Cascadia Mono", Consolas, "Lucida Console", monospace; --vf: "Cascadia Mono", Consolas, monospace;
+}
+body.theme-pixel.tone-dark {
+  --text: #f6eef6; --dim: #a898bd; --lab: #f6eef6; --sheet: #120e1c; --tile: #241c35; --tile2: var(--tile);
+  --rim: #45365f; --hl: #5a4880; --hl2: rgba(90, 72, 128, .25); --track: #33294a; --hair: #45365f; --ctl: #33294a; --pop: #241c35; --edge: #45365f;
+  --blue: #7cc6ff; --mint: #5fe3bf; --yel: #ffd36e; --pink: #ff6f9f; --cloud: #6c5a8a;
+  --a: var(--blue); --ok: var(--mint); --warm: var(--yel); --hot: var(--pink);
+}
+body.theme-pixel.tone-light {
+  --text: #5b4a5f; --dim: #9a8499; --lab: #5b4a5f; --sheet: #e8d5e0; --tile: #fff6ef; --tile2: var(--tile);
+  --rim: #d2b4c8; --hl: #ffffff; --hl2: rgba(255, 255, 255, .6); --track: #f0e0e6; --hair: #d2b4c8; --ctl: #f0e0e6; --pop: #fff6ef; --edge: #d2b4c8;
+  --blue: #7fb6f0; --mint: #5fc4ad; --yel: #f0b85a; --pink: #f2799b; --cloud: #c9d3ec;
+  --a: var(--blue); --ok: var(--mint); --warm: var(--yel); --hot: var(--pink);
+}
+/* цвета сцены погоды: клетка матрицы берёт ближайший из них (27-wxbg.js) */
+body.theme-pixel { --wx-p: var(--text); --wx-sun: var(--yel); --wx-fl: var(--yel); --wx-cl: var(--cloud); --wx-rain: var(--blue); }
+
+/* рамка: срезанные углы (в угол уходит один «пиксель»), внутренний уголок дорисован, верхняя кромка — блик */
+.theme-pixel #root, .theme-pixel .cb, .theme-pixel .cr, .theme-pixel #ov, .theme-pixel #ov .in, .theme-pixel #hcard, .theme-pixel #set {
+  --c: var(--px); --c2: calc(100% - var(--px));
+  clip-path: polygon(var(--c) 0, var(--c2) 0, var(--c2) var(--c), 100% var(--c), 100% var(--c2), var(--c2) var(--c2), var(--c2) 100%,
+    var(--c) 100%, var(--c) var(--c2), 0 var(--c2), 0 var(--c), var(--c) var(--c));
+  border-radius: 0;
+}
+.theme-pixel .cb, .theme-pixel .cr, .theme-pixel #ov .in, .theme-pixel #hcard {
+  background: linear-gradient(var(--rim), var(--rim)) var(--px) var(--px) / var(--px) var(--px) no-repeat,
+    linear-gradient(var(--rim), var(--rim)) var(--c2) var(--px) / var(--px) var(--px) no-repeat,
+    linear-gradient(var(--rim), var(--rim)) var(--px) var(--c2) / var(--px) var(--px) no-repeat,
+    linear-gradient(var(--rim), var(--rim)) var(--c2) var(--c2) / var(--px) var(--px) no-repeat, var(--tile);
+  box-shadow: inset 0 var(--px) 0 0 var(--hl), inset 0 0 0 var(--px) var(--rim), inset 0 calc(var(--px) * 2) 0 0 var(--hl2);
+}
+.theme-pixel .cb > canvas.wxbg { image-rendering: pixelated; }
+.theme-pixel svg { shape-rendering: crispEdges; }
+
+/* подписи: мелкий моноширинный заглавными */
+.theme-pixel .hd .nm, .theme-pixel .cr > .n { text-transform: uppercase; letter-spacing: .06em; font-weight: 400; font-size: 11px; }
+.theme-pixel .hd .ax, .theme-pixel .md .c2, .theme-pixel .cp, .theme-pixel .cap { font-size: 11px; letter-spacing: 0; }
+.theme-pixel .num small { font-weight: 400; font-size: 11px; text-transform: uppercase; }
+.theme-pixel .md .v { letter-spacing: 0; }
+
+/* пиксельная цифра 3×5 (у двоеточия, точки и запятой ширина 1, у градуса 2); между знаками один «пиксель» */
+.px5 { display: inline-block; height: .7em; width: .42em; margin-right: .14em; vertical-align: baseline; fill: currentColor; shape-rendering: crispEdges; overflow: visible; }
+.px5.n1 { width: .14em; } .px5.n2 { width: .28em; }
+.px5:last-child { margin-right: 0; }
+/* двоеточие в часах мигает раз в секунду, шагом */
+@keyframes pxblink { 50% { opacity: 0; } }
+.theme-pixel .tile[data-m=clock] .px5.pc, .theme-pixel .clk .px5.pc { animation: pxblink 1s steps(1) infinite; }
+
+/* индикаторы: сегменты без скруглений, блоки шагом 5px */
+.theme-pixel .bar, .theme-pixel .bar i { border-radius: 0; transition: none; }
+.theme-pixel .tk { height: 12px; }
+.theme-pixel .tk.thin { height: 6px; }
+.theme-pixel .tk > b { width: 3px; opacity: 1; background: var(--text); } /* порог цветом текста: розовый занят памятью */
+.theme-pixel .tile[data-m=mem], .theme-pixel .cr[data-m=mem] { --a: var(--pink); }
+.theme-pixel .tile[data-m=mem] .is-warm, .theme-pixel .tile[data-m=mem] .is-hot, .theme-pixel .cr[data-m=mem].is-warm > *, .theme-pixel .cr[data-m=mem].is-hot > * { --a: var(--pink); }
+/* столбики истории: блоки по высоте (pxHistViz) */
+.theme-pixel .hist { height: 24px; }
+.theme-pixel .hist .t { fill: var(--track); }
+.theme-pixel .hist .m { fill: var(--mint); } .theme-pixel .hist .y { fill: var(--yel); } .theme-pixel .hist .r { fill: var(--pink); }
+.theme-pixel .graph .l { stroke-linejoin: miter; stroke-linecap: square; }
+/* столбики по потокам — стопки блоков */
+.theme-pixel .cores { -webkit-mask: repeating-linear-gradient(0deg, #000 0 3px, transparent 3px 5px); }
+.theme-pixel .cores > i, .theme-pixel .cores > i > b { border-radius: 0 !important; transition: none; }
+.theme-pixel .cores > i > b { background: var(--core, var(--mint)); }
+.theme-pixel .cores > i.w > b { background: var(--yel); } .theme-pixel .cores > i.h > b { background: var(--pink); }
+/* карта памяти — прямоугольные блоки с рамкой в пиксель */
+.theme-pixel .tmap > i { border-radius: 0; box-shadow: inset 0 0 0 var(--px) color-mix(in srgb, var(--c) 60%, var(--tile)); }
+.theme-pixel .tmap > i.other { box-shadow: inset 0 0 0 var(--px) var(--hair); }
+/* вентилятор: квадратный ободок */
+.theme-pixel .fanv .ring { box-shadow: inset 0 0 0 var(--px) var(--rim); border-radius: 0; }
+
+/* тревога: рамка мигает розовым шагами, фон плитки не меняется */
+@keyframes pxalarm { 50% { box-shadow: inset 0 var(--px) 0 0 var(--pink), inset 0 0 0 var(--px) var(--pink), inset 0 calc(var(--px) * 2) 0 0 var(--hl2); } }
+.theme-pixel .alarm { animation: pxalarm 1s steps(1) infinite; background-color: var(--tile) !important; }
+.theme-pixel .alarm .md .v, .theme-pixel .alarm.cr > .v { color: var(--pink); }
+@media (prefers-reduced-motion: reduce) {
+  .theme-pixel .alarm { animation: none; box-shadow: inset 0 0 0 var(--px) var(--pink); }
+  .theme-pixel .px5.pc { animation: none !important; }
+}
+/* загрузка: блик идёт шагами */
+.theme-pixel.loading .cb::after, .theme-pixel .loading .cb::after, .theme-pixel .loading .cr::after { animation-timing-function: steps(8); }
+/* половинка: пиксельные цифры шире обычных */
+.theme-pixel .tile:not(.w2) .wx .wl .v { font-size: 34px; }
+.theme-pixel .tile[data-h="1"]:not(.w2) > .one.lines .ln > .w { font-size: 14px; }

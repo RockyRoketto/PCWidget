@@ -86,7 +86,7 @@ func buildOverlayPage() (string, error) {
 		css += part
 	}
 	js := ""
-	for _, g := range []string{"assets/js/00-core.js", "assets/js/05-layout.js", "assets/js/22-parts.js", "assets/overlay/*.js"} {
+	for _, g := range []string{"assets/js/00-core.js", "assets/js/05-layout.js", "assets/js/21b-pixel.js", "assets/js/22-parts.js", "assets/overlay/*.js"} {
 		part, err := concatGlob(g)
 		if err != nil {
 			return "", err

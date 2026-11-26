@@ -14,6 +14,8 @@ func TestParseStyle(t *testing.T) {
 		{"lcd:light", "lcd", true},
 		{"osc:dark", "osc", false},
 		{"bp:light", "bp", true},
+		{"pixel:dark", "pixel", false},
+		{"pixel:light", "pixel", true},
 		{"glass", "sheet", false}, // старая тема
 		{"", "sheet", false},
 	}
