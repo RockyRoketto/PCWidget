@@ -26,6 +26,8 @@ type CPUStat struct {
 	Temp  *float64 `json:"temp,omitempty"`
 	Freq  *float64 `json:"freq,omitempty"`  // МГц
 	Power *float64 `json:"power,omitempty"` // Вт
+	// Cores — загрузка каждого потока в %, группы процессоров подряд.
+	Cores []float64 `json:"cores,omitempty"`
 }
 
 type GPUStat struct {

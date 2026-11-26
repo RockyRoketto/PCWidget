@@ -1,0 +1,17 @@
+/* Столбики загрузки по потокам: вместо обычного индикатора в плитке CPU и в строке колонки.
+   Цвет — акцент темы или свой цвет плитки (--core, paintTile); занятые тёплые и горячие.
+   Свой цвет, как и везде, важнее «тепло», но уступает «горячо». Темы правят только форму. */
+.cores { display: flex; gap: 2px; width: 100%; flex: 1 1 0; min-height: 18px; max-height: 56px; overflow: hidden; }
+.cores.many { gap: 1px; }
+.cores.dense { gap: 0; }
+.cores > i { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; background: var(--track); }
+.cores b { position: absolute; left: 0; right: 0; bottom: 0; height: 0; min-height: 2px; background: var(--core, var(--accent)); transition: height .5s; }
+.cores > i.w > b { background: var(--warm); }
+.tinted .cores > i.w > b { background: var(--core); }
+.cores > i.h > b { background: var(--hot); }
+/* в ячейке столбики берут высоту под цифрами; нижнее поле меньше, чтобы им хватило места */
+.cb:has(> .cores) { padding-bottom: 8px; }
+/* колонка: полоса столбиков под текстом строки */
+.cr.has-cores { padding-bottom: 8px; }
+.cr > .cores.lo { left: 8px; right: 8px; bottom: 2px; width: auto; height: 9px; min-height: 0; }
+@media (prefers-reduced-motion: reduce) { .cores b { transition: none; } }

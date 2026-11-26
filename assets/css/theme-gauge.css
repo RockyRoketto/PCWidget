@@ -16,3 +16,5 @@ body.theme-gauge.tone-light {
 .theme-gauge .bar { border-radius: 0; }
 .theme-gauge .alarm { animation: none; box-shadow: inset 0 0 0 1.5px var(--hot); }
 .theme-gauge .tinted .cb, .theme-gauge .tinted.cr { --a: inherit; }
+/* столбики по потокам из тех же делений, что и шкалы: шаг 5px снизу вверх */
+.theme-gauge .cores { -webkit-mask: repeating-linear-gradient(0deg, #000 0 3px, transparent 3px 5px); }

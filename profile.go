@@ -21,7 +21,7 @@ const (
 )
 
 // profileKeys совпадает с PROF_KEYS в assets/js/07-profiles.js.
-var profileKeys = []string{"theme", "tone", "accent", "pal", "glass", "mode", "scale", "rows", "hide", "mini", "tileColors", "thin"}
+var profileKeys = []string{"theme", "tone", "accent", "pal", "glass", "mode", "scale", "rows", "hide", "mini", "tileColors", "thin", "cores"}
 
 var (
 	errProfileBig   = errors.New("файл слишком большой")

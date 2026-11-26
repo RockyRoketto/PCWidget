@@ -24,6 +24,10 @@ body.theme-fill.tone-light {
 .theme-fill .fill i.area { inset: 0; }
 .theme-fill .fill i.lvl { left: 0; right: 0; bottom: 0; transition: height .5s; }
 .theme-fill .fill i.run { left: 0; top: 0; bottom: 0; transition: width .5s; }
+/* столбики по потокам стоят под цифрами, а не за ними: цвет карточки, цифрам возвращается цвет тепла */
+.theme-fill .cores { min-height: 14px; }
+.theme-fill .cb:has(> .cores) { gap: 2px; }
+.theme-fill .cores b { background: var(--tint, var(--solid, #2f7df0)); }
 /* цифры крупные и внизу */
 .theme-fill .cb > .md, .theme-fill .cb.has-vz > .md { margin-block: auto 0; }
 .theme-fill .md .v { font-size: 44px; line-height: 44px; letter-spacing: -.03em; }
@@ -45,3 +49,5 @@ body.theme-fill.tone-light {
 .theme-fill.tone-light { --nshadow: 0 1px 2px rgba(255, 255, 255, .7), 0 0 14px rgba(255, 255, 255, .6); }
 .theme-fill .cb.has-vz .md, .theme-fill .ln > .w, .theme-fill .cr .v, .theme-fill .cr .s { text-shadow: var(--nshadow); }
 .theme-fill .cb.has-vz .md .num.warm, .theme-fill .cb.has-vz .md .num.hot { color: var(--text) !important; }
+.theme-fill .cb.has-vz:has(> .cores) .md .num.warm { color: var(--warm) !important; }
+.theme-fill .cb.has-vz:has(> .cores) .md .num.hot { color: var(--hot) !important; }

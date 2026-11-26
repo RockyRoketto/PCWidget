@@ -1,11 +1,13 @@
 'use strict';
 // Части плиток. Анатомия одна на всё: шапка (название и подробность), главное число, индикатор внизу.
-// Индикатор у каждой темы свой, место у всех одно:
+// Индикатор у каждой темы свой, место у всех одно (столбики по потокам общие, форму правят темы):
 //   Лист — кривая (graph, net) или полоса (level);  Прибор — деления или столбики;  Заливка — фон ячейки.
 
-// kind: graph (история 0..100), net (история скоростей), level (заполненность), run (тонкая полоса в строке).
+// kind: graph (история 0..100), net (история скоростей), level (заполненность), run (тонкая полоса в строке),
+// cores (загрузка по потокам).
 function makeViz(kind) {
   var t = CFG.theme;
+  if (kind === 'cores') return coresViz();
   if (t === 'fill') return fillViz(kind);
   if (t === 'gauge') return kind === 'net' ? histViz() : tickViz(kind === 'run');
   if (t === 'lcd') return kind === 'graph' || kind === 'net' ? histViz() : tickViz(kind === 'run');
@@ -13,6 +15,31 @@ function makeViz(kind) {
   var el = mk('<div class="bar' + (kind === 'run' ? ' thin' : '') + '"><i></i></div>'), i = el.firstChild;
   return { el: el, set: function (o) { i.style.width = clamp(o.pct, 0, 100) + '%'; } };
 }
+
+// Столбик на каждый поток: высота — загрузка, занятые больше 60% тёплые, больше 85% горячие.
+// Столбики делят всю ширину поровну; чем их больше, тем уже зазор (cores.css).
+var CORE_WARM = 60, CORE_HOT = 85;
+function coresViz() {
+  var el = mk('<div class="cores" aria-hidden="true"></div>');
+  return {
+    el: el,
+    set: function (o) {
+      var list = o.cores || [];
+      if (el.childNodes.length !== list.length) {
+        el.innerHTML = new Array(list.length + 1).join('<i><b></b></i>');
+        el.classList.toggle('many', list.length > 32);
+        el.classList.toggle('dense', list.length > 64);
+      }
+      list.forEach(function (v, i) {
+        var c = el.childNodes[i];
+        c.className = v > CORE_HOT ? 'h' : v > CORE_WARM ? 'w' : '';
+        c.firstChild.style.height = clamp(v, 0, 100) + '%';
+      });
+    }
+  };
+}
+// Столбики вместо обычного индикатора: включены в настройках и система отдала загрузку по потокам.
+function coresOn(d) { return !!(CFG.cores && d && d.cores && d.cores.length); }
 
 // Лист: линия и заливка под ней в координатах 100x30.
 function lineViz() {
@@ -92,7 +119,7 @@ function palAt(stops, t) {
 function placeFills(root) {
   if (CFG.theme !== 'fill' || !root.isConnected) return;
   var st = palStops(), dx = Math.sin(155 * Math.PI / 180), dy = -Math.cos(155 * Math.PI / 180);
-  var list = $$('.fill', root).map(function (f) {
+  var list = $$('.fill, .cores', root).map(function (f) {
     var r = f.parentNode.getBoundingClientRect();
     return { f: f, w: r.width, p: (r.left + r.width / 2) * dx + (r.top + r.height / 2) * dy };
   }).filter(function (x) { return x.w; });

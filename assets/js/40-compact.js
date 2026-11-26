@@ -47,6 +47,15 @@ var CSPEC = {
 };
 function fullest(s) { return (s.disks || []).slice().sort(function (a, b) { return b.usedPct - a.usedPct; })[0]; }
 
+// Индикатор строки: шкала по нижнему краю (у «Заливки» фон) или столбики по потокам.
+function rowViz(el, mode, bars) {
+  var vz = makeViz(bars ? 'cores' : mode === 'square' && CFG.theme === 'fill' ? 'level' : 'run');
+  vz.el.classList.add('lo');
+  if (vz.bg) el.insertBefore(vz.el, el.firstChild); else el.appendChild(vz.el);
+  el.classList.toggle('has-cores', bars);
+  return vz;
+}
+
 var COMPACT_CLS = { column: 'col', strip: 'strip', square: 'sqr' };
 function buildCompact(mode) {
   var list = CFG.mini[mode].filter(function (t) { return t.on; }), strip = mode === 'strip';
@@ -54,18 +63,13 @@ function buildCompact(mode) {
   var items = list.map(function (t, i) {
     var sp = CSPEC[t.id], face = mode === 'column' && sp.face ? sp.face() : null, prev = i > 0 && CSPEC[list[i - 1].id];
     var el = mk('<div class="cr" data-id="' + t.id + '"' + (sp.m ? ' data-m="' + sp.m + '"' : '') + '><b class="n"></b><span class="s"></span><span class="num v"></span></div>');
-    var vz = null;
-    if (sp.bar) {
-      vz = makeViz(mode === 'square' && CFG.theme === 'fill' ? 'level' : 'run');
-      vz.el.classList.add('lo');
-      if (vz.bg) el.insertBefore(vz.el, el.firstChild); else el.appendChild(vz.el);
-    }
+    var vz = sp.bar ? rowViz(el, mode, false) : null;
     if (mode === 'column' && prev && prev.g !== sp.g) el.classList.add('sep');
     if (editing) { el.setAttribute('data-nodrag', ''); el.appendChild(editButton()); }
     root.appendChild(el);
     if (sp.bind) sp.bind(el);
     if (face) { el.classList.add('facerow'); $$('.n, .s, .v', el).forEach(function (n) { n.remove(); }); el.appendChild(face.el); }
-    return { sp: sp, face: face, el: el, vz: vz, n: $('.n', el), v: $('.v', el), s: $('.s', el) };
+    return { id: t.id, sp: sp, face: face, el: el, vz: vz, bars: false, n: $('.n', el), v: $('.v', el), s: $('.s', el) };
   });
   if (!items.length) root.appendChild(emptyNote());
   editEvents(root, '[data-id]', function (id) { setOn(mode, id, false); },
@@ -95,7 +99,10 @@ function buildCompact(mode) {
     put(it.s, temp ? segs(Math.round(d.t)) + '°' : mode === 'strip' ? '' : d.sm || '');
     it.s.className = 's' + (temp ? ' num t ' + lv : '');
     setLv(it.el, lv);
-    if (it.vz) it.vz.set({ pct: d.pct || 0, mark: d.mark });
+    // в колонке у CPU вместо шкалы могут быть столбики по потокам
+    var bars = mode === 'column' && it.id === 'cpu' && coresOn(s.cpu);
+    if (bars !== it.bars) { it.vz.el.remove(); it.vz = rowViz(it.el, mode, bars); it.bars = bars; }
+    if (it.vz) it.vz.set({ pct: d.pct || 0, mark: d.mark, cores: bars ? s.cpu.cores : null });
     it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
     if (it.sp.post) it.sp.post(it.el);
   }

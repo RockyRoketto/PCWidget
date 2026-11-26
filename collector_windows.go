@@ -5,6 +5,7 @@ import "time"
 // collector собирает один снимок Stats из всех источников. Вызывается раз в секунду из одного потока.
 type collector struct {
 	cpu     cpuMeter
+	cores   coreMeter
 	net     netMeter
 	procs   procMeter
 	perf    *perf
@@ -34,8 +35,9 @@ func (c *collector) collect() Stats {
 	now := time.Now()
 	s := Stats{TS: now.Unix(), Uptime: uptimeSeconds(), Idle: userIdle()}
 
+	cores := c.cores.loads()
 	if load, ok := c.cpu.load(); ok {
-		s.CPU = &CPUStat{Load: load}
+		s.CPU = &CPUStat{Load: load, Cores: cores}
 		r := c.sensors.cpu()
 		s.CPU.Temp, s.CPU.Freq, s.CPU.Power = r.Temp, r.Freq, r.Power
 	}

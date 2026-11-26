@@ -70,13 +70,13 @@ var TILE_TINTS = ['#7cc4ff', '#c3b1ff', '#f6a8d0', '#ff8a7a', '#ffb35c', '#ffd85
 function paintTile(el) {
   var c = CFG.tileColors[colorKey(el.getAttribute('data-id'))] || '', h = fitColor(c);
   el.classList.toggle('tinted', !!c);
-  if (h) { el.style.setProperty('--a', h); el.style.setProperty('--tint', c); }
-  else { el.style.removeProperty('--a'); el.style.removeProperty('--tint'); }
+  if (h) { el.style.setProperty('--a', h); el.style.setProperty('--tint', c); el.style.setProperty('--core', h); }
+  else { el.style.removeProperty('--a'); el.style.removeProperty('--tint'); el.style.removeProperty('--core'); }
 }
 
 function defaults() {
   return {
-    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {},
+    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false,
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, antiburn: false, updates: true, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
@@ -106,7 +106,7 @@ function mergeCfg(saved) {
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
-  ['notify', 'antiburn', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
+  ['notify', 'antiburn', 'clockSec', 'cores'].forEach(function (k) { c[k] = saved[k] === true; });
   c.updates = saved.updates !== false;
   ['wxDays', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;

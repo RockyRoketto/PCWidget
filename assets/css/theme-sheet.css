@@ -12,3 +12,5 @@ body.theme-sheet.tone-light {
 /* тонкая кромка вместо разделителей; группы в колонке — отступ */
 .theme-sheet .cb, .theme-sheet .cr { box-shadow: inset 0 0 0 1px var(--rim); }
 .theme-sheet .mini.col .cr.sep { margin-top: 6px; }
+/* столбики по потокам со скруглёнными концами */
+.theme-sheet .cores > i, .theme-sheet .cores b { border-radius: 2px; }

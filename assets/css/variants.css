@@ -55,6 +55,7 @@
 .tile[data-h="1"] .cb > .bar, .tile[data-h="1"] .cb > .tk { position: absolute; left: 12px; right: 12px; bottom: 5px; width: auto; height: 3px; }
 .tile[data-h="1"] .cb > .graph, .tile[data-h="1"] .cb > .hist { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; min-height: 0; opacity: .55; z-index: 0; }
 .theme-fill .tile[data-h="1"] .cb > .fill { top: 0; }
+.tile[data-h="1"] .cb > .cores { position: absolute; left: 12px; right: 12px; bottom: 4px; width: auto; height: 9px; min-height: 0; z-index: 0; }
 /* строки в тонкой: сеть и лимиты в одну линию без шкал */
 .tile[data-h="1"] .cb.lines > .ls { flex: none; display: flex; gap: 12px; }
 .tile[data-h="1"] .cb.lines .ln { display: flex; gap: 4px; align-items: baseline; padding: 0; margin: 0; background: none; }

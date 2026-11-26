@@ -13,17 +13,26 @@ function cpuDetails(d) { return [d.freq != null ? dec(d.freq / 1000, 1) + ' ГГ
 
 // CPU и GPU: градусы крупно слева, загрузка справа, история загрузки. Без датчика — загрузка крупно.
 function loadTile(id, details) {
-  var el = tileBox(id), c = makeCell({ kind: 'graph', name: id.toUpperCase() }), thrKey = id + 'Temp';
-  el.appendChild(c.el);
+  var el = tileBox(id), thrKey = id + 'Temp', c, bars;
+  // индикатор меняется вместе с ячейкой: история загрузки или столбики по потокам (есть только у CPU)
+  function use(on) {
+    if (bars === on) return;
+    var n = makeCell({ kind: on ? 'cores' : 'graph', name: id.toUpperCase() });
+    if (c) { el.replaceChild(n.el, c.el); packSig = ''; } // раскладка заново покрасит «Заливку»
+    else el.appendChild(n.el);
+    c = n; bars = on;
+  }
+  use(false);
   return {
     el: el, span: function () { return thinOn(id) ? 1 : 2; },
     update: function (s) {
       var d = s[id]; el.hidden = !d; if (!d) return;
+      use(coresOn(d));
       var lv = level(d.temp, CFG.thr[thrKey]);
       c.aux(details(d));
       if (d.temp != null) { c.big(Math.round(d.temp) + '°', '', lv); c.side(Math.round(d.load), '%'); }
       else { c.big(Math.round(d.load), '%'); c.side(null); }
-      c.lv(lv); c.viz({ hist: HIST[id], max: 100, pct: d.load });
+      c.lv(lv); c.viz({ hist: HIST[id], max: 100, pct: d.load, cores: d.cores });
       c.alarm(Alarm.isOn(thrKey));
     }
   };

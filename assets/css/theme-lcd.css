@@ -42,6 +42,10 @@ body.theme-lcd.tone-dark {
 .theme-lcd .tk > b { opacity: .6; }
 .theme-lcd .bar, .theme-lcd .bar i { border-radius: 0; }
 
+/* столбики по потокам — стопки сегментов, пустые видны бледно */
+.theme-lcd .cores { -webkit-mask: repeating-linear-gradient(0deg, #000 0 3px, transparent 3px 4px); }
+.theme-lcd .cores > i { background: color-mix(in srgb, var(--text) calc(var(--ghost) * 100%), transparent); }
+
 /* тревога: цифры мигают, как на табло, рамка ячейки цвета тревоги */
 @keyframes lcdblink { 50% { opacity: .15; } }
 .theme-lcd .alarm { animation: none; background-color: var(--tile) !important; box-shadow: inset 0 0 0 1.5px var(--hot); }

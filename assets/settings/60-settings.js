@@ -42,7 +42,11 @@ TILE_OPTS.claude = function () { return thinOpt('claude') + '<div data-cl>' + cl
 function thinOpt(id) {
   return GRID_MODES[curMode()] ? '<div class="ol">Высота<span style="width:150px">' + segment('thin:' + id, [[0, 'Обычная'], [1, 'Тонкая']], CFG.thin[id] ? 1 : 0) + '</span></div>' : '';
 }
-['cpu', 'gpu', 'mem', 'net'].forEach(function (id) { TILE_OPTS[id] = function () { return thinOpt(id); }; });
+['gpu', 'mem', 'net'].forEach(function (id) { TILE_OPTS[id] = function () { return thinOpt(id); }; });
+// У CPU вместо обычного индикатора могут быть столбики по потокам (в Панели, Широкой и Колонке).
+TILE_OPTS.cpu = function () {
+  return thinOpt('cpu') + (GRID_MODES[curMode()] || curMode() === 'column' ? '<label class="ol">Столбики по потокам' + toggle('cores', CFG.cores, 'Столбики по потокам') + '</label>' : '');
+};
 // Лимиты пишет маленький мод внутри Claude Code; кнопка кладёт его в ~/.claude/skills или убирает.
 function claudeOpts() {
   var c = S && S.claude, has = !!(c && c.limits), fresh = has && Date.now() / 1000 - c.limitsAt < 7 * 86400;
