@@ -138,7 +138,8 @@ var SET_BODY = {
       setRow('Антивыгорание', 'Сдвиг на пару пикселей, в простое темнее', toggle('antiburn', CFG.antiburn, 'Антивыгорание')) +
       setRow('Положение окна', '', ghost('corner', 'Вернуть в угол')) +
       setRow('Настройки', setState.sure ? 'Плитки, тема и пороги станут как в начале' : '', ghost('reset', setState.sure ? 'Точно сбросить?' : 'Сбросить')) +
-      (SYS.installed ? setRow('PC Widget', 'Установлен на этот ПК', ghost('uninstall', 'Удалить…')) : setRow('PC Widget', 'Запущен без установки', ghost('install', 'Установить…')));
+      (SYS.installed ? setRow('PC Widget', 'Установлен на этот ПК', ghost('uninstall', 'Удалить…')) : setRow('PC Widget', 'Запущен без установки', ghost('install', 'Установить…'))) +
+      label('О программе') + setRow('PC Widget ' + esc(SYS.version || ''), 'RockyRoketto · лицензия MIT', ghost('github', 'GitHub'));
   }
 };
 

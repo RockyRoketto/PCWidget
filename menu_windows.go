@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"unsafe"
 )
@@ -33,7 +36,7 @@ func sysInfo() string {
 		"driver": pawnInstalled(), "sensors": hub != nil && hub.available(),
 		"topmost": app.settings.Topmost, "visible": app.visible,
 		"claude": claudeModState(claudeDir()), "claudeErr": claudeModErr,
-		"accent": lastAccent,
+		"accent": lastAccent, "version": appVersion,
 	})
 	return string(b)
 }
@@ -162,10 +165,21 @@ func onSys(c string) {
 		installPawnIO(hub)
 	case "corner":
 		moveToCorner()
+	case "github":
+		openProjectPage()
 	case "autostart:1", "autostart:0":
 		setAutostart(c == "autostart:1")
 	case "claudemod:1", "claudemod:0":
 		setClaudeMod(c == "claudemod:1")
+	}
+}
+
+// openProjectPage открывает страницу проекта через проводник: виджет работает от администратора,
+// а браузер должен запуститься с обычными правами.
+func openProjectPage() {
+	c := exec.Command(filepath.Join(os.Getenv("SystemRoot"), "explorer.exe"), repoURL)
+	if c.Start() == nil {
+		go c.Wait()
 	}
 }
 

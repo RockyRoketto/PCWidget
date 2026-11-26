@@ -34,6 +34,8 @@
           "0409": {
             "FileDescription": "PC Widget",
             "ProductName": "PC Widget",
+            "FileVersion": "1.0",
+            "ProductVersion": "1.0",
             "OriginalFilename": "widget.exe"
           }
         }

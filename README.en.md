@@ -4,6 +4,8 @@
 
 [Русский](README.md) · **English**
 
+**Version 1.0**
+
 A Windows desktop widget showing CPU and GPU load and temperatures, memory, network, disks and processes. A single exe that lives in the tray; everything is configured from the widget itself.
 
 ![Three themes: Sheet, Gauge, Fill](media/themes.png)

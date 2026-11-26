@@ -86,7 +86,7 @@ function defaults() {
 var CFG = null;        // задаётся в конце 05-layout.js, потом из __init
 var S = null;          // последний снимок от Go
 var TOPMOST = false;
-var SYS = { installed: false, autostart: false, driver: false, sensors: false, claude: 'none', claudeErr: '', accent: '' }; // состояние системы от Go
+var SYS = { installed: false, autostart: false, driver: false, sensors: false, claude: 'none', claudeErr: '', accent: '', version: '' }; // состояние системы от Go
 
 // Настройки из файла накладываются на значения по умолчанию, лишнее и битое отбрасывается.
 // До ver 3 были другие темы и виды: тема становится «Листом», плотность по умолчанию.
