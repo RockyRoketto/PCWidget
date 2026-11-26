@@ -1,5 +1,5 @@
 'use strict';
-// Подробный график по наведению. Мышь задержалась на плитке CPU, GPU, Память, Сеть или Энергия на 0,5 с —
+// Карточка по наведению. Мышь задержалась на плитке на 0,5 с (список плиток — HV_IDS, остальные в 96-hvcards.js) —
 // рядом открывается карточка: график за 10 минут или за час, минимум, среднее, максимум, порог температуры.
 // История копится здесь: 600 точек по секунде и 360 средних по 10 с (с минимумом и максимумом внутри).
 // Карточку показывает отдельное окно (hist_windows.go): разметка уходит в Go сообщением hist:.
@@ -151,9 +151,11 @@ function hvPart(p, range) {
 
 function hvCardHTML(id, range, tint) {
   var c = HV_CARDS[id], parts = c.parts.map(function (p) { return hvPart(p, range); }).join('');
-  if (!parts) return '';
-  var seg = Object.keys(HV_RANGES).map(function (r) { return '<button data-r="' + r + '" class="' + (r === range ? 'on' : '') + '">' + HV_RANGES[r][0] + '</button>'; }).join('');
-  return '<div class="hc"' + (tint ? ' style="--a:' + tint + '"' : '') + '><div class="hc-hd"><b class="hc-nm">' + c.name + '</b><span class="hc-seg">' + seg + '</span></div>' + parts + '</div>';
+  var more = c.more && S ? c.more(S) : ''; // блоки без графика (96-hvcards.js)
+  if (!parts && !more) return '';
+  var seg = parts ? '<span class="hc-seg">' + Object.keys(HV_RANGES).map(function (r) { return '<button data-r="' + r + '" class="' + (r === range ? 'on' : '') + '">' + HV_RANGES[r][0] + '</button>'; }).join('') + '</span>' : '';
+  var name = typeof c.name === 'function' ? c.name(S || {}) : c.name;
+  return '<div class="hc"' + (tint ? ' style="--a:' + tint + '"' : '') + '><div class="hc-hd"><b class="hc-nm">' + name + '</b>' + seg + '</div>' + parts + more + '</div>';
 }
 
 // ---- наведение ----

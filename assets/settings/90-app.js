@@ -38,7 +38,7 @@ window.__sys = function (sys) {
   var acc = SYS.accent;
   SYS = sys; TOPMOST = sys.topmost;
   if (acc !== sys.accent && CFG) { applySetBody(); if (settings && setState.tab === 'look') settings.render(); }
-  if (settings && setState.tab === 'sys') settings.render();
+  if (settings && (setState.tab === 'sys' || setState.tab === 'game')) settings.render();
   else if (settings) settings.update();
 };
 

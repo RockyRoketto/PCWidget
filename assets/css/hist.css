@@ -79,3 +79,73 @@
 .theme-pixel .hc-v { font-size: 17px; }
 .theme-pixel .hc-g rect.off { fill: var(--track); }
 .theme-pixel .hc-g rect.bm { fill: var(--mint); } .theme-pixel .hc-g rect.by { fill: var(--yel); } .theme-pixel .hc-g rect.br { fill: var(--pink); }
+
+/* Блоки без графика (96-hvcards.js): строки «подпись — значение», полосы заполнения, прогноз, столбики токенов */
+.hc-more { display: grid; gap: 6px; }
+.hc-more .hc-tt { margin-bottom: 0; }
+.hc-r { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--dim); }
+.hc-r b { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.hc-r small { font-size: 11px; color: var(--dim); margin-left: 4px; }
+.hc-r .warm, .hc-r small.warm { color: var(--warm); } .hc-r .hot, .hc-r small.hot { color: var(--hot); }
+.hc-bar { display: grid; gap: 3px; }
+.hc-bar + .hc-bar { margin-top: 3px; }
+.hc-tr { height: 6px; border-radius: 6px; background: var(--track); overflow: hidden; }
+.hc-tr i { display: block; height: 100%; border-radius: inherit; background: var(--a); }
+.hc-bar.warm .hc-tr i { background: var(--warm); } .hc-bar.hot .hc-tr i { background: var(--hot); }
+.hc-nt { font-size: 10.5px; line-height: 13px; color: var(--dim); }
+.hc-wx { display: flex; align-items: center; gap: 10px; }
+.hc-wi { width: 34px; height: 34px; flex: none; color: var(--a); }
+.hc-wi svg { width: 100%; height: 100%; }
+.hc-wx > b { font-size: 28px; line-height: 30px; font-weight: 600; }
+.hc-wd { display: grid; font-size: 12px; color: var(--text); min-width: 0; }
+.hc-wd small { font-size: 11px; color: var(--dim); }
+.hc-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.hc-day { display: grid; justify-items: center; padding: 3px 0 2px; border-radius: 7px; font-size: 10.5px; color: var(--dim); }
+.hc-day.now { background: var(--ctl); }
+.hc-day i { width: 18px; height: 18px; margin: 2px 0; color: var(--a); } .hc-day i svg { width: 100%; height: 100%; }
+.hc-day b { font-size: 12px; font-weight: 600; color: var(--text); } .hc-day small { font-size: 10.5px; }
+.hc-date { display: grid; gap: 1px; }
+.hc-date b { font-size: 18px; font-weight: 600; line-height: 22px; }
+.hc-date span { font-size: 12px; color: var(--dim); }
+.hc-cols { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; height: 52px; margin-top: 2px; }
+.hc-col { display: grid; grid-template-rows: 1fr auto; justify-items: center; gap: 2px; min-height: 0; }
+.hc-col i { align-self: end; width: 100%; max-width: 20px; border-radius: 3px 3px 1px 1px; background: var(--a); opacity: .45; }
+.hc-col.now i { opacity: 1; }
+.hc-col span { font-size: 10px; line-height: 11px; color: var(--dim); }
+/* материал темы у полос и столбиков */
+.theme-gauge .hc-tr { border-radius: 1px; height: 7px; }
+.theme-gauge .hc-tr i { border-radius: 0; background: repeating-linear-gradient(90deg, var(--a) 0 3px, transparent 3px 5px); }
+.theme-gauge .hc-bar.warm .hc-tr i { background: repeating-linear-gradient(90deg, var(--warm) 0 3px, transparent 3px 5px); }
+.theme-gauge .hc-bar.hot .hc-tr i { background: repeating-linear-gradient(90deg, var(--hot) 0 3px, transparent 3px 5px); }
+.theme-gauge .hc-col i, .theme-osc .hc-col i { border-radius: 0; }
+.theme-gauge .hc-date b, .theme-gauge .hc-r, .theme-osc .hc-r, .theme-lcd .hc-r { text-transform: uppercase; letter-spacing: .03em; font-size: 11px; }
+.theme-fill .hc-tr { height: 8px; }
+.theme-fill .hc-tr i, .theme-fill .hc-col i { background: var(--pal); }
+.theme-fill .hc-date b, .theme-fill .hc-wx > b { font-weight: 700; }
+.theme-lcd .hc-tr { position: relative; height: 8px; border-radius: 0; background: none; }
+.theme-lcd .hc-tr::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, var(--a) 0 5px, transparent 5px 7px); opacity: var(--ghost); }
+.theme-lcd .hc-tr i { position: relative; border-radius: 0; background: repeating-linear-gradient(90deg, var(--a) 0 5px, transparent 5px 7px); }
+.theme-lcd .hc-bar.warm .hc-tr i { background: repeating-linear-gradient(90deg, var(--warm) 0 5px, transparent 5px 7px); }
+.theme-lcd .hc-bar.hot .hc-tr i { background: repeating-linear-gradient(90deg, var(--hot) 0 5px, transparent 5px 7px); }
+.theme-lcd .hc-col i { border-radius: 0; background: repeating-linear-gradient(0deg, var(--a) 0 4px, transparent 4px 6px); opacity: .5; }
+.theme-lcd .hc-col.now i { opacity: 1; }
+.theme-lcd .hc-day.now { background: rgba(0, 0, 0, .08); }
+.theme-osc .hc-tr { height: 4px; background: var(--hair); }
+.theme-osc .hc-tr i { box-shadow: 0 0 var(--glow) var(--a); }
+.theme-osc .hc-day.now { background: none; box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-bp .hc-tr { height: 7px; border-radius: 0; background: none; box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-bp .hc-tr i { border-radius: 0; background: repeating-linear-gradient(135deg, var(--ln, var(--a)) 0 1px, transparent 1px 4px); box-shadow: inset -1px 0 0 var(--ln, var(--a)); }
+.theme-bp .hc-col i { border-radius: 0; background: repeating-linear-gradient(135deg, var(--ln, var(--a)) 0 1px, transparent 1px 4px); box-shadow: inset 0 0 0 1px var(--ln, var(--a)); opacity: 1; }
+.theme-bp .hc-col:not(.now) i { opacity: .5; }
+.theme-bp .hc-date b { font-style: italic; font-weight: 400; }
+.theme-bp .hc-day.now { background: none; box-shadow: inset 0 0 0 1px var(--hair); border-radius: 0; }
+.theme-pixel .hc-tr { height: 8px; border-radius: 0; background: var(--track); }
+.theme-pixel .hc-tr i { border-radius: 0; background: repeating-linear-gradient(90deg, var(--mint) 0 6px, transparent 6px 8px); }
+.theme-pixel .hc-bar.warm .hc-tr i { background: repeating-linear-gradient(90deg, var(--yel) 0 6px, transparent 6px 8px); }
+.theme-pixel .hc-bar.hot .hc-tr i { background: repeating-linear-gradient(90deg, var(--pink) 0 6px, transparent 6px 8px); }
+.theme-pixel .hc-col i { border-radius: 0; background: var(--mint); }
+.theme-pixel .hc-day.now { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rim); background: none; }
+.theme-pixel .hc-r, .theme-pixel .hc-date b { text-transform: uppercase; letter-spacing: .04em; }
+.theme-pixel .hc-date b { font-weight: 400; }
+/* моноширинные цифры шире: скорости «293 КБ/с» в три столбца не влезают в 288 */
+.theme-lcd .hc, .theme-osc .hc, .theme-bp .hc, .theme-pixel .hc { width: 340px; }

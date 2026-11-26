@@ -6,7 +6,7 @@
 .sh span { flex: 1; }
 .sh .x { width: 30px; height: 30px; padding: 7px; border-radius: 8px; color: var(--dim); }
 .sh .x:hover { background: var(--ctl); color: var(--text); }
-.stabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--edge); }
+.stabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--edge); }
 .stabs button { display: grid; justify-items: center; gap: 3px; padding: 6px 0 8px; font-size: 12px; color: var(--dim); border-bottom: 2px solid transparent; }
 .stabs button.on { color: var(--text); border-bottom-color: var(--accent); }
 .stabs button.on .i { color: var(--accent); }
@@ -93,7 +93,6 @@
 .tpop .tint.sm { width: 20px; height: 20px; }
 .tpop .two { gap: 16px; }
 .tpop .hint { margin: -4px 0 0; }
-.how { margin: 8px 0 8px; }
 .lnk { color: var(--accent); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; }
 .lnk:hover { color: var(--text); }
 .txt.num-in { width: 84px; flex: none; text-align: right; }
@@ -107,3 +106,24 @@
 .gchips { display: flex; flex-wrap: wrap; gap: 6px; }
 .gchip { padding: 4px 10px; border-radius: 14px; border: 1px solid var(--edge); background: var(--ctl); color: var(--dim); font-size: 12px; }
 .gchip.on { border-color: var(--accent); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
+/* Группы: подпись сверху, строки в одной карточке через тонкую черту, пояснение снизу */
+.grp { margin-top: 14px; }
+.grp:first-child { margin-top: 8px; }
+.gt { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 2px 6px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); }
+.gt b { font-weight: 400; letter-spacing: 0; text-transform: none; }
+.gt .lnk { font-size: 11px; letter-spacing: 0; text-transform: none; font-weight: 400; }
+.gb { background: var(--ctl); border: 1px solid var(--edge); border-radius: 10px; }
+.gb > .row, .gb > .gi { padding: 0 12px; }
+.gb > .gi { padding: 9px 12px 11px; }
+.gb > * + * { border-top: 1px solid var(--edge); }
+.gb > .row { border-bottom: 0; min-height: 48px; padding-top: 6px; padding-bottom: 6px; }
+.gb .lab { margin-top: 0; }
+.gb .seg { background: var(--edge); }
+.gb .thr { margin: 0; }
+.gb .gchips { padding-bottom: 1px; }
+.grp.bare .gb { background: none; border: 0; border-radius: 0; }
+.grp.bare .gb > * + * { border-top: 0; margin-top: 6px; }
+.gn { margin: 6px 2px 0; }
+.row small .bad { color: var(--hot); }
+.row .g small { margin-top: 1px; line-height: 1.35; }
+.how { margin: 8px 2px 0; }

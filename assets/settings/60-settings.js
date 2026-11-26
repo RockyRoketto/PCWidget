@@ -8,6 +8,15 @@ function segment(key, opts, cur) {
   return '<div class="seg">' + opts.map(function (o) { return '<button data-k="' + key + '" data-v="' + o[0] + '" class="' + (String(o[0]) === String(cur) ? 'on' : '') + '">' + o[1] + '</button>'; }).join('') + '</div>';
 }
 function setRow(title, note, right) { return '<div class="row"><div class="g">' + title + (note ? '<small>' + note + '</small>' : '') + '</div>' + right + '</div>'; }
+// Группа настроек: подпись над карточкой, внутри строки через тонкую черту, под ней пояснение.
+// bare — без подложки (у содержимого свои карточки: темы, профили).
+function grp(title, items, note, bare, side) {
+  items = items.filter(Boolean);
+  if (!items.length) return '';
+  return '<section class="grp' + (bare ? ' bare' : '') + '">' + (title ? '<div class="gt"><span>' + title + '</span>' + (side ? '<b>' + side + '</b>' : '') + '</div>' : '') +
+    '<div class="gb">' + items.join('') + '</div>' + (note ? '<p class="hint gn">' + note + '</p>' : '') + '</section>';
+}
+function gi(inner) { return inner ? '<div class="gi">' + inner + '</div>' : ''; }
 function label(text, val) { return '<div class="lab">' + text + (val ? '<b data-val>' + val + '</b>' : '') + '</div>'; }
 function ghost(act, text) { return '<button class="btn ghost" data-sys="' + act + '">' + text + '</button>'; }
 function zonePos(v) { return clamp((v - 50) * 2, 0, 100); } // шкала порогов 50..100
@@ -20,7 +29,7 @@ var THR_ROWS = {
   disk: ['disks', 'Диск заполнен', '%', function (s) { return s.disks && s.disks.length ? Math.max.apply(null, s.disks.map(function (d) { return d.usedPct; })) : null; }],
   claude: ['claude', 'Лимит Claude', '%', function (s) { var l = s.claude && s.claude.limits; return l ? Math.max.apply(null, l.map(function (x) { return x.pct; })) : null; }]
 };
-var SET_TABS = { look: ['look', 'Вид'], tiles: ['tiles', 'Плитки'], alarm: ['bell', 'Тревоги'], sys: ['sys', 'Система'] };
+var SET_TABS = { look: ['look', 'Вид'], tiles: ['tiles', 'Плитки'], alarm: ['bell', 'Тревоги'], game: ['game', 'Игра'], sys: ['sys', 'Система'] };
 var TILE_OPTS = {
   clock: function () {
     var strip = curMode() === 'strip', hands = !strip && CFG.clockView === 'analog'; // в полоске часы всегда цифрами
@@ -97,7 +106,7 @@ function modeCards() {
 // Как переставлять: сразу на виджете, правка включена, пока открыта эта вкладка.
 function tilesHint(m) {
   var what = GRID_MODES[m] ? 'плитки' : m === 'column' ? 'строки' : 'блоки';
-  return '<p class="hint how">Перетаскивай ' + what + ' прямо на виджете, крестик убирает.' + (GRID_MODES[m] ? ' Длинную к краю — станет короткой.' : '') + ' <button class="lnk" data-sys="tiles">Как в начале</button></p>';
+  return '<p class="hint how">Перетаскивай ' + what + ' прямо на виджете, крестик убирает.' + (GRID_MODES[m] ? ' Длинную к краю — станет короткой.' : '') + '</p>';
 }
 
 function densityRow(text) {
@@ -142,47 +151,50 @@ function colorMarks(body) {
 function aboutRows() {
   var note = SYS.updateBusy ? SYS.updateNote : SYS.update ? '<span class="s-ok">Вышла версия ' + esc(SYS.update) + '</span>' : SYS.updateNote || 'RockyRoketto · лицензия MIT';
   var act = SYS.updateBusy ? '' : SYS.update ? ghost('update', 'Обновить') : ghost('updcheck', 'Проверить');
-  return setRow('PC Widget ' + esc(SYS.version || ''), note, act + ghost('github', 'GitHub')) +
-    setRow('Проверять обновления', '', toggle('updates', CFG.updates, 'Проверять обновления'));
+  return [setRow('PC Widget ' + esc(SYS.version || ''), note, act + ghost('github', 'GitHub')),
+    setRow('Проверять обновления', 'Только сообщает о новой версии', toggle('updates', CFG.updates, 'Проверять обновления'))];
 }
 
 var SET_BODY = {
   look: function () {
-    return label('Тема') + '<div class="cards c4">' + Object.keys(THEMES).map(function (k) {
-        return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>' +
-      label('Оформление') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone) +
-      colorBlock() + densityBlock() +
-      label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale) +
+    return grp('Тема', ['<div class="cards c4">' + Object.keys(THEMES).map(function (k) {
+        return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>'], '', true) +
+      grp('Оформление', [
+        gi(label('Тон') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone)),
+        gi(colorBlock()), gi(densityBlock()),
+        gi(label('Размер', CFG.scale + '%') + segment('scale', SCALES.map(function (v) { return [v, v]; }), CFG.scale))]) +
       profBlock(); // 62-profiles.js
   },
   tiles: function () {
     var m = curMode();
-    return label('Режим') + modeCards() + tilesHint(m) + '<div class="tgrid">' +
-      modeIds(m).map(function (id) {
+    return grp('Режим', [modeCards()], '', true) +
+      grp('Плитки', ['<div class="tgrid">' + modeIds(m).map(function (id) {
         var on = isOn(m, id), name = tileName(m, id);
         return '<div class="trow' + (on ? '' : ' off') + '" data-id="' + id + '" data-m="' + colorKey(id) + '">' +
           '<div class="m"><button class="tb" data-open="' + id + '" title="Цвет и параметры">' + I(id === 'space' ? 'disk' : id) +
           '<span class="nm" title="' + name + '">' + name + '</span><i class="cdot"></i></button>' + toggle('tile:' + id, on, name) + '</div></div>';
-      }).join('') + '</div><div class="tpop" hidden></div>';
+      }).join('') + '</div>'], '', true, '<button class="lnk" data-sys="tiles">Как в начале</button>') + tilesHint(m) + '<div class="tpop" hidden></div>';
   },
   alarm: function () {
-    return Object.keys(THR_ROWS).filter(function (k) { return k !== 'claude' || claudeOn(); }).map(function (k) {
+    return grp('Пороги', Object.keys(THR_ROWS).filter(function (k) { return k !== 'claude' || claudeOn(); }).map(function (k) {
       var r = THR_ROWS[k], v = CFG.thr[k];
-      return '<div class="thr" data-m="' + r[0] + '"><div class="t">' + I(r[0]) + '<span>' + r[1] + '</span><b>' + v + r[2] + '</b></div><div class="zone" style="--t:' + zonePos(v) + '%"><div class="tr"></div>' +
-        '<div class="now" data-now="' + k + '" hidden></div><input type="range" min="50" max="100" value="' + v + '" data-thr="' + k + '" aria-label="' + r[1] + '"></div></div>';
-    }).join('') + '<p class="hint">Черта: значение сейчас. Тревога включается через 3 секунды выше порога.</p><div style="height:8px"></div>' +
-      setRow('Уведомления Windows', 'При включении тревоги', toggle('notify', CFG.notify, 'Уведомления Windows'));
+      return gi('<div class="thr" data-m="' + r[0] + '"><div class="t">' + I(r[0]) + '<span>' + r[1] + '</span><b>' + v + r[2] + '</b></div><div class="zone" style="--t:' + zonePos(v) + '%"><div class="tr"></div>' +
+        '<div class="now" data-now="' + k + '" hidden></div><input type="range" min="50" max="100" value="' + v + '" data-thr="' + k + '" aria-label="' + r[1] + '"></div></div>');
+    }), 'Черта — значение сейчас. Плитка краснеет, если значение выше порога 3 секунды подряд.') +
+      grp('Уведомления', [setRow('Уведомления Windows', 'Когда включается тревога и кончается отрезок фокуса', toggle('notify', CFG.notify, 'Уведомления Windows'))]);
   },
+  game: function () { return gameBlock(); }, // 70-game.js
   sys: function () {
-    return setRow('Поверх всех окон', TOPMOST ? '' : 'Выключено: лежит на рабочем столе', toggle('topmost', TOPMOST, 'Поверх всех окон')) +
-      (SYS.installed ? setRow('Запускать с Windows', '', toggle('autostart', SYS.autostart, 'Запускать с Windows')) : '') +
-      (SYS.sensors ? setRow('Температура CPU', SYS.driver ? '<span class="s-ok">Драйвер PawnIO установлен</span>' : 'Нужен драйвер PawnIO', SYS.driver ? '' : ghost('driver', 'Поставить…')) : '') +
-      setRow('Антивыгорание', 'Сдвиг на пару пикселей, в простое темнее', toggle('antiburn', CFG.antiburn, 'Антивыгорание')) +
-      setRow('Положение окна', '', ghost('corner', 'Вернуть в угол')) +
-      setRow('Настройки', setState.sure ? 'Плитки, тема и пороги станут как в начале' : '', ghost('reset', setState.sure ? 'Точно сбросить?' : 'Сбросить')) +
-      (SYS.installed ? setRow('PC Widget', 'Установлен на этот ПК', ghost('uninstall', 'Удалить…')) : setRow('PC Widget', 'Запущен без установки', ghost('install', 'Установить…'))) +
-      gameBlock() +
-      label('О программе') + aboutRows();
+    return grp('Окно', [
+        setRow('Поверх всех окон', TOPMOST ? '' : 'Выключено: лежит на рабочем столе', toggle('topmost', TOPMOST, 'Поверх всех окон')),
+        setRow('Антивыгорание', 'Сдвиг на пару пикселей, в простое темнее', toggle('antiburn', CFG.antiburn, 'Антивыгорание')),
+        setRow('Положение', 'Если виджет потерялся за краем', ghost('corner', 'Вернуть в угол'))]) +
+      grp('Запуск', [
+        SYS.installed ? setRow('Запускать с Windows', 'Без запроса прав при входе', toggle('autostart', SYS.autostart, 'Запускать с Windows')) : '',
+        SYS.installed ? setRow('Установка', 'Установлен на этот ПК', ghost('uninstall', 'Удалить…')) : setRow('Установка', 'Запущен без установки', ghost('install', 'Установить…'))]) +
+      (SYS.sensors ? grp('Датчики', [setRow('Температура CPU', SYS.driver ? '<span class="s-ok">Драйвер PawnIO установлен</span>' : 'Нужен драйвер PawnIO', SYS.driver ? '' : ghost('driver', 'Поставить…'))]) : '') +
+      grp('О программе', aboutRows()) +
+      grp('Сброс', [setRow('Все настройки', setState.sure ? 'Плитки, тема и пороги станут как в начале' : 'Тема, плитки, пороги, город', ghost('reset', setState.sure ? 'Точно сбросить?' : 'Сбросить'))]);
   }
 };
 

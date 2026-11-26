@@ -27,10 +27,10 @@ function profBlock() {
       '<button class="pi' + (sure ? ' sure' : '') + '" data-prof="del" data-i="' + i + '" title="Удалить" aria-label="Удалить">' + (sure ? 'Удалить?' : I('hide')) + '</button></div>';
   }).join('');
   if (Prof.edit === -1) rows += profEditRow(-1);
-  return label('Профили', n ? n + ' из ' + PROF_MAX : ' ') + (rows ? '<div class="profs">' + rows + '</div>' : '<p class="hint">Профиль запоминает тему, цвета, режим и плитки. Пороги, город и тариф не меняются.</p>') +
+  return grp('Профили', [(rows ? '<div class="profs">' + rows + '</div>' : '<p class="hint">Профиль запоминает тему, цвета, режим и плитки. Пороги, город и тариф не меняются.</p>') +
     '<div class="pacts"><button class="btn ghost" data-prof="new"' + (full || Prof.edit === -1 ? ' disabled' : '') + '>Сохранить текущий как…</button>' +
     '<button class="btn ghost" data-prof="imp"' + (full ? ' disabled' : '') + ' title="Загрузить из файла">' + PROF_ICONS.load + 'Из файла…</button></div>' +
-    (Prof.msg ? '<div class="hint' + (Prof.bad ? ' bad' : '') + '">' + esc(Prof.msg) + '</div>' : full ? '<div class="hint">Больше шести не помещается: удалите ненужный</div>' : '');
+    (Prof.msg ? '<div class="hint' + (Prof.bad ? ' bad' : '') + '">' + esc(Prof.msg) + '</div>' : full ? '<div class="hint">Больше шести не помещается: удалите ненужный</div>' : '')], '', true, n ? n + ' из ' + PROF_MAX : '');
 }
 function profSay(t, bad) { Prof.msg = t || ''; Prof.bad = !!bad; }
 

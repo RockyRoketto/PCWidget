@@ -24,14 +24,17 @@ function gameBlock() {
   var sum = '<div class="seg">' + [[0, 'Показывать'], [1, 'Не нужен']].map(function (o) {
     return '<button data-gsum="' + o[0] + '" class="' + (g.noSummary === !!o[0] ? 'on' : '') + '">' + o[1] + '</button>';
   }).join('') + '</div>';
-  return label('Игровой режим') +
-    setRow('Показ поверх игры', 'Игра в окне или в окне без рамки. Полноэкранный эксклюзивный режим перекрыть нельзя', '<span class="sw"><input type="checkbox" data-gon aria-label="Игровой режим"' + (SYS.game ? ' checked' : '') + '><i></i></span>') +
-    '<div class="ol">Горячая клавиша<input class="txt key-in" type="text" readonly data-gkey value="' + esc(g.key || '') + '" placeholder="Нет" aria-label="Горячая клавиша игрового режима"></div>' +
-    '<div class="hint' + (SYS.gameKeyErr ? ' bad' : '') + '">' + esc(SYS.gameKeyErr || 'Щёлкни поле и нажми сочетание. Backspace — без клавиши') + '</div>' +
-    '<div class="ol gsp">Угол экрана<span style="width:150px">' + corners + '</span></div>' +
-    '<div class="ol gsp">Главный виджет<span style="width:170px">' + hide + '</span></div>' +
-    '<div class="ol gsp" title="Карточка с FPS и графиком, когда игру закрыли или режим выключен">Итог после игры<span style="width:170px">' + sum + '</span></div>' +
-    '<div class="lab">Строки</div><div class="gchips">' + chips + '</div>';
+  var seg = function (w, html) { return '<span style="width:' + w + 'px">' + html + '</span>'; };
+  return grp('Панель поверх игры', [
+      setRow('Показывать', 'Игра в окне или в окне без рамки. Полноэкранный эксклюзивный режим перекрыть нельзя', '<span class="sw"><input type="checkbox" data-gon aria-label="Игровой режим"' + (SYS.game ? ' checked' : '') + '><i></i></span>'),
+      setRow('Горячая клавиша', '<span class="' + (SYS.gameKeyErr ? 'bad' : '') + '">' + esc(SYS.gameKeyErr || 'Щёлкни поле и нажми сочетание, Backspace — без клавиши') + '</span>',
+        '<input class="txt key-in" type="text" readonly data-gkey value="' + esc(g.key || '') + '" placeholder="Нет" aria-label="Горячая клавиша игрового режима">')]) +
+    grp('Вид панели', [
+      setRow('Угол экрана', '', seg(150, corners)),
+      gi('<div class="lab">Строки</div><div class="gchips">' + chips + '</div>')]) +
+    grp('Пока идёт игра', [
+      setRow('Главный виджет', '', seg(170, hide)),
+      setRow('Итог после игры', 'Карточка с FPS и графиком, когда игру закрыли', seg(170, sum))]);
 }
 
 function sendGame(g) { SYS.gameCfg = g; post('game:' + JSON.stringify(g)); }
