@@ -1,0 +1,81 @@
+<img src="media/icon.png" width="64" alt="">
+
+# PC Widget
+
+[Русский](README.md) · **English**
+
+A Windows desktop widget showing CPU and GPU load and temperatures, memory, network, disks and processes. A single exe that lives in the tray; everything is configured from the widget itself.
+
+![Three themes: Sheet, Gauge, Fill](media/themes.png)
+
+> **Note:** the interface is currently in Russian only.
+
+## Features
+
+- **Tiles:** CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime. Optional clock, calendar, weather and Claude Code limits.
+- **Themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient). Each comes in light, dark and "follow Windows". Any tile can have its own color.
+- **Modes:** Panel, Wide, Column, Strip, Square. Dragged to the left or right screen edge, the widget turns into a column.
+- **Layout:** drag tiles with the mouse, hide them, make them half or full width.
+- **Alerts:** temperature and usage thresholds, optional Windows notifications.
+- **Extras:** sits on the desktop and survives Win+D, optional always-on-top, scaling, screen burn-in protection.
+
+![Modes: Wide, Column, Square](media/modes.png)
+
+*Screenshots show sample data.*
+
+## Requirements
+
+- Windows 10 or 11, 64-bit
+- WebView2 Runtime (preinstalled on Windows 11)
+- .NET Framework 4 (preinstalled on Windows)
+- The GPU tile needs an NVIDIA card with its driver. Without one the tile is hidden.
+- Administrator rights: CPU sensors cannot be read without them.
+
+## Installation
+
+1. Download `widget.exe` from [Releases](../../releases) or build it yourself.
+2. Run it. The file is not code-signed, so SmartScreen may warn you: choose "More info", then "Run anyway".
+3. To start the widget with Windows, open its menu (right-click the widget or the tray icon) and choose **«Установить (автозапуск)…»** (Install with autostart). The program copies itself to `Program Files\PCWidget` and creates a scheduled task.
+
+### CPU temperature
+
+CPU temperature, clock and power need the [PawnIO](https://pawnio.eu/) driver. The installer offers to set it up through `winget`; you can also do it later from the menu. Without the driver everything else works, those readings are simply absent.
+
+## Uninstall
+
+Use the menu item **«Удалить PC Widget…»** (Remove PC Widget) or "Apps & features" in Windows. Settings remain in `%APPDATA%\pcwidget` and the unpacked sensor libraries in `%LOCALAPPDATA%\pcwidget`; delete these folders by hand if you wish. The PawnIO driver is removed separately.
+
+## Network and privacy
+
+There is no telemetry. The widget only connects to:
+
+| Where | Why | When |
+|---|---|---|
+| `1.1.1.1:443` | ping and packet loss (connection only, no data sent) | every 5 seconds |
+| `open-meteo.com` | weather for the city you type in | only while the weather tile is enabled |
+
+**The Claude tile** is off by default. It reads local Claude Code files in `~/.claude` (logs, to count tokens, and the session list). It does not read your login token and makes no network requests. The button that connects usage limits adds a small mod to `~/.claude/skills/pcwidget-limits`; disconnecting or uninstalling the widget removes it.
+
+## Building
+
+You need Go (version as in `go.mod`) and PowerShell. CGO is not used.
+
+```powershell
+go install github.com/tc-hib/go-winres@latest
+```
+
+```powershell
+./scripts/build.ps1
+```
+
+The script runs the tests, downloads the LibreHardwareMonitor release, adds the icon and manifest, and writes `dist/widget.exe`. Without `go-winres` the exe is built without them.
+
+## How it works
+
+Go without CGO, a custom Win32 window hosting WebView2. Once a second Go sends the readings to the page (HTML, CSS and JavaScript from `assets/`, all embedded in the exe). CPU sensors are read by a small C# helper, compiled on the machine with the built-in `csc.exe`, using LibreHardwareMonitorLib. The GPU is queried through `nvidia-smi`.
+
+## License
+
+[MIT](LICENSE). Third-party components and their licenses are listed in [THIRD-PARTY.md](THIRD-PARTY.md).
+
+This is an independent project, not affiliated with Anthropic, NVIDIA, Microsoft, or the authors of LibreHardwareMonitor and PawnIO. All names belong to their owners.
