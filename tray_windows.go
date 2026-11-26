@@ -30,6 +30,7 @@ const (
 	cmdInstall   = 5
 	cmdUninstall = 6
 	cmdPawn      = 7
+	cmdGame      = 8
 	cmdExit      = 9
 	cmdTheme     = 10 // 10..13
 	cmdMode      = 20 // 20..24
@@ -147,6 +148,7 @@ func showNativeMenu() {
 	pAppendMenu.Call(m, mfPopup, submenu(cmdTheme, themeText, themeKeys, app.brief.Theme), uintptr(unsafe.Pointer(utf16("Тема"))))
 	pAppendMenu.Call(m, mfString, cmdSettings, uintptr(unsafe.Pointer(utf16("Настройки…"))))
 	pAppendMenu.Call(m, topFlags, cmdTopmost, uintptr(unsafe.Pointer(utf16("Поверх всех окон"))))
+	pAppendMenu.Call(m, checkIf(ov.on), cmdGame, uintptr(unsafe.Pointer(utf16("Игровой режим"))))
 	pAppendMenu.Call(m, mfSeparator, 0, 0)
 	if hub.available() && !pawnInstalled() {
 		pAppendMenu.Call(m, mfString, cmdPawn, uintptr(unsafe.Pointer(utf16("Поставить драйвер для температуры CPU…"))))
@@ -173,6 +175,8 @@ func showNativeMenu() {
 		toggleVisible()
 	case id == cmdTopmost:
 		toggleTopmost()
+	case id == cmdGame:
+		toggleGame()
 	case id == cmdPawn:
 		installPawnIO(hub)
 	case id == cmdInstall:

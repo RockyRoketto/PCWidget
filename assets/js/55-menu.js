@@ -13,7 +13,7 @@ function menuHTML() {
     return '<button class="mi" data-cmd="' + cmd + '">' + I(icon) + '<span>' + text + '</span>' + (on ? '<span class="i ck">' + ICONS.check + '</span>' : '') + '</button>';
   };
   return '<div class="menu"><div class="mseg">' + seg + '</div><div class="mthemes">' + themes + '</div><hr>' +
-    item('pen', 'Изменить плитки', 'edit') + item('gear', 'Настройки', 'settings') + item('pin', 'Поверх всех окон', 'topmost', TOPMOST) + '<hr>' +
+    item('pen', 'Изменить плитки', 'edit') + item('gear', 'Настройки', 'settings') + item('pin', 'Поверх всех окон', 'topmost', TOPMOST) + item('game', 'Игровой режим', 'game', SYS.game) + '<hr>' +
     (SYS.sensors && !SYS.driver ? item('install', 'Датчик температуры CPU…', 'driver') : '') +
     (SYS.installed ? '' : item('install', 'Установить на ПК…', 'install')) +
     item('eye', SYS.visible === false ? 'Показать' : 'Скрыть в трей', 'toggle') + item('power', 'Выход', 'exit') + '</div>';

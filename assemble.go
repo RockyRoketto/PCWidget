@@ -71,6 +71,32 @@ func buildSettingsPage() (string, error) {
 	return strings.Replace(page, "/*{{JS}}*/", js, 1), nil
 }
 
+// buildOverlayPage собирает страницу игровой панели: стили тем, общие скрипты и свои из assets/overlay/.
+func buildOverlayPage() (string, error) {
+	idx, err := assetsFS.ReadFile("assets/overlay.html")
+	if err != nil {
+		return "", err
+	}
+	css := ""
+	for _, g := range []string{"assets/css/base.css", "assets/css/theme-*.css", "assets/overlay/*.css"} {
+		part, err := concatGlob(g)
+		if err != nil {
+			return "", err
+		}
+		css += part
+	}
+	js := ""
+	for _, g := range []string{"assets/js/00-core.js", "assets/js/05-layout.js", "assets/js/22-parts.js", "assets/overlay/*.js"} {
+		part, err := concatGlob(g)
+		if err != nil {
+			return "", err
+		}
+		js += part
+	}
+	page := strings.Replace(string(idx), "/*{{CSS}}*/", css, 1)
+	return strings.Replace(page, "/*{{JS}}*/", js, 1), nil
+}
+
 func concatGlob(pattern string) (string, error) {
 	names, err := fs.Glob(assetsFS, pattern)
 	if err != nil {

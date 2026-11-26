@@ -20,6 +20,8 @@ type Settings struct {
 	AutostartKey string `json:"autostartKey,omitempty"`
 	// UI — настройки интерфейса (плитки, порядок, пороги, режим). Их ведёт страница, Go хранит как есть.
 	UI json.RawMessage `json:"ui,omitempty"`
+	// Game — игровой режим (game.go); нет = по умолчанию.
+	Game *GameCfg `json:"game,omitempty"`
 }
 
 func defaultSettings() Settings {

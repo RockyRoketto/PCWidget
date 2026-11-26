@@ -328,6 +328,7 @@ func onCfg(raw string) {
 	if set.open {
 		styleSettings(false)
 	}
+	sendOverlayInit() // тема и цвета панели игрового режима
 }
 
 // initData — с чего начинает страница (виджет и окно настроек).

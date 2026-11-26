@@ -31,6 +31,7 @@ var ICONS = (function () {
     gear: w('<path d="M3 6h7M14 6h3M3 14h3M10 14h7"/><circle cx="12" cy="6" r="2"/><circle cx="8" cy="14" r="2"/>'),
     pen: w('<path d="M3.5 16.5l.8-3.6L13 4.2a1.6 1.6 0 0 1 2.3 0l.5.5a1.6 1.6 0 0 1 0 2.3L7.1 15.7z"/>'),
     hide: w('<path d="M5 5l10 10M15 5L5 15"/>'),
+    game: w('<path d="M6.5 6h7a4 4 0 0 1 3.9 4.8l-.7 3.4a2 2 0 0 1-3.4 1L11.6 13H8.4l-1.7 2.2a2 2 0 0 1-3.4-1l-.7-3.4A4 4 0 0 1 6.5 6z"/><path d="M6.5 8.5v3M5 10h3"/><circle cx="13.5" cy="9.3" r=".4"/><circle cx="14.6" cy="11" r=".4"/>'),
     pin: w('<path d="M7 3h6M8 3v5l-2.5 3.5h9L12 8V3M10 11.5V17"/>'),
     power: w('<path d="M10 3v6M6 5.2a6 6 0 1 0 8 0"/>'),
     eye: w('<path d="M2 10s3-5.5 8-5.5S18 10 18 10s-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.3"/>'),
