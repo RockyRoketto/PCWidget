@@ -1,6 +1,6 @@
 /* Тема «ЖК-табло»: стекло индикатора в тёмной рамке. Цифры из семи сегментов (segs в 22-parts.js),
    несветящиеся сегменты видны бледно, как на настоящем табло. Индикаторы — блоки сегментов.
-   Светлая: серо-зелёное табло без подсветки. Тёмная: негатив с голубой подсветкой. Окно прозрачно, рамку рисует страница. */
+   Светлая: серо-зелёное табло без подсветки. Тёмная: то же табло ночью — тёмная олива, цифры светятся бледно-зелёным. Окно прозрачно, рамку рисует страница. */
 body.theme-lcd {
   --R: 12px; --r: 5px; --r2: 4px; --vw: 400; --vw2: 400;
   --font: "Cascadia Mono", Consolas, "Lucida Console", monospace; --vf: "Cascadia Mono", Consolas, monospace;
@@ -11,9 +11,9 @@ body.theme-lcd.tone-light {
   --a: #1b2617; --ok: #1d5c2a; --warm: #7a4700; --hot: #a3160c; --ghost: .1; --glass-in: rgba(0, 0, 0, .28);
 }
 body.theme-lcd.tone-dark {
-  --text: #d3ecff; --dim: rgba(211, 236, 255, .6); --lab: #d3ecff; --sheet: #121418; --tile: #0c2236; --tile2: var(--tile);
-  --track: rgba(211, 236, 255, .09); --hair: rgba(211, 236, 255, .12); --ctl: rgba(211, 236, 255, .08); --pop: #0f2539; --edge: rgba(211, 236, 255, .16);
-  --a: #9fd6ff; --ok: #8fe3b0; --warm: #ffc65c; --hot: #ff7b6b; --ghost: .08; --glass-in: rgba(0, 0, 0, .55);
+  --text: #c8d9a6; --dim: rgba(200, 217, 166, .6); --lab: #c8d9a6; --sheet: #121410; --tile: #1d2318; --tile2: var(--tile);
+  --track: rgba(200, 217, 166, .09); --hair: rgba(200, 217, 166, .12); --ctl: rgba(200, 217, 166, .08); --pop: #222a1c; --edge: rgba(200, 217, 166, .16);
+  --a: #dbe9bd; --ok: #9fd68a; --warm: #e8c25e; --hot: #ff8a6a; --ghost: .07; --glass-in: rgba(0, 0, 0, .55);
 }
 /* стекло табло чуть утоплено в рамку */
 .theme-lcd .cb, .theme-lcd .cr { box-shadow: inset 0 1px 3px var(--glass-in); }

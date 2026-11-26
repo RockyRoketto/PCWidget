@@ -55,7 +55,7 @@ function gradOf(stops) { return 'linear-gradient(155deg,' + stops[0] + ',' + sto
 // Переменные страницы: плотность, акцент, градиент. Одинаково для виджета, меню и настроек.
 // У «Прибора» и «ЖК-табло» свой цвет шкал, у «Заливки» акцент берётся из середины градиента.
 function themeVars() {
-  var a = CFG.theme === 'gauge' ? (isLight() ? '#2f5d5c' : '#e9dfc3') : CFG.theme === 'lcd' ? (isLight() ? '#1b2617' : '#9fd6ff') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
+  var a = CFG.theme === 'gauge' ? (isLight() ? '#2f5d5c' : '#e9dfc3') : CFG.theme === 'lcd' ? (isLight() ? '#1b2617' : '#dbe9bd') : CFG.theme === 'fill' ? fitColor(palStops()[1]) : accentColor();
   return { '--glass': CFG.glass / 100, '--accent': a, '--on-accent': accentOn(a), '--pal': gradOf(palStops()) };
 }
 function setThemeVars(style, density) {

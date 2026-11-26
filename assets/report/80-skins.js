@@ -23,7 +23,7 @@ var SKINS = {
     light: { bg: '#e6e9f1', tile: '#fcfdff', text: '#141c33', dim: 'rgba(20,28,51,.7)', track: 'rgba(20,28,51,.1)', warm: '#8a4b00', hot: '#a3160c', top: .16, bot: .5, mix: .38 }
   },
   lcd: {
-    dark: { bg: '#121418', tile: '#0c2236', text: '#d3ecff', dim: 'rgba(211,236,255,.62)', track: 'rgba(211,236,255,.1)', head: '#e9ece4', mute: 'rgba(233,236,228,.6)', inset: .55, ghost: .08 },
+    dark: { bg: '#121410', tile: '#1d2318', text: '#c8d9a6', dim: 'rgba(200,217,166,.62)', track: 'rgba(200,217,166,.1)', ok: '#9fd68a', warm: '#e8c25e', hot: '#ff8a6a', head: '#e9ece4', mute: 'rgba(233,236,228,.6)', inset: .55, ghost: .08 },
     light: { bg: '#2e322c', tile: '#a9b597', text: '#1b2617', dim: 'rgba(27,38,23,.68)', track: 'rgba(27,38,23,.14)', head: '#e9ece4', mute: 'rgba(233,236,228,.6)', ok: '#1d5c2a', warm: '#7a4700', hot: '#a3160c', inset: .28, ghost: .1 }
   }
 };

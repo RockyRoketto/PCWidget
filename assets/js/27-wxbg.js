@@ -63,7 +63,13 @@ function wxKit(o) {
     base: dark ? .75 : .5, cla: dark ? .26 : .32, dka: dark ? .4 : .42, sa: dark ? .34 : .5
   };
   k.dot = wxDot(p);
-  if (style.matrix) { k.sun = p; k.fl = p; k.cla *= .6; k.dka *= .45; k.thick = 3; } // табло одноцветное; тонкое не попадёт в точку — толще
+  if (style.matrix) { // табло одноцветное; тонкое не попадёт в точку — толще
+    k.sun = p; k.fl = p; k.cla *= .6; k.dka *= .45; k.thick = 3;
+    // Яркость точек — от контраста с фоном плитки: одинаково мягко и на светлом табло, и на тёмном с подсветкой
+    // (светлые точки на тёмном при той же прозрачности режут глаз).
+    var bg = wxRgb(host, 'var(--wx-bg, var(--tile))').split(',').reduce(function (s, v, i) { return s + v * [.3, .59, .11][i]; }, 0), diff = Math.max(40, Math.abs(lum - bg));
+    k.mOn = Math.min(.6, 55 / diff); k.mGhost = Math.min(.08, 7 / diff);
+  }
   kind.kit(k);
   return k;
 }
@@ -123,8 +129,8 @@ function wxMatrix(o) {
   o.smg.clearRect(0, 0, cols, rows); o.smg.imageSmoothingQuality = 'high'; o.smg.drawImage(o.off, 0, 0, cols, rows);
   var d = o.smg.getImageData(0, 0, cols, rows).data, x, y;
   g.clearRect(0, 0, o.W, o.H);
-  if (m.ghost) { g.fillStyle = 'rgba(' + o.kit.p + ',' + (o.kit.dark ? .035 : .05) + ')'; for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) g.fillRect(x * c, y * c, s, s); }
-  g.fillStyle = 'rgba(' + o.kit.p + ',' + (o.kit.dark ? .42 : .38) + ')';
+  if (m.ghost) { g.fillStyle = 'rgba(' + o.kit.p + ',' + o.kit.mGhost + ')'; for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) g.fillRect(x * c, y * c, s, s); }
+  g.fillStyle = 'rgba(' + o.kit.p + ',' + o.kit.mOn + ')';
   for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) {
     var th = m.lo + (WX_BAYER[(x & 3) + ((y & 3) << 2)] + .5) / 16 * (m.hi - m.lo);
     if (d[(y * cols + x) * 4 + 3] > th * 255) g.fillRect(x * c, y * c, s, s);
