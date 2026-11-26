@@ -123,7 +123,7 @@ function palAt(stops, t) {
 function placeFills(root) {
   if (CFG.theme !== 'fill' || !root.isConnected) return;
   var st = palStops(), dx = Math.sin(155 * Math.PI / 180), dy = -Math.cos(155 * Math.PI / 180);
-  var list = $$('.fill, .cores, .tmap', root).map(function (f) {
+  var list = $$('.fill, .cores, .tmap, .wxbg', root).map(function (f) {
     var r = f.parentNode.getBoundingClientRect();
     return { f: f, w: r.width, p: (r.left + r.width / 2) * dx + (r.top + r.height / 2) * dy };
   }).filter(function (x) { return x.w; });

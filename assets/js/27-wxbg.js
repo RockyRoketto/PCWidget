@@ -1,13 +1,20 @@
 'use strict';
 // Фон плитки погоды: солнце (ночью звёзды), облака, туман, дождь с брызгами, снег, гроза с молниями.
 // Рисует <canvas> под содержимым плитки. Цвета берутся из темы: частицы — цвет текста (или --wx-p),
-// солнце — --warm (или --wx-sun), вспышка — --wx-fl. Новой теме ничего задавать не нужно.
-// Облака и туман рисуются один раз в спрайты с размытием, в кадре их только сдвигают.
-// Не больше 30 кадров в секунду; стоит, когда окно скрыто, идёт игра, плитка не видна,
-// в Windows «уменьшить движение» или выключено в настройках (CFG.wxAnim).
+// солнце — --warm (или --wx-sun), вспышка — --wx-fl, заливка — цвет карточки (--wx-f или --solid).
+// Как рисовать, задаёт тема в WX_STYLE: kind — набор форм (28-wxdraw.js — soft, 29-wxstyles.js — tick и fill),
+// matrix — вывести кадр точками матрицы (ЖК-табло, пиксельные темы), fps — частота кадров.
+// Стоит, когда окно скрыто, идёт игра, плитка не видна, в Windows «уменьшить движение» или выключено (CFG.wxAnim).
 // Координаты внутри — в «единицах макета»: 2 единицы на CSS-пиксель, плитка около 420×300.
 
-var WX_FPS = 30, WX_LIST = [], wxRaf = 0, wxLast = 0;
+var WX_STYLE = {
+  sheet: { kind: 'soft' },                                   // стекло: мягкие облака, свечение солнца
+  gauge: { kind: 'tick' },                                   // приборная доска: деления, штрихи, без свечения
+  fill: { kind: 'fill' },                                    // заливка: залитые формы, уровень воды, сугроб
+  lcd: { kind: 'soft', fps: 12, matrix: { cell: 7, gap: 2, lo: .06, hi: .5, ghost: true } } // точки табло
+};
+var WX_KINDS = {};   // наборы форм: { kit(k), sky, night, cloud, fog, rain, snow } — чего нет, берётся из soft
+var WX_LIST = [], wxRaf = 0;
 var wxR = Math.random;
 
 function wxRun() { return CFG && CFG.wxAnim !== false && !document.hidden && !SYS.game && !(stillMQ && stillMQ.matches); }
@@ -19,10 +26,14 @@ function wxRgb(host, css) {
   return m.slice(0, 3).join(',');
 }
 function wxCanvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
-function wxBlur(src, bl) { var o = wxCanvas(src.width + bl * 6, src.height + bl * 6), g = o.getContext('2d'); g.filter = 'blur(' + bl + 'px)'; g.drawImage(src, bl * 3, bl * 3); return o; }
+function wxBlur(src, bl) {
+  if (!bl) return src;
+  var o = wxCanvas(src.width + bl * 6, src.height + bl * 6), g = o.getContext('2d'); g.filter = 'blur(' + bl + 'px)'; g.drawImage(src, bl * 3, bl * 3); return o;
+}
 
 // Облако: пушистые круги с плоским низом; холст по габаритам кругов, чтобы ничего не обрезалось.
-function wxCloud(rgb, w, h, bl) {
+// paint(g, w, h) — чем залить (по умолчанию сплошной цвет rgb), после заливки можно наложить узор.
+function wxCloud(rgb, w, h, bl, paint) {
   var cs = [], x0 = 1e9, x1 = -1e9, y0 = 1e9;
   for (var i = 0; i < 14; i++) {
     var cx = w * (.1 + wxR() * .8), e = 1 - Math.abs(cx - w / 2) / (w / 2), r = h * (.18 + e * .32 + wxR() * .1), cy = h - r * .75 - wxR() * h * .1;
@@ -31,24 +42,9 @@ function wxCloud(rgb, w, h, bl) {
   var t = wxCanvas(x1 - x0, h - y0), g = t.getContext('2d');
   g.translate(-x0, -y0); g.fillStyle = 'rgb(' + rgb + ')';
   cs.forEach(function (c) { g.beginPath(); g.arc(c[0], c[1], c[2], 0, 7); g.fill(); });
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  if (paint) paint(g, t.width, t.height);
   return wxBlur(t, bl);
-}
-function wxFog(rgb, w, h, bl) {
-  var t = wxCanvas(w, h), g = t.getContext('2d'); g.fillStyle = 'rgb(' + rgb + ')';
-  for (var i = 0; i < 9; i++) {
-    var rx = w * (.08 + wxR() * .1), ry = h * (.15 + wxR() * .15);
-    g.beginPath(); g.ellipse(rx + wxR() * (w - 2 * rx), h / 2 + (wxR() - .5) * (h - 2 * ry) * .6, rx, ry, 0, 0, 7); g.fill();
-  }
-  return wxBlur(t, bl);
-}
-function wxRays(rgb, R) {
-  var o = wxCanvas(R * 2, R * 2), g = o.getContext('2d'); g.filter = 'blur(10px)'; g.translate(R, R);
-  for (var i = 0; i < 9; i++) {
-    var a = i * Math.PI * 2 / 9 + wxR() * .3, sp = .05 + wxR() * .05, gr = g.createLinearGradient(0, 0, Math.cos(a) * R, Math.sin(a) * R);
-    gr.addColorStop(0, 'rgba(' + rgb + ',.5)'); gr.addColorStop(1, 'rgba(' + rgb + ',0)');
-    g.fillStyle = gr; g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R * .95, a - sp, a + sp); g.closePath(); g.fill();
-  }
-  return o;
 }
 function wxDot(rgb) {
   var o = wxCanvas(32, 32), g = o.getContext('2d'), gr = g.createRadialGradient(16, 16, 0, 16, 16, 16);
@@ -57,15 +53,18 @@ function wxDot(rgb) {
 }
 
 // Палитра и спрайты под текущую тему. Светлые частицы — значит фон тёмный: тучи темнее фона, иначе — цвета частиц.
-function wxKit(host) {
-  var p = wxRgb(host, 'var(--wx-p, var(--text))'), sun = wxRgb(host, 'var(--wx-sun, var(--warm))'), fl = wxRgb(host, 'var(--wx-fl, #fff)');
-  var lum = p.split(',').reduce(function (s, v, i) { return s + v * [.3, .59, .11][i]; }, 0), dark = lum > 128;
-  var dk = dark ? '0,0,0' : p, k = { p: p, sun: sun, fl: fl, dark: dark, base: dark ? .75 : .5, cla: dark ? .26 : .32, dka: dark ? .4 : .42, sa: dark ? .34 : .5 };
-  k.clouds = [0, 1, 2, 3, 4, 5].map(function (i) { return wxCloud(p, 200 + i * 20, 90 + i * 8, i < 3 ? 10 : 6); });
-  k.darkC = [0, 1, 2, 3].map(function (i) { return wxCloud(dk, 260 + i * 30, 100 + i * 10, 9); });
-  k.lit = [0, 1, 2, 3].map(function (i) { return wxCloud(fl, 260 + i * 30, 100 + i * 10, 12); });
-  k.fogs = [0, 1, 2, 3, 4].map(function () { return wxFog(p, 420, 110, 16); });
-  k.rays = wxRays(sun, 390); k.dot = wxDot(p);
+function wxKit(o) {
+  var host = o.cb, sol = o.cv.style.getPropertyValue('--solid'); // цвет карточки в «Заливке» ставит placeFills на сам холст
+  var style = WX_STYLE[CFG.theme] || WX_STYLE.sheet, kind = WX_KINDS[style.kind] || WX_KINDS.soft;
+  var p = wxRgb(host, 'var(--wx-p, var(--text))'), lum = p.split(',').reduce(function (s, v, i) { return s + v * [.3, .59, .11][i]; }, 0), dark = lum > 128;
+  var k = {
+    style: style, kind: kind, p: p, dark: dark, dk: dark ? '0,0,0' : p,
+    sun: wxRgb(host, 'var(--wx-sun, var(--warm))'), fl: wxRgb(host, 'var(--wx-fl, #fff)'), fc: wxRgb(host, sol || 'var(--wx-f, var(--a))'),
+    base: dark ? .75 : .5, cla: dark ? .26 : .32, dka: dark ? .4 : .42, sa: dark ? .34 : .5
+  };
+  k.dot = wxDot(p);
+  if (style.matrix) { k.sun = p; k.fl = p; k.cla *= .6; k.dka *= .45; k.thick = 3; } // табло одноцветное; тонкое не попадёт в точку — толще
+  kind.kit(k);
   return k;
 }
 
@@ -73,7 +72,7 @@ function wxKit(host) {
 function wxBg(cb) {
   var cv = document.createElement('canvas'); cv.className = 'wxbg'; cv.setAttribute('aria-hidden', 'true');
   cb.insertBefore(cv, cb.firstChild);
-  var o = { cb: cb, cv: cv, g: cv.getContext('2d'), st: '', pw: 2, night: false, W: 0, H: 0, kitKey: '', kit: null, ps: [], sp: [], cl: [], seg: null, ft: -1e9, next: 0, drawn: false };
+  var o = { cb: cb, cv: cv, g: cv.getContext('2d'), st: '', pw: 2, night: false, W: 0, H: 0, kitKey: '', kit: null, last: 0, drawn: false };
   WX_LIST.push(o);
   return function (icon, power, night) {
     var st = icon || '', pw = power || 2, n = !!night;
@@ -90,19 +89,44 @@ function wxFrame(t) {
   wxRaf = 0;
   if (!wxRun()) { WX_LIST.forEach(wxClear); setTimeout(wxKick, 1000); return; } // проверяем раз в секунду, без кадров
   wxRaf = requestAnimationFrame(wxFrame);
-  if (t - wxLast < 1000 / WX_FPS - 2) return;
-  var dt = Math.min(4, (t - wxLast) / 16); wxLast = t;
-  WX_LIST.forEach(function (o) { if (o.cb.isConnected && o.cb.offsetParent) wxDraw(o, t, dt); });
   WX_LIST = WX_LIST.filter(function (o) { return o.cb.isConnected; }); // плитку пересоздали — старую забываем
+  WX_LIST.forEach(function (o) {
+    var fps = (o.kit && o.kit.style.fps) || 30;
+    if (!o.cb.offsetParent || t - o.last < 1000 / fps - 2) return;
+    var dt = o.last ? Math.min(6, (t - o.last) / 16) : 1; o.last = t;
+    wxDraw(o, t, dt); // 28-wxdraw.js
+  });
 }
 function wxClear(o) { if (o.drawn) { o.g.clearRect(0, 0, o.W, o.H); o.drawn = false; } } // в единицах макета: масштаб холста задан в wxFit
 
-// Размер холста и тема проверяются в кадре: изменились — пересчитываем.
+// Размер холста и тема проверяются в кадре: изменились — пересчитываем. При матрице сцена рисуется во внеэкранный холст.
 function wxFit(o) {
-  var w = o.cb.clientWidth, h = o.cb.clientHeight, dpr = window.devicePixelRatio || 1, key = document.body.className;
-  if (key !== o.kitKey || !o.kit) { o.kitKey = key; o.kit = wxKit(o.cb); o.W = 0; }
+  var w = o.cb.clientWidth, h = o.cb.clientHeight, dpr = window.devicePixelRatio || 1, key = document.body.className + o.cv.style.getPropertyValue('--solid');
+  if (key !== o.kitKey || !o.kit) { o.kitKey = key; o.kit = wxKit(o); o.W = 0; }
   if (o.W === w * 2 && o.H === h * 2) return;
   o.cv.width = Math.round(w * dpr); o.cv.height = Math.round(h * dpr); o.W = w * 2; o.H = h * 2;
   o.g.setTransform(dpr / 2, 0, 0, dpr / 2, 0, 0);
+  var m = o.kit.style.matrix;
+  if (m) {
+    o.off = wxCanvas(o.W, o.H); o.cols = Math.ceil(o.W / m.cell); o.rows = Math.ceil(o.H / m.cell);
+    o.sm = wxCanvas(o.cols, o.rows); o.smg = o.sm.getContext('2d', { willReadFrequently: true });
+  } else o.off = null;
   wxSeed(o);
+}
+
+// Кадр точками матрицы: сцену уменьшаем до сетки, клетка светится, если в ней набралось достаточно цвета.
+// Порог у соседних клеток разный (упорядоченный дизеринг 4×4): полупрозрачное — редкими точками, плотное — сплошь.
+// Несветящиеся точки видны бледно (ghost), как сегменты табло.
+var WX_BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+function wxMatrix(o) {
+  var m = o.kit.style.matrix, g = o.g, c = m.cell, s = c - m.gap, cols = o.cols, rows = o.rows;
+  o.smg.clearRect(0, 0, cols, rows); o.smg.imageSmoothingQuality = 'high'; o.smg.drawImage(o.off, 0, 0, cols, rows);
+  var d = o.smg.getImageData(0, 0, cols, rows).data, x, y;
+  g.clearRect(0, 0, o.W, o.H);
+  if (m.ghost) { g.fillStyle = 'rgba(' + o.kit.p + ',' + (o.kit.dark ? .035 : .05) + ')'; for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) g.fillRect(x * c, y * c, s, s); }
+  g.fillStyle = 'rgba(' + o.kit.p + ',' + (o.kit.dark ? .42 : .38) + ')';
+  for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) {
+    var th = m.lo + (WX_BAYER[(x & 3) + ((y & 3) << 2)] + .5) / 16 * (m.hi - m.lo);
+    if (d[(y * cols + x) * 4 + 3] > th * 255) g.fillRect(x * c, y * c, s, s);
+  }
 }
