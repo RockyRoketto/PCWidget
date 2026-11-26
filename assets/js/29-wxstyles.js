@@ -1,8 +1,8 @@
 'use strict';
 // Формы фона погоды под темы (общий посев и soft — в 28-wxdraw.js).
-// tick — «Прибор»: деления и штрихи, без свечения и размытия: солнце-циферблат, облака в полоску, как шкалы,
+// tick — «Прибор»: деления и штрихи, без размытия: пунктирные кольца у значка, облака в полоску, как шкалы,
 //   дождь отвесными штрихами, снег крестиками, туман пунктиром, молния цветом индикатора.
-// fill — «Заливка»: залитые формы с переходом «сверху прозрачнее, книзу плотнее»: солнце — залитый круг,
+// fill — «Заливка»: залитые формы с переходом «сверху прозрачнее, книзу плотнее»: у значка залитый круг,
 //   дождь наполняет карточку снизу волнующимся уровнем, снег наметает сугроб, туман оседает внизу.
 
 // Полоски, как деления шкал «Прибора»: 3 px штрих, 2 px просвет (в единицах макета 6 и 4).
@@ -23,19 +23,8 @@ WX_KINDS.tick = {
     k.lit = wxSet(4, function (i) { return wxCloud(k.fl, 260 + i * 30, 100 + i * 10, 0, wxStripes); });
     k.cla *= 1.4; k.dka *= 1.2; // в полоску закрыто меньше места — плотнее
   },
-  sky: function (o, g, t, dt, k, f) {
-    var c = wxSpot(o, 70, 14), cx = c.x, cy = c.y, i, a = t / 40000; // циферблат наполовину за верхним краем
-    g.lineWidth = 2; g.strokeStyle = g.fillStyle = 'rgba(' + k.sun + ',' + .5 * f + ')';
-    g.beginPath(); g.arc(cx, cy, 24, 0, 7); g.globalAlpha = .45; g.fill(); g.globalAlpha = 1;
-    g.beginPath();
-    for (i = 0; i < 48; i++) { var an = a + i * Math.PI / 24, r1 = 38, r2 = i % 4 ? 46 : 54; g.moveTo(cx + Math.cos(an) * r1, cy + Math.sin(an) * r1); g.lineTo(cx + Math.cos(an) * r2, cy + Math.sin(an) * r2); }
-    g.stroke();
-    g.save(); g.setLineDash([6, 8]); g.lineDashOffset = t / 300; g.globalAlpha = .5; g.beginPath(); g.arc(cx, cy, 68, 0, 7); g.stroke(); g.restore();
-  },
-  night: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 52, 14), cx = c.x, cy = c.y; // крупный месяц, виден только низ
-    g.fillStyle = 'rgba(' + k.p + ',.24)'; g.beginPath(); g.arc(cx, cy, 52, 0, 7); g.fill();
-    g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(cx + 23, cy - 16, 47, 0, 7); g.fill(); g.globalCompositeOperation = 'source-over';
+  ring: function (o, g, t, h) { wxRings(g, t, h, [6, 8]); },
+  stars: function (o, g, t, k) {
     g.strokeStyle = 'rgb(' + k.p + ')'; g.lineWidth = 1.6;
     o.stars.forEach(function (s) {
       var r = 2 + s.s * 3; g.globalAlpha = (.15 + s.s * .35) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph));
@@ -95,21 +84,11 @@ WX_KINDS.fill = {
     k.fogs = wxSet(5, function () { return wxFogBand(k.p, 420, 110, 10); });
     k.a0 = k.dark ? .22 : .16; k.a1 = k.dark ? .55 : .4; // верх и низ заливки
   },
-  sky: function (o, g, t, dt, k, f) {
-    var c = wxSpot(o, 110, -16), cx = c.x, cy = c.y, b = 1 + .03 * Math.sin(t / 2200);
-    [[110, .45], [70, 1]].forEach(function (d) {
-      var r = d[0] * b, gr = g.createLinearGradient(0, cy - r, 0, cy + r);
-      gr.addColorStop(0, 'rgba(' + k.sun + ',' + k.a0 * d[1] * f + ')'); gr.addColorStop(1, 'rgba(' + k.sun + ',' + k.a1 * d[1] * f + ')');
-      g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
-    });
+  ring: function (o, g, t, h) { // большой бледный залитый круг с тем же центром, что у значка
+    var r = h.r * 1.9 * (1 + .02 * Math.sin(t / 2200));
+    g.fillStyle = 'rgba(' + h.col + ',' + h.a * .5 + ')'; g.beginPath(); g.arc(h.x, h.y, r, 0, 7); g.fill();
   },
-  night: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 90, -20); // луна — большой бледный круг из-за верхнего края, с ореолом
-    [[90, .35], [62, .7]].forEach(function (d) {
-      var r = d[0], gr = g.createLinearGradient(0, c.y - r, 0, c.y + r);
-      gr.addColorStop(0, 'rgba(' + k.p + ',' + k.a0 * d[1] * .6 + ')'); gr.addColorStop(1, 'rgba(' + k.p + ',' + k.a1 * d[1] * .6 + ')');
-      g.fillStyle = gr; g.beginPath(); g.arc(c.x, c.y, r, 0, 7); g.fill();
-    });
+  stars: function (o, g, t, k) {
     g.fillStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) { g.globalAlpha = (.15 + s.s * .3) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph)); g.beginPath(); g.arc(s.x, s.y, 1 + s.s * 1.4, 0, 7); g.fill(); });
     g.globalAlpha = 1;

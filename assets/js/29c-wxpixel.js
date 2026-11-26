@@ -10,23 +10,22 @@ WX_KINDS.pix = {
     k.darkC = [0, 1, 2, 3].map(function (i) { return wxCloud(k.cl, 260 + i * 30, 100 + i * 10, 0); });
     k.fogs = [0, 1, 2, 3, 4].map(function () { return wxFogBand(k.cl, 420, 110, 8); });
   },
-  // Солнце: круг и восемь лучей, лучи через полсекунды то длинные, то короткие.
-  sky: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 76, 20), sx = c.x, sy = c.y, ph = Math.floor(t / 500) % 2; // восходит из-за верхнего края
-    g.save(); if (o.W < 440) g.globalAlpha = .45; // в узкой солнце заходит за цифры — редкими клетками
-    g.fillStyle = 'rgb(' + k.sun + ')';
-    g.beginPath(); g.arc(sx, sy, 40, 0, 7); g.fill();
-    for (var i = 0; i < 8; i++) {
-      var a = i * Math.PI / 4, r0 = 52, r1 = (i + ph) % 2 ? 76 : 64;
-      g.save(); g.translate(sx, sy); g.rotate(a); g.fillRect(r0, -5, r1 - r0, 10); g.restore();
-    }
-    g.restore();
+  // У значка — кольца из отдельных клеток, без свечения (оно в матрице слипается в пятно); шаг раз в полсекунды.
+  noGlow: true,
+  ring: function (o, g, t, h) {
+    var turn = Math.floor(t / 500) % 2;
+    g.fillStyle = 'rgb(' + h.col + ')';
+    [[1.25, 20], [1.9, 28]].forEach(function (d, j) {
+      if (j && o.W < 440) return; // в узкой дальнее кольцо легло бы на цифры
+      var R = h.r * d[0], n = Math.round(2 * Math.PI * R / d[1]);
+      for (var i = 0; i < n; i++) {
+        var a = (i + turn / 2) * 2 * Math.PI / n;
+        g.fillRect(Math.floor((h.x + Math.cos(a) * R) / 10) * 10, Math.floor((h.y + Math.sin(a) * R) / 10) * 10, 10, 10);
+      }
+    });
   },
-  // Ночью: месяц и звёзды по одной клетке, мигают шагами; часть звёзд жёлтые.
-  night: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 56, 16), mx = c.x, my = c.y; // крупный месяц, виден только низ; редкими клетками, чтобы не спорить с цифрами
-    g.save(); g.globalAlpha = o.W < 440 ? .35 : .55; g.fillStyle = 'rgb(' + k.p + ')'; g.beginPath(); g.arc(mx, my, 56, 0, 7); g.fill();
-    g.globalAlpha = 1; g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(mx - 28, my - 18, 50, 0, 7); g.fill(); g.restore();
+  // Звёзды по одной клетке, мигают шагами; часть жёлтые.
+  stars: function (o, g, t, k) {
     o.stars.forEach(function (s) {
       if (Math.sin(Math.floor(t / 400) * (1 + s.s) + s.ph) < -.3) return; // погасла на этом шаге
       g.fillStyle = 'rgb(' + (s.s > .7 ? k.sun : k.p) + ')';

@@ -67,7 +67,7 @@ function wxKit(o) {
   var k = {
     style: style, kind: kind, p: p, dark: dark, dk: dark ? '0,0,0' : p,
     sun: wxRgb(host, 'var(--wx-sun, var(--warm))'), fl: wxRgb(host, 'var(--wx-fl, #fff)'), fc: wxRgb(host, sol || 'var(--wx-f, var(--a))'),
-    base: dark ? .75 : .5, cla: dark ? .26 : .32, dka: dark ? .4 : .42, sa: dark ? .34 : .5
+    base: dark ? .75 : .5, cla: dark ? .26 : .32, dka: dark ? .4 : .42
   };
   k.dot = wxDot(p);
   if (style.matrix && style.matrix.color) { // цветная матрица: свои цвета облаков и дождя, клетка берёт ближайший из палитры
@@ -127,30 +127,8 @@ function wxFit(o) {
     o.off = wxCanvas(o.W, o.H); o.cols = Math.ceil(o.W / m.cell); o.rows = Math.ceil(o.H / m.cell);
     o.sm = wxCanvas(o.cols, o.rows); o.smg = o.sm.getContext('2d', { willReadFrequently: true });
   } else o.off = null;
-  wxIconBox(o);
+  wxIconBox(o); // 28b-wxhalo.js
   wxSeed(o);
-}
-
-// В правом углу плитки стоит значок погоды (.wi). Фон не должен его повторять и подкладывать под него фигуру:
-// светило уводится в сторону (wxSpot), звёзды у значка не сеются, облака вокруг него тают (wxHole).
-// o.ib — прямоугольник значка в единицах макета; деление на ratio убирает масштаб, если карточка нарисована увеличенной.
-function wxIconBox(o) {
-  var el = o.cb.querySelector('.wi'), a = o.cb.getBoundingClientRect(), b = el && el.getBoundingClientRect();
-  if (!b || !b.width) { o.ib = { x0: o.W - 120, y0: 24, x1: o.W - 24, y1: 120 }; return; }
-  var u = 2 / (a.width / o.cb.offsetWidth || 1), x = (b.left - a.left) * u - o.cb.clientLeft * 2, y = (b.top - a.top) * u - o.cb.clientTop * 2;
-  o.ib = { x0: x, y0: y, x1: x + b.width * u, y1: y + b.height * u };
-}
-// Место светила радиуса r: у верхнего края (центр y на краю или выше — видна только часть, читается как свет
-// из-за карточки), в широкой плитке — около середины, в узкой — левее значка, не заходя под него;
-// в узкой ещё выше, чтобы не спорить с температурой.
-function wxSpot(o, r, y) { return { x: Math.max(30, Math.min(o.W * .55, o.ib.x0 - 12 - r)), y: o.W < 440 ? y - r * .4 : y }; }
-// Мягко стирает нарисованное вокруг значка: под ним пусто, дальше плавно возвращается.
-function wxHole(o, g) {
-  var b = o.ib, r = (b.x1 - b.x0) / 2, R = r * 2.2;
-  var gr = g.createRadialGradient(0, 0, r, 0, 0, R);
-  gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(.35, 'rgba(0,0,0,.85)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
-  g.save(); g.globalCompositeOperation = 'destination-out'; g.translate((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2);
-  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill(); g.restore();
 }
 
 // Кадр точками матрицы: сцену уменьшаем до сетки, клетка светится, если в ней набралось достаточно цвета.

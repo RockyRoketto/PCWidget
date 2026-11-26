@@ -2,6 +2,7 @@
 // Кадры фона погоды (подключение, палитра, матрица — в 27-wxbg.js). Единицы — макетные: o.W×o.H, около 420×300.
 // Сила (o.pw: 1..3) меняет густоту и скорость; у облачности 1 — переменная: пара облаков и солнце.
 // Здесь общий посев частиц, выбор формы по теме и набор soft — мягкий, «как в природе» (Лист, основа для табло).
+// Солнце и луна всех наборов — ореол вокруг значка погоды (28b-wxhalo.js).
 
 var WX_MUL = [1, .55, 1, 1.6];
 
@@ -9,8 +10,8 @@ function wxSeed(o) {
   var W = o.W, H = o.H, R = wxR, A = Math.max(.4, Math.min(3, W * H / 126000)), m = WX_MUL[o.pw] || 1, i;
   o.ps = []; o.sp = []; o.cl = []; o.stars = []; o.seg = null; o.ft = -1e9; o.next = performance.now() + 1500; o.lv = null; o.hp = [R() * 7, R() * 7];
   if (wxSky(o) && o.night) for (i = 0; i < 40 * A; i++) {
-    var s = { x: R() * W, y: R() * H * .7, s: R(), ph: R() * 7 }, b = o.ib; // у значка звёзд нет
-    if (s.x < b.x0 - 24 || s.x > b.x1 + 24 || s.y < b.y0 - 24 || s.y > b.y1 + 24) o.stars.push(s);
+    var s = { x: R() * W, y: R() * H * .7, s: R(), ph: R() * 7 };
+    if (!wxNearIcon(o, s.x, s.y)) o.stars.push(s);
   }
   if (o.st === 'cloud') {
     var n = o.pw === 1 ? 3 : 7;
@@ -89,7 +90,7 @@ function wxDraw(o, t, dt) {
   o.drawn = true;
   var K = k.kind, f = function (n) { return K[n] || WX_KINDS.soft[n]; };
   if (wxSky(o)) f(o.night ? 'night' : 'sky')(o, g, t, dt, k, st === 'sun' ? 1 : .6);
-  if (st === 'cloud') { f('cloud')(o, g, t, dt, k); wxHole(o, g); } // облако за значком читалось бы вторым значком
+  if (st === 'cloud') wxCloudsAside(o, g, dt, k, f('cloud'));
   else if (st === 'fog') f('fog')(o, g, t, dt, k);
   else if (st === 'rain' || st === 'storm') f('rain')(o, g, t, dt, k, st === 'storm');
   else if (st === 'snow') f('snow')(o, g, t, dt, k);
@@ -103,25 +104,11 @@ WX_KINDS.soft = {
     k.darkC = [0, 1, 2, 3].map(function (i) { return wxCloud(k.dk, 260 + i * 30, 100 + i * 10, 9); });
     k.lit = [0, 1, 2, 3].map(function (i) { return wxCloud(k.fl, 260 + i * 30, 100 + i * 10, 12); });
     k.fogs = [0, 1, 2, 3, 4].map(function () { return wxFogBand(k.p, 420, 110, 16); });
-    k.rays = wxRays(k.sun, 390);
   },
-  sky: function (o, g, t, dt, k, f) {
-    var W = o.W, c = wxSpot(o, 100, -36), sx = c.x, sy = c.y, br = .9 + .1 * Math.sin(t / 2200), a = k.sa * f, gr = g.createRadialGradient(sx, sy, 0, sx, sy, 330);
-    gr.addColorStop(0, 'rgba(' + k.sun + ',' + a * br + ')'); gr.addColorStop(.12, 'rgba(' + k.sun + ',' + a * .7 * br + ')');
-    gr.addColorStop(.4, 'rgba(' + k.sun + ',' + a * .18 + ')'); gr.addColorStop(1, 'rgba(' + k.sun + ',0)');
-    g.fillStyle = gr; g.fillRect(0, 0, W, o.H);
-    g.save(); g.globalAlpha = (.35 + .12 * Math.sin(t / 3100)) * (a / .55); g.translate(sx, sy); g.rotate(t / 60000);
-    g.drawImage(k.rays, -k.rays.width / 2, -k.rays.height / 2); g.restore();
-    if (f < 1) return;
-    g.save(); g.globalAlpha = .10 + .05 * Math.sin(t / 1800); g.fillStyle = 'rgb(' + k.sun + ')'; // блики, как от объектива
-    [[.45, 14], [.7, 8], [1, 22]].forEach(function (b) { g.beginPath(); g.arc(sx * (1 - .7 * b[0]), sy + (o.H * .9 - sy) * b[0], b[1], 0, 7); g.fill(); }); // вниз и влево, прочь от значка
-    g.restore();
-  },
-  // Ночью вместо солнца — мерцающие звёзды и слабый лунный свет из-за верхнего края.
-  night: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 90, -30), gr = g.createRadialGradient(c.x, c.y, 0, c.x, c.y, 160);
-    gr.addColorStop(0, 'rgba(' + k.p + ',.22)'); gr.addColorStop(.25, 'rgba(' + k.p + ',.12)'); gr.addColorStop(1, 'rgba(' + k.p + ',0)');
-    g.fillStyle = gr; g.fillRect(0, 0, o.W, o.H);
+  sky: function (o, g, t, dt, k, f) { wxHalo(o, g, t, k, false, f); },
+  // Ночью — слабый лунный свет и мерцающие звёзды (stars в наборе темы).
+  night: function (o, g, t, dt, k) { wxHalo(o, g, t, k, true, 1); (k.kind.stars || WX_KINDS.soft.stars)(o, g, t, k); },
+  stars: function (o, g, t, k) {
     g.fillStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) {
       g.globalAlpha = (.25 + s.s * .45) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph));
@@ -189,13 +176,4 @@ function wxFogBand(rgb, w, h, bl) {
     g.beginPath(); g.ellipse(rx + wxR() * (w - 2 * rx), h / 2 + (wxR() - .5) * (h - 2 * ry) * .6, rx, ry, 0, 0, 7); g.fill();
   }
   return wxBlur(t, bl);
-}
-function wxRays(rgb, R) {
-  var o = wxCanvas(R * 2, R * 2), g = o.getContext('2d'); g.filter = 'blur(10px)'; g.translate(R, R);
-  for (var i = 0; i < 9; i++) {
-    var a = i * Math.PI * 2 / 9 + wxR() * .3, sp = .05 + wxR() * .05, gr = g.createLinearGradient(0, 0, Math.cos(a) * R, Math.sin(a) * R);
-    gr.addColorStop(0, 'rgba(' + rgb + ',.5)'); gr.addColorStop(1, 'rgba(' + rgb + ',0)');
-    g.fillStyle = gr; g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R * .95, a - sp, a + sp); g.closePath(); g.fill();
-  }
-  return o;
 }

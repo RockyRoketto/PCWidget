@@ -1,9 +1,9 @@
 'use strict';
 // Формы фона погоды для «Осциллографа» и «Чертежа» (общий посев и soft — в 28-wxdraw.js, tick и fill — в 29-wxstyles.js).
 // phos — «Осциллограф»: всё цветом луча, у движущегося короткий след (послесвечение — WX_STYLE.persist в wxDraw):
-//   солнце — светящийся круг, по которому бежит точка луча; облака в строку развёртки; туман — шумящие трассы;
+//   у значка светящиеся кольца; облака в строку развёртки; туман — шумящие трассы;
 //   дождь штрихами со свечением ближнего слоя; снег квадратными пикселями; молния цветом луча со свечением.
-// line — «Чертёж»: только контуры, без заливки: солнце окружностью с осевыми линиями и засечками, облака контуром,
+// line — «Чертёж»: только контуры, без заливки: у значка штрихпунктирные окружности, облака контуром,
 //   дождь тонкими линиями, снежинки звёздочками из трёх черт (вращаются), туман штриховыми линиями.
 
 // Строки развёртки: 3 единицы луча, 3 просвета.
@@ -16,8 +16,6 @@ function wxOutline(src, lw) {
   return o;
 }
 function wxGlow(g, k, b) { g.shadowColor = 'rgba(' + k.p + ',1)'; g.shadowBlur = b; }
-// Контур месяца: внешняя дуга и вырез; s — увеличение (1 — радиус 20).
-function wxMoonPath(g, cx, cy, s) { g.beginPath(); g.arc(cx, cy, 20 * s, .9, 5.4); g.arc(cx + 9 * s, cy - 6 * s, 16 * s, 4.75, 1.45, true); g.closePath(); }
 
 WX_KINDS.phos = {
   kit: function (k) {
@@ -28,20 +26,8 @@ WX_KINDS.phos = {
     if (!k.dark) k.cla *= .6; // тёмный луч на светлом экране плотнее на вид
     k.dka = k.cla * .8;
   },
-  sky: function (o, g, t, dt, k, f) {
-    var c = wxSpot(o, 70, 18), cx = c.x, cy = c.y, r = 42, a = t / 700, i; // крупный круг, верхняя половина за краем
-    g.save(); wxGlow(g, k, 10); g.lineWidth = 2.4; g.strokeStyle = 'rgba(' + k.p + ',' + .55 * f + ')';
-    g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke();
-    g.lineWidth = 2; g.beginPath();
-    for (i = 0; i < 12; i++) { var an = i * Math.PI / 6 + t / 30000; g.moveTo(cx + Math.cos(an) * 56, cy + Math.sin(an) * 56); g.lineTo(cx + Math.cos(an) * 68, cy + Math.sin(an) * 68); }
-    g.globalAlpha = .6; g.stroke(); g.globalAlpha = 1;
-    g.fillStyle = 'rgba(' + k.p + ',' + f + ')'; g.shadowBlur = 14; // точка луча бежит по кругу и оставляет след
-    g.beginPath(); g.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 3.4, 0, 7); g.fill();
-    g.restore();
-  },
-  night: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 52, 20);
-    g.save(); wxGlow(g, k, 8); g.lineWidth = 2; g.strokeStyle = 'rgba(' + k.p + ',.5)'; wxMoonPath(g, c.x, c.y, 2.5); g.stroke(); g.restore();
+  ring: function (o, g, t, h) { g.shadowColor = 'rgba(' + h.col + ',1)'; g.shadowBlur = 10; wxRings(g, t, h); },
+  stars: function (o, g, t, k) {
     g.fillStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) { g.globalAlpha = (.2 + s.s * .45) * (.5 + .5 * Math.sin(t / (700 + s.s * 900) + s.ph)); g.fillRect(Math.round(s.x), Math.round(s.y), 3, 3); });
     g.globalAlpha = 1;
@@ -100,30 +86,14 @@ WX_KINDS.line = {
     k.darkC = wxSet(4, function (i) { return wxOutline(wxCloud(k.p, 260 + i * 30, 100 + i * 10, 0), 2); });
     k.cla = .5; k.dka = .42;
   },
-  sky: function (o, g, t, dt, k, f) {
-    var c = wxSpot(o, 62, 14), cx = c.x, cy = c.y, r = 40, i; // деталь крупнее листа: верх за краем, размер под ней
-    g.save(); g.strokeStyle = g.fillStyle = 'rgba(' + k.p + ',' + .65 * f + ')'; g.lineWidth = 2;
-    g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke();
-    g.lineWidth = 1.2; g.setLineDash([16, 4, 3, 4]); g.beginPath(); // осевые линии
-    g.moveTo(cx - r - 18, cy); g.lineTo(cx + r + 18, cy); g.moveTo(cx, cy - r - 18); g.lineTo(cx, cy + r + 18); g.stroke();
-    g.setLineDash([]); g.lineWidth = 1.6; g.beginPath(); // засечки по окружности, медленно поворачиваются
-    for (i = 0; i < 16; i++) { var an = i * Math.PI / 8 + t / 50000, r2 = i % 4 ? 52 : 58; g.moveTo(cx + Math.cos(an) * 46, cy + Math.sin(an) * 46); g.lineTo(cx + Math.cos(an) * r2, cy + Math.sin(an) * r2); }
-    g.stroke();
-    var dy = cy + r + 30; g.lineWidth = 1.2; g.beginPath(); // размер: диаметр со стрелками
-    g.moveTo(cx - r, cy + 6); g.lineTo(cx - r, dy + 6); g.moveTo(cx + r, cy + 6); g.lineTo(cx + r, dy + 6); g.moveTo(cx - r, dy); g.lineTo(cx + r, dy); g.stroke();
-    [[cx - r, 1], [cx + r, -1]].forEach(function (a) { g.beginPath(); g.moveTo(a[0], dy); g.lineTo(a[0] + a[1] * 9, dy - 3.5); g.lineTo(a[0] + a[1] * 9, dy + 3.5); g.fill(); });
-    g.font = 'italic 20px Consolas, monospace'; g.textAlign = 'center'; g.fillText('Ø' + r * 2, cx, dy - 6);
-    g.restore();
-  },
-  night: function (o, g, t, dt, k) {
-    var c = wxSpot(o, 52, 20);
-    g.save(); g.lineWidth = 2; g.strokeStyle = 'rgba(' + k.p + ',.55)'; wxMoonPath(g, c.x, c.y, 2.5); g.stroke();
+  ring: function (o, g, t, h) { wxRings(g, t, h, [16, 4, 3, 4]); }, // штрихпунктир, как осевые линии
+  stars: function (o, g, t, k) {
     g.lineWidth = 1.4; g.strokeStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) {
       var r = 2 + s.s * 3; g.globalAlpha = (.2 + s.s * .4) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph));
       g.beginPath(); g.moveTo(s.x - r, s.y); g.lineTo(s.x + r, s.y); g.moveTo(s.x, s.y - r); g.lineTo(s.x, s.y + r); g.stroke();
     });
-    g.restore();
+    g.globalAlpha = 1;
   },
   cloud: function (o, g, t, dt, k) { wxDrift(o, g, dt, k); },
   fog: function (o, g, t, dt, k) {
