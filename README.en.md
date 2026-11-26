@@ -12,30 +12,55 @@ Windows 10/11, 64-bit. [Requirements](#requirements) · [How to install](#instal
 
 A Windows desktop widget showing CPU and GPU load and temperatures, memory, network, disks and processes. A single exe that lives in the tray; everything is configured from the widget itself.
 
-![Three themes: Sheet, Gauge, Fill](media/themes.png)
+![Seven themes: Sheet, Gauge, Fill, LCD, Oscilloscope, Blueprint, Pixels](media/themes.png)
 
 > **Note:** the interface is currently in Russian only.
 
 ## Features
 
-- **Tiles:** CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime. Optional clock, calendar, weather, energy, focus timer and Claude Code limits.
-- **Themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient), LCD (segmented digits), Oscilloscope, Blueprint, Pixels. Each comes in light, dark and "follow Windows". Any tile can have its own color.
-- **Modes:** Panel, Wide, Column, Strip, Square. Dragged to the left or right screen edge, the widget turns into a column.
-- **Layout:** drag tiles with the mouse, hide them, make them half or full width; some can also be thin.
-- **Alerts:** temperature and usage thresholds, optional Windows notifications.
-- **Hover details:** rest the mouse on a tile. CPU, GPU, memory, network, energy and disks have charts (10 minutes or an hour with minimum, average and maximum); the other tiles show a card with details.
-- **Game mode:** FPS, 1% low and frame time over a windowed or borderless game (Ctrl+Shift+F). Nothing is injected into the game; exclusive fullscreen cannot be overlaid.
-- **Game summary:** after a game, a card with FPS, 1% low, stutters, peak temperatures and energy used; it can be saved as an image.
-- **Clock, calendar, weather:** several clock and calendar faces matching each theme, an animated weather background (can be turned off).
-- **More in tiles:** optional per-thread CPU bars, a memory map by process and a GPU fan icon.
+### What it shows
+
+- **Tiles:** CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime.
+- **Optional:** clock, calendar, weather, energy, focus timer and Claude Code limits.
 - **Energy:** CPU and GPU consumption in Wh per day and month, with the cost at your tariff. Other PC parts are not counted.
 - **Focus:** a pomodoro timer with sound and a notification.
+- **Alerts:** temperature and usage thresholds, optional Windows notifications.
+
+### How it looks
+
+- **Seven themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient), LCD (segmented digits), Oscilloscope, Blueprint, Pixels. Each comes in light, dark and "follow Windows". Any tile can have its own color.
+- **Modes:** Panel, Wide, Column, Strip, Square. Dragged to the left or right screen edge, the widget turns into a column.
+- **Layout:** drag tiles with the mouse, hide them, make them half or full width; some can also be thin.
 - **Profiles:** up to six appearance sets, transferable as a file.
-- **Extras:** sits on the desktop and survives Win+D, optional always-on-top, scaling, screen burn-in protection.
 
-![Modes: Wide, Column, Square](media/modes.png)
+![Modes: Wide, Column, Square, Strip](media/modes.png)
 
-*Screenshots show sample data.*
+### Clock, weather and tile details
+
+- **Clock and calendar:** several faces matching each theme.
+- **Weather:** now and for the week, with an animated background (can be turned off).
+- **Optional:** per-thread CPU bars, a memory map by process and a GPU fan icon (in the settings of that tile).
+
+![Clock, calendar, weather, CPU threads and memory map](media/features.png)
+
+### Hover details
+
+Rest the mouse on a tile. CPU, GPU, memory, network, energy and disks have charts (10 minutes or an hour with minimum, average and maximum); the other tiles show a card with details.
+
+![Hover cards: network, disks, weather](media/hover.png)
+
+### Games
+
+- **Game mode:** FPS, 1% low and frame time over a windowed or borderless game (Ctrl+Shift+F). Nothing is injected into the game; exclusive fullscreen cannot be overlaid.
+- **Game summary:** after a game, a card with FPS, 1% low, stutters, peak temperatures and energy used; it can be saved as an image.
+
+<img src="media/game.png" width="600" alt="Game summary card">
+
+### Extras
+
+The widget sits on the desktop and survives Win+D, can be always on top, scales, and protects against screen burn-in.
+
+*Screenshots show sample data and the Russian interface.*
 
 ## Requirements
 
