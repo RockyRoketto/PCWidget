@@ -87,6 +87,7 @@ const (
 	wmApp             = 0x8000
 	wmRunUI           = wmApp + 1
 	wmTray            = wmApp + 2
+	wmSummon          = wmApp + 3 // повторный запуск: показаться
 	htCaption         = 2
 	idiApplication    = 32512
 	idcArrow          = 32512

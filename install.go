@@ -22,6 +22,19 @@ func isInstalled(exe, programFiles string) bool {
 	return strings.EqualFold(filepath.Clean(filepath.Dir(exe)), filepath.Clean(installDir(programFiles)))
 }
 
+// startMenuLink — ярлык в меню «Пуск» для всех пользователей.
+func startMenuLink(programData string) string {
+	return filepath.Join(programData, "Microsoft", "Windows", "Start Menu", "Programs", "PC Widget.lnk")
+}
+
+// shortcutScript — команда PowerShell, создающая ярлык. В одинарных кавычках всё буквально,
+// кроме самой кавычки: её удваиваем.
+func shortcutScript(link, target string) string {
+	q := func(s string) string { return "'" + strings.ReplaceAll(s, "'", "''") + "'" }
+	return "$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + q(link) + ");" +
+		"$s.TargetPath=" + q(target) + ";$s.Description='PC Widget';$s.Save()"
+}
+
 // shouldAutoInstall: запущенный не из папки установки exe ставит себя сам.
 // --portable и отладка (PCWIDGET_DEBUG) запускают его на месте.
 func shouldAutoInstall(args []string, installed, debug bool) bool {

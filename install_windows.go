@@ -131,6 +131,10 @@ func runInstall() {
 		}
 	}
 	writeUninstallEntry(dst)
+	if err := runHidden("powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+		shortcutScript(startMenuLink(os.Getenv("ProgramData")), dst)); err != nil {
+		logf("ярлык в меню «Пуск»: %v", err) // без ярлыка виджет всё равно работает
+	}
 	// Всё нужное ставится сразу: драйвер для температуры CPU (с согласием владельца), чтобы не искать его в меню.
 	if fresh && !pawnInstalled() && askPawnIO() {
 		if err := runPawnIOInstall(); err != nil {
@@ -167,6 +171,7 @@ func runUninstall() {
 	}
 	killOthers()
 	deleteTask()
+	_ = os.Remove(startMenuLink(os.Getenv("ProgramData")))
 	_ = removeClaudeMod(claudeDir())
 	_ = registry.DeleteKey(registry.LOCAL_MACHINE, uninstallKey)
 	msgBox("PC Widget удалён.", windows.MB_OK|windows.MB_ICONINFORMATION)

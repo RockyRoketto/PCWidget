@@ -228,6 +228,9 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 	case wmTray:
 		onTray(lp)
 		return 0
+	case wmSummon:
+		runOnUI(summon)
+		return 0
 	case wmSettingChange, wmDwmColorChanged:
 		sendSysIfAccent() // сменили цвет акцента Windows
 	case wmDestroy:
@@ -377,6 +380,15 @@ func setTopmost(on bool) {
 	}
 	pSetWindowPos.Call(app.hwnd, hwndNoTop, 0, 0, 0, 0, swpNoMove|swpNoSize|swpNoActivate)
 	sendToDesktopLevel()
+}
+
+// summon: виджет мог быть скрыт или лежать под окнами. Настройки поднимают его наверх,
+// и сразу видно, где он.
+func summon() {
+	if !app.visible {
+		toggleVisible()
+	}
+	openSettings("")
 }
 
 func toggleVisible() {

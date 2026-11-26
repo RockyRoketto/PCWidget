@@ -41,7 +41,7 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 
 1. Download `widget.exe` from [Releases](../../releases) or build it yourself.
 2. Run it. The file is not code-signed, so SmartScreen may warn you: choose "More info", then "Run anyway".
-3. That is all: the program installs itself to `Program Files\PCWidget`, adds itself to startup (a scheduled task) and starts. You can delete the downloaded file afterwards.
+3. That is all: the program installs itself to `Program Files\PCWidget`, adds itself to the Start menu and to startup (a scheduled task) and starts. You can delete the downloaded file afterwards.
 
 Autostart can be turned off in the settings. To run without installing, pass `--portable`.
 

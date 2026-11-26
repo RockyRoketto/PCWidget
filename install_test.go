@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestIsInstalled(t *testing.T) {
 	pf := `C:\Program Files`
@@ -27,5 +30,12 @@ func TestIsInstalled(t *testing.T) {
 func TestCliMode(t *testing.T) {
 	if cliMode([]string{"--install"}) != "install" || cliMode([]string{"x", "--UNINSTALL"}) != "uninstall" || cliMode(nil) != "" {
 		t.Error("cliMode разбирает аргументы неверно")
+	}
+}
+
+func TestShortcutScript(t *testing.T) {
+	s := shortcutScript(`C:\a\it's.lnk`, `C:\Program Files\PCWidget\widget.exe`)
+	if !strings.Contains(s, `CreateShortcut('C:\a\it''s.lnk')`) || !strings.Contains(s, `$s.TargetPath='C:\Program Files\PCWidget\widget.exe'`) {
+		t.Errorf("команда ярлыка: %s", s)
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+	"unsafe"
 
 	"golang.org/x/sys/windows"
 )
@@ -32,6 +33,7 @@ func main() {
 		return
 	}
 	if !singleInstance() {
+		summonRunning() // запустили ещё раз (ярлыком): показываем уже работающий
 		return
 	}
 	page, err := buildPage()
@@ -70,6 +72,14 @@ func statsLoop(col *collector) {
 func singleInstance() bool {
 	_, err := windows.CreateMutex(nil, false, windows.StringToUTF16Ptr(`Local\pcwidget-single-instance`))
 	return err != windows.ERROR_ALREADY_EXISTS
+}
+
+// summonRunning просит работающую копию показаться.
+func summonRunning() {
+	h, _, _ := pFindWindow.Call(uintptr(unsafe.Pointer(utf16(winClass))), 0)
+	if h != 0 {
+		pPostMessage.Call(h, wmSummon, 0, 0)
+	}
 }
 
 func fatal(text string) {
