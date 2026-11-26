@@ -30,8 +30,10 @@ body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .num { font-family: var(--vf); font-variant-numeric: tabular-nums; }
 .num small { font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--dim); margin-left: 2px; letter-spacing: 0; }
 .warm { color: var(--warm) !important; } .hot { color: var(--hot) !important; } .s-ok { color: var(--ok) !important; }
-/* состояние красит индикатор; свой цвет плитки (paintTile) — тоже только индикатор */
+/* состояние красит индикатор; свой цвет плитки (paintTile) — тоже только индикатор.
+   Выбранный цвет важнее «тепло», но уступает «горячо» и тревоге. */
 .is-warm, .is-warm > * { --a: var(--warm); --aur: linear-gradient(120deg, #ffb341, #f58a1f); }
+.tinted.is-warm > *, .tinted .is-warm, .tinted .is-warm > * { --a: inherit; }
 .is-hot, .is-hot > *, .alarm, .alarm > * { --a: var(--hot); --aur: linear-gradient(120deg, #ff7a59, #e8203f); }
 .btn { background: var(--accent); color: var(--on-accent); font-weight: 600; border-radius: 7px; padding: 4px 13px; }
 .btn.ghost { background: var(--ctl); color: var(--text); font-weight: 500; }

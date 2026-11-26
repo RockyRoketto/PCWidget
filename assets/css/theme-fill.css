@@ -17,8 +17,8 @@ body.theme-fill.tone-light {
 /* заливка мягкая: сверху прозрачнее, книзу плотнее; в строках слева направо */
 .theme-fill .fill i { position: absolute; display: block; background: linear-gradient(180deg, color-mix(in srgb, var(--c) var(--top), transparent), color-mix(in srgb, var(--c) var(--bot), transparent)); }
 .theme-fill .fill i.run { background: linear-gradient(90deg, color-mix(in srgb, var(--c) var(--top), transparent), color-mix(in srgb, var(--c) var(--bot), transparent)); }
-.theme-fill .is-warm .fill i, .theme-fill .is-hot .fill i, .theme-fill .alarm .fill i, .theme-fill .is-warm > .fill i, .theme-fill .is-hot > .fill i { background: var(--aur); }
-.theme-fill.tone-light .is-warm .fill i, .theme-fill.tone-light .is-hot .fill i, .theme-fill.tone-light .alarm .fill i { opacity: .6; }
+.theme-fill .is-warm:not(.tinted, .tinted *) .fill i, .theme-fill .is-hot .fill i, .theme-fill .alarm .fill i { background: var(--aur); }
+.theme-fill.tone-light .is-warm:not(.tinted, .tinted *) .fill i,.theme-fill.tone-light .is-hot .fill i, .theme-fill.tone-light .alarm .fill i { opacity: .6; }
 .theme-fill .cb > .fill { top: 30px; }
 /* рельеф истории сплошной, гребень тонкой линией */
 .theme-fill .fill i.area { inset: 0; }
