@@ -17,15 +17,19 @@ const maxReportPNG = 8 << 20
 
 var errReportPNG = errors.New("не картинка")
 
-// buildReportPage собирает страницу окна итога: она самостоятельная, темы виджета ей не нужны.
+// buildReportPage собирает страницу окна итога: цвета и тему берёт из 00-core.js, рисует своими скриптами.
 func buildReportPage() (string, error) {
 	idx, err := assetsFS.ReadFile("assets/report.html")
 	if err != nil {
 		return "", err
 	}
-	js, err := concatGlob("assets/report/*.js")
-	if err != nil {
-		return "", err
+	js := ""
+	for _, g := range []string{"assets/js/00-core.js", "assets/report/*.js"} {
+		part, err := concatGlob(g)
+		if err != nil {
+			return "", err
+		}
+		js += part
 	}
 	return strings.Replace(string(idx), "/*{{JS}}*/", js, 1), nil
 }

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <title>report</title>
 <style>
-html, body { margin: 0; overflow: hidden; background: #141a24; user-select: none; -webkit-user-select: none; cursor: default; }
+html, body { margin: 0; overflow: hidden; background: #151b26; user-select: none; -webkit-user-select: none; cursor: default; }
 #box { display: inline-block; }
 canvas { display: block; width: 560px; }
-.row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 16px 14px; font: 12px/16px "Segoe UI Variable Text", "Segoe UI", sans-serif; color: rgba(255, 255, 255, .66); }
+.row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 16px 14px; font: 12px/16px var(--font, "Segoe UI", sans-serif); color: var(--mute, rgba(255, 255, 255, .66)); }
 #msg { margin-right: auto; }
-button { font: inherit; cursor: pointer; border: 0; border-radius: 7px; padding: 5px 14px; background: rgba(255, 255, 255, .09); color: #fff; }
+button { font: inherit; cursor: pointer; border: 0; border-radius: var(--r, 7px); padding: 5px 14px; background: var(--btn, rgba(255, 255, 255, .09)); color: var(--text, #fff); }
 #save { background: var(--accent, #7cc4ff); color: var(--on, #14181f); font-weight: 600; }
 </style>
 </head>
