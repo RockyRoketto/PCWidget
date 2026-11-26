@@ -57,6 +57,7 @@
 
 /* погода: температура и иконка самые крупные, город и описание под температурой, «ощущается» под иконкой */
 .cb.wx { gap: 8px; }
+.cb > canvas.wxbg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; } /* фон погоды, 27-wxbg.js */
 .wtop { display: flex; justify-content: space-between; gap: 10px; flex: 1; min-height: 0; }
 .wl { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
 .wx .wl .v { white-space: nowrap; font-size: 48px; line-height: 44px; font-weight: var(--vw); letter-spacing: -.03em; }

@@ -81,6 +81,7 @@ var TILE_BUILD = {
     var q = function (x) { return $(x, c); }, tv = q('.v'), city = q('.wcity'), dsc = q('.wdesc'), ic = q('.wi'), feel = q('.wfeel'), days = q('.wdays');
     var put = function (n, html) { if (n.__h !== html) { n.__h = html; n.innerHTML = html; } };
     el.appendChild(c);
+    var bg = wxBg(c); // 27-wxbg.js
     function t(v) { return String(Math.round(v)).replace('-', '−') + '°'; }
     function dayHtml(d, i) {
       var p = d.date.split('-'), dt = new Date(+p[0], +p[1] - 1, +p[2]);
@@ -93,7 +94,7 @@ var TILE_BUILD = {
         var w = s.weather; el.hidden = !w; if (!w) return;
         var list = w.days || [], now = list[0], desc = w.desc ? w.desc.charAt(0).toUpperCase() + w.desc.slice(1) : '';
         var k = CFG.wxDays && !thinOn('weather') && list.length > 1 && wide(el) ? JSON.stringify(list) : '', text = desc + (now && wide(el) ? (desc ? ', ' : '') + 'от ' + t(now.min) + ' до ' + t(now.max) : ''); // в узкой только описание
-        put(tv, segs(t(w.temp))); put(city, esc(w.city)); put(dsc, esc(text)); put(ic, ICONS[w.icon] || '');
+        put(tv, segs(t(w.temp))); put(city, esc(w.city)); put(dsc, esc(text)); put(ic, ICONS[w.icon] || ''); bg(w.icon, w.power, w.night);
         put(feel, (wide(el) ? 'ощущается ' : 'ощ. ') + t(w.feels)); feel.title = 'Ощущается ' + t(w.feels);
         if (k !== key) { key = k; days.innerHTML = k ? list.map(dayHtml).join('') : ''; }
         el.classList.toggle('has-days', !!key);

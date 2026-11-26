@@ -16,12 +16,14 @@ import (
 
 // WeatherStat — то, что уходит странице. Поле Weather в Stats пустое, пока плитка выключена или данных нет.
 type WeatherStat struct {
-	City  string  `json:"city"`
-	Temp  float64 `json:"temp"`
-	Feels float64 `json:"feels"`
-	Desc  string  `json:"desc"`
-	Icon  string  `json:"icon"` // sun, cloud, fog, rain, snow, storm
-	Days  []WeatherDay `json:"days,omitempty"` // прогноз на неделю, первый день = сегодня
+	City  string       `json:"city"`
+	Temp  float64      `json:"temp"`
+	Feels float64      `json:"feels"`
+	Desc  string       `json:"desc"`
+	Icon  string       `json:"icon"`            // sun, cloud, fog, rain, snow, storm
+	Power int          `json:"power,omitempty"` // сила для фона плитки: 1 слабо, 2 умеренно, 3 сильно; у облачности 1 — переменная
+	Night bool         `json:"night,omitempty"` // сейчас тёмное время суток
+	Days  []WeatherDay `json:"days,omitempty"`  // прогноз на неделю, первый день = сегодня
 }
 
 // WeatherDay — прогноз на один день.
@@ -81,6 +83,19 @@ func parseGeocode(b []byte) (name string, lat, lon float64, err error) {
 	return g.Name, g.Latitude, g.Longitude, nil
 }
 
+// wmoPower — сила явления по коду WMO: от неё зависит густота дождя, снега и облаков на фоне плитки.
+func wmoPower(code int) int {
+	switch code {
+	case 0:
+		return 0
+	case 1, 2, 45, 51, 56, 61, 66, 71, 77, 80, 85:
+		return 1
+	case 55, 57, 65, 67, 75, 82, 86, 96, 99:
+		return 3
+	}
+	return 2
+}
+
 // parseForecast разбирает блок current ответа Open-Meteo.
 func parseForecast(city string, b []byte) (*WeatherStat, error) {
 	var r struct {
@@ -88,6 +103,7 @@ func parseForecast(city string, b []byte) (*WeatherStat, error) {
 			Temp  float64 `json:"temperature_2m"`
 			Feels float64 `json:"apparent_temperature"`
 			Code  int     `json:"weather_code"`
+			Day   *int    `json:"is_day"`
 		} `json:"current"`
 		Daily *struct {
 			Time []string  `json:"time"`
@@ -103,7 +119,8 @@ func parseForecast(city string, b []byte) (*WeatherStat, error) {
 		return nil, errors.New("нет данных о погоде")
 	}
 	d, ic := wmoInfo(r.Current.Code)
-	st := &WeatherStat{City: city, Temp: r.Current.Temp, Feels: r.Current.Feels, Desc: d, Icon: ic}
+	st := &WeatherStat{City: city, Temp: r.Current.Temp, Feels: r.Current.Feels, Desc: d, Icon: ic, Power: wmoPower(r.Current.Code)}
+	st.Night = r.Current.Day != nil && *r.Current.Day == 0
 	if dl := r.Daily; dl != nil {
 		n := min(len(dl.Time), len(dl.Code), len(dl.Max), len(dl.Min), 7)
 		for i := 0; i < n; i++ {
@@ -249,7 +266,7 @@ func fetchWeather(city string) (*WeatherStat, error) {
 	if err != nil {
 		return nil, err
 	}
-	f, err := httpGet("https://api.open-meteo.com/v1/forecast?timezone=auto&current=temperature_2m,apparent_temperature,weather_code" +
+	f, err := httpGet("https://api.open-meteo.com/v1/forecast?timezone=auto&current=temperature_2m,apparent_temperature,weather_code,is_day" +
 		"&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7" +
 		"&latitude=" + strconv.FormatFloat(lat, 'f', 4, 64) + "&longitude=" + strconv.FormatFloat(lon, 'f', 4, 64))
 	if err != nil {

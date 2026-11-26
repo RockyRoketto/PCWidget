@@ -30,6 +30,7 @@ var TILE_OPTS = {
   },
   calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>' +
+    '<label class="ol">Анимация погоды' + toggle('wxAnim', CFG.wxAnim, 'Анимация погоды') + '</label><div class="hint">Дождь, снег, облака и солнце на фоне плитки</div>' +
     (GRID_MODES[curMode()] ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
   energy: function () {
     return '<div class="ol">Тариф, ₽ за кВт·ч<input class="txt num-in" type="number" min="0" max="1000" step="0.01" data-tariff value="' + (CFG.tariff || '') + '" placeholder="0" aria-label="Тариф, рублей за киловатт-час"></div>' +

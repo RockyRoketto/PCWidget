@@ -24,6 +24,13 @@ func TestParseForecast(t *testing.T) {
 	if err != nil || len(w.Days) != 2 || w.Days[1].Icon != "snow" || w.Days[1].Min != -4 || w.Days[0].Max != 3 {
 		t.Fatalf("прогноз: %+v %v", w, err)
 	}
+	w, err = parseForecast("Х", []byte(`{"current":{"temperature_2m":1,"apparent_temperature":0,"weather_code":65,"is_day":0}}`))
+	if err != nil || w.Power != 3 || !w.Night {
+		t.Fatalf("сила и ночь: %+v %v", w, err)
+	}
+	if w, _ = parseForecast("Х", []byte(`{"current":{"temperature_2m":1,"apparent_temperature":0,"weather_code":2}}`)); w.Night || w.Power != 1 {
+		t.Fatalf("без is_day — день: %+v", w)
+	}
 	if _, err := parseForecast("Х", []byte(`{}`)); err == nil {
 		t.Fatal("нет current — ошибка")
 	}
