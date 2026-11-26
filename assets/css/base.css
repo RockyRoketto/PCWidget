@@ -49,6 +49,10 @@ body :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .hist path { fill: var(--a); }
 .fill { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 
+/* антивыгорание: в простое темнеет не спеша, просыпается быстро */
+#root { transition: filter .4s; }
+#root.dim { filter: brightness(.4); transition-duration: 3s; }
+
 /* тревога: ячейка подсвечена и мягко пульсирует */
 @keyframes pulse { 50% { box-shadow: inset 0 0 0 1.5px var(--hot), inset 0 0 22px color-mix(in srgb, var(--hot) 40%, transparent); } }
 .alarm { background-color: color-mix(in srgb, var(--hot) 22%, transparent) !important; animation: pulse 1.8s ease-in-out infinite; }

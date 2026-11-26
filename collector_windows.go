@@ -31,7 +31,7 @@ func newCollector() *collector {
 
 func (c *collector) collect() Stats {
 	now := time.Now()
-	s := Stats{TS: now.Unix(), Uptime: uptimeSeconds()}
+	s := Stats{TS: now.Unix(), Uptime: uptimeSeconds(), Idle: userIdle()}
 
 	if load, ok := c.cpu.load(); ok {
 		s.CPU = &CPUStat{Load: load}

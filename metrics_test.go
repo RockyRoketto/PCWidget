@@ -78,3 +78,19 @@ func TestTrafficRollover(t *testing.T) {
 		t.Errorf("смена дня: %+v", tr)
 	}
 }
+
+func TestIdleSeconds(t *testing.T) {
+	cases := []struct {
+		now, last uint32
+		want      int64
+	}{
+		{301_000, 1_000, 300},
+		{2_000, 0xFFFFFFFF - 2_999, 5}, // переход счётчика через ноль
+		{1_000, 1_016, 0},              // ввод пришёл после замера now
+	}
+	for _, c := range cases {
+		if got := idleSeconds(c.now, c.last); got != c.want {
+			t.Errorf("idleSeconds(%d, %d) = %d, ждали %d", c.now, c.last, got, c.want)
+		}
+	}
+}

@@ -25,6 +25,16 @@ func cpuLoad(idle, total uint64) float64 {
 	return 100 * (1 - float64(idle)/float64(total))
 }
 
+// idleSeconds: секунды между двумя отметками GetTickCount (мс). Счётчик 32-битный и раз в 49 дней
+// переходит через ноль; отметка ввода «из будущего» (чуть новее now) даёт 0.
+func idleSeconds(now, last uint32) int64 {
+	d := int32(now - last)
+	if d < 0 {
+		return 0
+	}
+	return int64(d / 1000)
+}
+
 // topN возвращает n элементов с наибольшим V (нулевые отбрасываются).
 func topN(items []ProcItem, n int) []ProcItem {
 	sort.Slice(items, func(i, j int) bool { return items[i].V > items[j].V })

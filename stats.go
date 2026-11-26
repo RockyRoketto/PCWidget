@@ -15,6 +15,7 @@ type Stats struct {
 	WeatherState string      `json:"weatherState,omitempty"`
 	Claude       *ClaudeStat `json:"claude,omitempty"`
 	Uptime       int64       `json:"uptime"` // секунды с запуска системы
+	Idle         int64       `json:"idle"`   // секунды без мыши и клавиатуры
 }
 
 type CPUStat struct {

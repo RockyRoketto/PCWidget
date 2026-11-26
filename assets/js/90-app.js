@@ -12,6 +12,7 @@ function postOnce(key, v) { if (sent[key] !== v) { sent[key] = v; post(key + ':'
 function applyBody() {
   document.body.className = bodyClass();
   setThemeVars(document.body.style);
+  burnTick(Date.now());
   rootEl.style.zoom = CFG.scale / 100;
   rootEl.classList.toggle('loading', !dataReady);
   $$('[data-id]', rootEl).forEach(paintTile);
@@ -26,6 +27,18 @@ function layout() {
   if (old) rootEl.replaceChild(view.el, old); else rootEl.insertBefore(view.el, rootEl.firstChild);
   applyBody(); syncWeather(); syncClaude();
   if (S && dataReady) refresh(Date.now());
+}
+
+// Антивыгорание (по выбору): содержимое раз в 3 минуты сдвигается на пару пикселей по кругу,
+// а после 5 минут без мыши и клавиатуры виджет тускнеет.
+var ORBIT = [[0, 0], [2, 0], [2, 2], [0, 2], [-2, 2], [-2, 0], [-2, -2], [0, -2], [2, -2]];
+var SHIFT_MS = 180000, IDLE_DIM = 300;
+function burnTick(now) {
+  var on = !!CFG.antiburn;
+  // пока плитки правят мышью, они стоят на месте
+  var p = on && !editing ? ORBIT[Math.floor(now / SHIFT_MS) % ORBIT.length] : ORBIT[0];
+  if (view) view.el.style.translate = p[0] || p[1] ? p[0] + 'px ' + p[1] + 'px' : '';
+  rootEl.classList.toggle('dim', on && !editing && !!S && S.idle >= IDLE_DIM);
 }
 
 function refresh(now) {
@@ -61,6 +74,7 @@ window.__stats = function (s) {
   if (s.mem) pushHist('mem', s.mem.pct);
   if (s.net) { pushHist('down', s.net.down); pushHist('up', s.net.up); }
   updateRecords(s);
+  burnTick(now);
   if (!view || (!dataReady && !checkReady(s, now))) return;
   refresh(now);
 };
@@ -73,7 +87,7 @@ window.__sys = function (sys) {
 if (darkMQ) darkMQ.addEventListener('change', function () { if (CFG && CFG.tone === 'auto' && view) applyBody(); });
 
 // Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
-var LIGHT = { edgeBack: 1, glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1 };
+var LIGHT = { antiburn: 1, edgeBack: 1, glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1 };
 function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
 window.__cfg = function (c) {
   var old = CFG;

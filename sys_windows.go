@@ -12,6 +12,8 @@ var (
 	pGetSystemTimes     = kernel32.NewProc("GetSystemTimes")
 	pGlobalMemoryStatus = kernel32.NewProc("GlobalMemoryStatusEx")
 	pGetTickCount64     = kernel32.NewProc("GetTickCount64")
+	pGetTickCount       = kernel32.NewProc("GetTickCount")
+	pGetLastInputInfo   = user32.NewProc("GetLastInputInfo")
 )
 
 const gb = 1 << 30
@@ -63,6 +65,16 @@ func readMem(pageUsagePct *float64) *MemStat {
 		s.PageUsedGB = ptr(total * *pageUsagePct / 100)
 	}
 	return s
+}
+
+// userIdle — сколько секунд не трогали мышь и клавиатуру. При ошибке 0 (считаем, что за ПК сидят).
+func userIdle() int64 {
+	in := struct{ size, tick uint32 }{size: 8}
+	if r, _, _ := pGetLastInputInfo.Call(uintptr(unsafe.Pointer(&in))); r == 0 {
+		return 0
+	}
+	now, _, _ := pGetTickCount.Call()
+	return idleSeconds(uint32(now), in.tick)
 }
 
 func uptimeSeconds() int64 {

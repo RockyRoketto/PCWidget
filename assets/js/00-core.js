@@ -79,7 +79,7 @@ function defaults() {
     ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
-    notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
+    notify: false, antiburn: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
   };
 }
 
@@ -104,7 +104,7 @@ function mergeCfg(saved) {
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
-  ['notify', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
+  ['notify', 'antiburn', 'clockSec'].forEach(function (k) { c[k] = saved[k] === true; });
   ['wxDays', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;
   if (CALS[saved.calView]) c.calView = saved.calView;
