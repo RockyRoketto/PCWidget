@@ -1,0 +1,56 @@
+/* Фокус-таймер: время крупно, справа кольцо с «пуск/пауза», внизу точки циклов и сброс. */
+.cb.fz { cursor: pointer; }
+.fz .md { gap: 8px; }
+.fz .md .v { letter-spacing: -.01em; }
+.fz-paused .md .v { opacity: .62; }
+.fz-ring { flex: none; width: 36px; height: 36px; margin-left: auto; align-self: center; overflow: visible; }
+.fz-ring .tr { fill: none; stroke: var(--track); stroke-width: 3; }
+.fz-ring .pg { fill: none; stroke: var(--a); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 0 100; transition: stroke-dasharray .4s; }
+.fz-ring .tks line { stroke: var(--track); stroke-width: 2.2; }
+.fz-ring .tks line.on { stroke: var(--a); }
+.fz-ring .play { fill: var(--text); }
+.fz-ring .pause { fill: none; stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; display: none; }
+.fz-ring.run .play { display: none; }
+.fz-ring.run .pause { display: inline; }
+/* перерыв: спокойнее, кольцо цвета «ок» */
+.fz-brk .fz-ring, .fz-brk.cr { --a: var(--ok); }
+.tinted .fz-brk .fz-ring { --a: inherit; }
+
+.fz-ft { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 16px; margin-top: auto; }
+.fz-dots { display: flex; gap: 5px; }
+.fz-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--track); }
+.fz-dots i.on { background: var(--a); }
+.fz-dots i.cur { box-shadow: inset 0 0 0 1.5px var(--a); }
+.fz-rs { width: 16px; height: 16px; color: var(--dim); border-radius: 4px; }
+.fz-rs:hover { color: var(--text); }
+.editing .fz-rs { display: none; }
+.editing .cb.fz { cursor: inherit; }
+
+/* во всю ширину: время и кольцо крупнее */
+.tile.w2 .fz .md .v { font-size: 44px; line-height: 46px; }
+.tile.w2 .fz-ring { width: 44px; height: 44px; }
+
+/* строка компакта */
+.cr[data-id=focus] { cursor: pointer; }
+.cr.fz-paused > .v { opacity: .62; }
+
+/* Прибор и ЖК-табло: деления прямоугольные, точки квадратные */
+.theme-gauge .fz-dots i, .theme-lcd .fz-dots i { border-radius: 0; }
+.theme-lcd .fz-ring .tks line { stroke: color-mix(in srgb, var(--text) calc(var(--ghost) * 100%), transparent); stroke-width: 2.6; }
+.theme-lcd .fz-ring .tks line.on { stroke: var(--a); }
+.theme-lcd .fz-dots i { background: color-mix(in srgb, var(--text) calc(var(--ghost) * 100%), transparent); }
+.theme-lcd .fz-dots i.on { background: var(--a); }
+.theme-lcd .fz-ring .pause { stroke-linecap: butt; }
+/* Заливка: карточка наполняется по ходу отрезка, кольцо и точки цвета текста поверх */
+.theme-fill .fz { --a: var(--text); }
+.theme-fill .fz-ring .tr { stroke: color-mix(in srgb, var(--text) 22%, transparent); }
+.theme-fill .fz .md .v { font-size: 38px; line-height: 40px; }
+.theme-fill .tile.w2 .fz .md .v { font-size: 44px; line-height: 46px; }
+.theme-fill .fz-dots i { background: color-mix(in srgb, var(--text) 25%, transparent); }
+.theme-lcd .fz .hd .nm { letter-spacing: .02em; }
+/* в квадрате нет места для значка рядом с подписью: подпись вместо значка */
+.mini.sqr .cr[data-id=focus] > .n { display: none; }
+.mini.sqr .cr[data-id=focus] > .s { grid-column: 1 / -1; justify-self: start; }
+/* настройки плитки: длительности в два столбца */
+.fzset { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.fzset .txt.num-in { width: 56px; }

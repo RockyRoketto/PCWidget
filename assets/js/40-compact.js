@@ -63,6 +63,7 @@ function buildCompact(mode) {
     if (mode === 'column' && prev && prev.g !== sp.g) el.classList.add('sep');
     if (editing) { el.setAttribute('data-nodrag', ''); el.appendChild(editButton()); }
     root.appendChild(el);
+    if (sp.bind) sp.bind(el);
     if (face) { el.classList.add('facerow'); $$('.n, .s, .v', el).forEach(function (n) { n.remove(); }); el.appendChild(face.el); }
     return { sp: sp, face: face, el: el, vz: vz, n: $('.n', el), v: $('.v', el), s: $('.s', el) };
   });
@@ -96,6 +97,7 @@ function buildCompact(mode) {
     setLv(it.el, lv);
     if (it.vz) it.vz.set({ pct: d.pct || 0, mark: d.mark });
     it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
+    if (it.sp.post) it.sp.post(it.el);
   }
   return {
     el: root,

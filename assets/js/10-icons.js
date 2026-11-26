@@ -20,6 +20,8 @@ var ICONS = (function () {
     records: w('<path d="M2.5 15 7 9l3.5 3.5L17 4.5M13 4.5h4v4"/>'),
     uptime: w('<path d="M10 3v6M6 5.2a6 6 0 1 0 8 0"/>'),
     calendar: w('<rect x="3.5" y="4.5" width="13" height="12" rx="2"/><path d="M3.5 8.5h13M7 2.8v3M13 2.8v3"/>'),
+    focus: w('<circle cx="10" cy="11" r="6.5"/><path d="M10 11V7.5M8 2.5h4M15.2 5.3l1.3-1.3"/>'),
+    reset: w('<path d="M4 10a6 6 0 1 0 1.8-4.3M4 3.5v3h3"/>'),
     clock: w('<circle cx="10" cy="10" r="7"/><path d="M10 5.5V10l3 2"/>'),
     weather: w('<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'),
     sun: w('<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'),
