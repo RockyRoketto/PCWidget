@@ -32,7 +32,10 @@ var TILE_OPTS = {
       '<div class="two"><label class="ol">24 часа' + toggle('clock24', CFG.clock24, '24-часовой формат') + '</label>' +
         (plain || strip ? '<label class="ol">Секунды' + toggle('clockSec', CFG.clockSec, 'Секунды') + '</label>' : '') + '</div>');
   },
-  calendar: function () { return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView); },
+  calendar: function () {
+    return curMode() === 'strip' ? '' : segment('calView', Object.keys(CALS).map(function (k) { return [k, CALS[k]]; }), CFG.calView) +
+      segment('calV', calVars().map(function (n, i) { return [i, n]; }), CFG.calV);
+  },
   weather: function () { return '<input class="txt" type="text" maxlength="60" data-city value="' + esc(CFG.city) + '" placeholder="Название города" aria-label="Город"><div class="hint" data-hint></div>' +
     '<label class="ol">Анимация погоды' + toggle('wxAnim', CFG.wxAnim, 'Анимация погоды') + '</label><div class="hint">Дождь, снег, облака и солнце на фоне плитки</div>' +
     (GRID_MODES[curMode()] ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
@@ -261,7 +264,7 @@ function buildSettings() {
     else if (d.k === 'theme' || d.k === 'tone') { CFG[d.k] = d.v; changed(); render(); }
     else if (d.k && d.k.indexOf('thin:') === 0) { var tid = d.k.slice(5); if (d.v === '1') CFG.thin[tid] = 1; else delete CFG.thin[tid]; changed(); pick(b); }
     else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
-    else if (d.k === 'clockA' || d.k === 'clockD') { CFG[d.k] = Number(d.v); changed(); render(); }
+    else if (d.k === 'clockA' || d.k === 'clockD' || d.k === 'calV') { CFG[d.k] = Number(d.v); changed(); render(); }
     else if (d.k) { CFG[d.k] = /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
   el.addEventListener('change', function (e) {

@@ -1,0 +1,45 @@
+/* Календарь по темам (25e-calkit.js): лицо на всё место плитки, раскладку и размеры подбирает само. */
+.face-cb:has(.kc) { padding: 8px 10px; justify-content: stretch; }
+.face.kc { flex: 1; height: 100%; min-height: 0; position: relative; display: flex; flex-direction: column; justify-content: center; color: var(--text); }
+.cr .face.kc { height: 104px; }
+.cr .face.kc.v-month { height: 168px; }
+.kc .L { display: flex; gap: 10px; min-height: 0; min-width: 0; position: relative; z-index: 1; }
+.kc .L.kf { flex: 1; }
+.kc .L.row { flex-direction: row; align-items: center; }
+.kc .L.col { flex-direction: column; justify-content: center; }
+.kc .L.ksb { justify-content: space-between; }
+.kc .L.row > .tb.col { flex: none; max-width: 48%; }
+.kc .L.row > .cg { flex: 1; align-self: stretch; }
+.kc .L.row > .ex { flex: 1; min-width: 0; }
+.kc .L.col > .cg, .kc .fx > .cg { flex: 1; }
+.kc .L.col > .ex, .kc .fx > .ex { align-self: stretch; }
+.kc .fx { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px; align-self: stretch; }
+/* сегодня */
+.kc .tb { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.kc .tb.col { flex-direction: column; align-items: flex-start; gap: 4px; }
+.kc .tb .kn { line-height: .86; font-family: var(--vf); font-weight: var(--vw); font-variant-numeric: tabular-nums; flex: none; }
+.kc .tx { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+.kc .tx b { font-weight: 600; font-size: var(--tb, 14px); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kc .tx span { font-size: var(--ts, 12px); line-height: 1.25; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kc .tx b::first-letter, .kc .kh::first-letter { text-transform: uppercase; }
+.kc .kh { font-weight: 600; font-size: 12px; line-height: 16px; color: var(--lab); white-space: nowrap; flex: none; }
+/* сетка */
+.kc .cg { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); font-size: var(--cf); text-align: center; min-height: 0; min-width: 0; position: relative; overflow: hidden; isolation: isolate; font-family: var(--vf); }
+.kc .cg.auto { flex: none !important; }
+.kc .cg.auto .cd { min-height: 1.9em; }
+.kc .cw { font-size: var(--lf); line-height: 1.6; color: var(--dim); white-space: nowrap; font-family: var(--font); }
+.kc .cd { display: grid; place-items: center; min-height: 0; position: relative; }
+.kc .cd i { font-style: normal; display: grid; place-items: center; min-width: min(1.75em, 100%); height: min(100%, 1.75em); line-height: 1; position: relative; border-radius: 0; }
+.kc .cd.off { opacity: .32; }
+.kc .cd.now i { background: none; color: inherit; font-weight: inherit; } /* общее «сегодня» старого календаря (time.css) */
+.kc .cd.we, .kc .cw.we { color: color-mix(in srgb, var(--hot) 60%, var(--text)); }
+.kc .cw.we { color: color-mix(in srgb, var(--hot) 60%, var(--dim)); }
+/* добавка */
+.kc .ex { flex: none; min-width: 0; overflow: hidden; display: flex; align-items: center; }
+.kc .ex > * { flex: 1; min-width: 0; }
+.kc .ex svg { display: block; overflow: visible; }
+/* сегменты ЖК: не горящие — призраки */
+.kc .sg { fill: currentColor; opacity: var(--ghost, .08); }
+.kc .sg.on { opacity: 1; }
+.kc .seg7 { flex: none; overflow: visible; }
+.kc .pxt, .kc .kx-px { flex: none; shape-rendering: crispEdges; }

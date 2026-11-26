@@ -96,6 +96,7 @@ function calHtml(d) {
     }).join('') + '</div></div>';
 }
 function calendarFace() {
+  if (CFG.calV) return calThemed(CFG.calV); // виды тем: 25e-calkit.js
   var el = mk('<div class="face cal ' + CFG.calView + '"></div>'), day = '';
   return {
     el: el,

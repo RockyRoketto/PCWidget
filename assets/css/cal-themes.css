@@ -1,0 +1,155 @@
+/* Варианты календаря по темам (25f-calvars.js). Цвета только из переменных темы: светлый тон без отдельных правил. */
+
+/* Лист 1 «Тонкий»: светлое начертание, сегодня — тонкое кольцо, прошедшие притушены */
+.kc-sh1 .kn { font-weight: 200 !important; letter-spacing: -.04em; }
+.kc-sh1 .tx span, .kc-sh1 .cd { font-weight: 300; }
+.kc-sh1 .cw { text-transform: uppercase; letter-spacing: .08em; }
+.kc-sh1 .cd.past { opacity: .5; }
+.kc-sh1 .cd.now i { box-shadow: inset 0 0 0 1.5px var(--accent); border-radius: 99px; color: var(--accent); font-weight: 600; }
+.kx-t { font-weight: 300; font-size: var(--xf); line-height: 1.35; color: var(--dim); }
+.kx-t > span { white-space: nowrap; }
+.kx-t b { font-weight: 600; color: var(--text); }
+/* Лист 2 «Полоса»: сегодня залито, прошедшие подчёркнуты, полоса месяца */
+.kc-sh2 .kn { font-weight: 600 !important; letter-spacing: -.03em; }
+.kc-sh2 .cd i { border-radius: 7px; }
+.kc-sh2 .cd.now i { background: linear-gradient(135deg, var(--ok), var(--warm)); color: var(--pop); font-weight: 700; }
+.kc-sh2 .cd.past i::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 6%; height: 1.5px; border-radius: 1px; background: var(--ok); opacity: .6; }
+.kx-bar .kbr { height: 5px; border-radius: 3px; background: var(--track); position: relative; overflow: hidden; }
+.kx-bar .kbr i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(90deg, var(--ok), var(--warm)); }
+.kx-bar .lb { display: flex; justify-content: space-between; font-size: calc(var(--xf) - 2px); line-height: 1.2; color: var(--dim); margin-top: 3px; }
+.kx-bar .lf { font-size: var(--xf); line-height: 1.2; margin-top: 4px; white-space: nowrap; }
+
+/* Прибор 1 «Барабаны»: число в окошках счётчика, дни — утопленные ячейки */
+.kc-dr { display: inline-flex; gap: .08em; }
+.kc-dr i { font-style: normal; display: inline-block; padding: .06em .1em; background: var(--sheet); border-radius: .12em; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent), inset 0 .08em .18em rgba(0, 0, 0, .5); line-height: 1; font-weight: 500; min-width: .62em; text-align: center; }
+.kc-ga1 .tb .kn i { color: var(--warm); }
+.kc-ga1 .cd i { width: calc(100% - 3px); min-width: 0; height: calc(100% - 3px); max-height: 2.1em; background: color-mix(in srgb, var(--sheet) 60%, transparent); border-radius: 3px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 16%, transparent), inset 0 1px 3px rgba(0, 0, 0, .35); }
+.kc-ga1 .cd.now i { color: var(--warm); box-shadow: inset 0 0 0 1px var(--warm), 0 0 6px color-mix(in srgb, var(--warm) 45%, transparent); font-weight: 600; }
+.kc-ga1 .cd.off i { background: none; box-shadow: none; }
+.kc-gauge-cw, .kc-ga1 .cw, .kc-ga2 .cw { text-transform: uppercase; letter-spacing: .06em; }
+.kx-dr { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; white-space: nowrap; font-size: var(--xf); font-family: var(--vf); }
+.kx-dr small { font-size: .62em; color: var(--dim); letter-spacing: .08em; margin-right: 4px; font-family: var(--font); }
+/* Прибор 2 «Шкала»: под чертой сегодня — стрелка */
+.kc-ga2 .kn { font-weight: 500 !important; }
+.kc-ga2 .cd.now i { color: var(--warm); font-weight: 600; }
+.kc-ga2 .cd.now i::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: 2%; height: 2px; background: var(--warm); box-shadow: 0 0 5px color-mix(in srgb, var(--warm) 70%, transparent); }
+.kc-ga2 .cd.past { color: var(--dim); }
+
+/* Заливка 1 «Пилюли»: число градиентом, день недели и сегодня — цветные пилюли */
+.kc-fi1 .kn, .kc-fi2 .kn { font-weight: 800 !important; letter-spacing: -.04em; }
+.kc-fi1 .kn { -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: .04em; }
+.kc-fi1 .tx b { display: inline-block; align-self: flex-start; max-width: 100%; background: var(--kp1, #8a4df2); color: #fff; border-radius: 10px; padding: 1px 9px; }
+.kc-fi1 .cw { font-weight: 700; }
+.kc-fi1 .cd { font-weight: 600; }
+.kc-fi1 .cd i { border-radius: 99px; }
+.kc-fi1 .cd.now i { color: #fff; font-weight: 800; min-width: min(2.1em, 100%); }
+.kx-pl { display: flex; gap: 5px; flex-wrap: wrap; align-content: center; }
+.kx-pl i { font-style: normal; font-weight: 800; border-radius: 10px; padding: 1px 9px; color: #fff; font-size: var(--xf); white-space: nowrap; }
+/* Заливка 2 «Налив»: ячейки налиты цветом, прошедшие — доверху, сегодня — на долю дня */
+.kc-fi2 .cd { font-weight: 600; }
+.kc-fi2 .cd i { border-radius: 6px; width: calc(100% - 3px); height: calc(100% - 3px); max-height: 2.2em; min-width: 0; background: linear-gradient(to top, var(--cc) var(--f), color-mix(in srgb, var(--text) 7%, transparent) var(--f)); }
+.kc-fi2 .cd.past i { color: #fff; }
+.kc-fi2 .cd.now i { box-shadow: 0 0 0 1.5px var(--cc); font-weight: 800; }
+.kc-fi2 .cd.off i { background: none; }
+.kc-lvl { position: absolute; left: -10px; right: -10px; bottom: -8px; height: calc((100% + 16px) * var(--p)); opacity: .35; z-index: 0; border-top: 2px solid color-mix(in srgb, var(--text) 50%, transparent); }
+.kx-fl .kbr { height: var(--bh); border-radius: 99px; background: color-mix(in srgb, var(--text) 8%, transparent); position: relative; overflow: hidden; display: flex; align-items: center; }
+.kx-fl .kbr i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; }
+.kx-fl .kbr b { position: relative; margin-left: 10px; font-weight: 800; font-size: calc(var(--bh) * .55); color: #fff; }
+
+/* ЖК-табло: заглавные, мелкая разрядка */
+:is(.kc-lc1, .kc-lc2) .tx b { text-transform: uppercase; letter-spacing: .06em; }
+:is(.kc-lc1, .kc-lc2) .tx span, :is(.kc-lc1, .kc-lc2) .kh { text-transform: uppercase; letter-spacing: .06em; }
+:is(.kc-lc1, .kc-lc2) .cw { text-transform: uppercase; }
+/* 1 «Сегменты»: за числами погашенные 88 */
+.kc-lc1 .cd i { white-space: pre; }
+.kc-lc1 .tb .kn { margin-left: .12em; } /* наклон сегментов уходит влево */
+.kc-lc1 .cd i s { position: absolute; inset: 0; display: grid; place-items: center; text-decoration: none; opacity: var(--ghost, .08); }
+.kc-lc1 .cd.now i { outline: 1px solid var(--text); outline-offset: -1px; font-weight: 700; }
+.kc-lc1 .cd.we { text-decoration: underline dotted; text-underline-offset: 2px; }
+.kx-sg { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: var(--xf); letter-spacing: .06em; }
+.kx-sg span { display: flex; align-items: center; gap: 6px; font-size: .75em; white-space: nowrap; }
+.kx-sg svg { font-size: 1.33em; }
+/* 2 «Инверсия»: сегодня и число негативом, подписи в рамках */
+.kc-lc2 .kn { background: var(--text); color: var(--tile); padding: .06em .12em; border-radius: 2px; font-weight: 700 !important; }
+.kc-lc2 .kh { border: 1px solid color-mix(in srgb, var(--text) 45%, transparent); padding: 0 5px; border-radius: 2px; align-self: flex-start; }
+.kc-lc2 .cw { background: color-mix(in srgb, var(--text) 14%, transparent); color: var(--text); }
+.kc-lc2 .cd.now i { background: var(--text); color: var(--tile); font-weight: 700; border-radius: 2px; }
+.kc-lc2 .cd.we { opacity: .7; }
+.kx-bx { display: flex; gap: 4px 6px; flex-wrap: wrap; align-content: center; font-size: var(--xf); letter-spacing: .06em; }
+.kx-bx span { border: 1px solid color-mix(in srgb, var(--text) 45%, transparent); padding: 0 4px; border-radius: 2px; white-space: nowrap; }
+
+/* Осциллограф: свечение, подписи каналов в поле плитки */
+:is(.kc-os1, .kc-os2) .kn { font-weight: 600 !important; color: var(--a); text-shadow: 0 0 var(--glow, 2px) var(--a), 0 0 8px color-mix(in srgb, var(--a) 50%, transparent); }
+:is(.kc-os1, .kc-os2) .tx b, :is(.kc-os1, .kc-os2) .kh { text-transform: uppercase; letter-spacing: .06em; }
+:is(.kc-os1, .kc-os2) .cw { text-transform: uppercase; color: var(--a); opacity: .6; }
+:is(.kc-os1, .kc-os2) .cd { color: color-mix(in srgb, var(--text) 72%, transparent); }
+:is(.kc-os1, .kc-os2) .cd.we { color: var(--ch2); opacity: .8; }
+.kc-ch, .kc-rd { position: absolute; top: -9px; font-size: 8px; line-height: 10px; letter-spacing: .06em; z-index: 2; }
+.kc-ch { left: -3px; color: var(--a); opacity: .75; }
+.kc-rd { top: auto; bottom: -9px; right: -3px; color: var(--ch2); opacity: .85; }
+/* 1 «Развёртка»: сегодня в скобках-маркерах, луч с импульсом */
+.kc-os1 .cd.now i { color: var(--text); text-shadow: 0 0 6px var(--a), 0 0 12px var(--a); font-weight: 700; }
+.kc-os1 .cd.now i::before, .kc-os1 .cd.now i::after { content: ""; position: absolute; top: 10%; bottom: 10%; width: 3px; border: 1px solid var(--a); box-shadow: 0 0 4px var(--a); }
+.kc-os1 .cd.now i::before { left: 0; border-right: 0; } .kc-os1 .cd.now i::after { right: 0; border-left: 0; }
+.kx-tr svg { filter: drop-shadow(0 0 var(--glow, 2px) var(--a)); }
+/* 2 «Курсоры»: пунктир через сегодня по строке и столбцу */
+.kc-os2 .cd.now { z-index: 1; }
+.kc-os2 .cd.now::before { content: ""; position: absolute; left: 50%; top: -600px; bottom: -600px; border-left: 1px dashed color-mix(in srgb, var(--ch2) 60%, transparent); z-index: -1; }
+.kc-os2 .cd.now::after { content: ""; position: absolute; top: 50%; left: -600px; right: -600px; border-top: 1px dashed color-mix(in srgb, var(--ch2) 60%, transparent); z-index: -1; }
+.kc-os2 .cg.week .cd.now::after { display: none; }
+.kc-os2 .cd.now i { color: var(--ch2); text-shadow: 0 0 6px color-mix(in srgb, var(--ch2) 80%, transparent); font-weight: 700; background: var(--tile); border: 1px solid var(--ch2); border-radius: 2px; }
+.kc .xh { position: relative; display: inline-block; }
+.kc .xh::before { content: ""; position: absolute; left: 50%; top: -.25em; bottom: -.25em; border-left: 1px dashed color-mix(in srgb, var(--ch2) 70%, transparent); }
+.kc .xh::after { content: ""; position: absolute; top: 52%; left: -.2em; right: -.2em; border-top: 1px dashed color-mix(in srgb, var(--ch2) 70%, transparent); }
+.kx-rd { color: var(--ch2); font-size: var(--xf); letter-spacing: .03em; white-space: nowrap; display: flex; flex-wrap: wrap; gap: 0 12px; font-family: var(--vf); }
+
+/* Чертёж: заглавные, линии цвета --ln */
+:is(.kc-bp1, .kc-bp2) .tx b, :is(.kc-bp1, .kc-bp2) .tx span, :is(.kc-bp1, .kc-bp2) .cw { text-transform: uppercase; letter-spacing: .05em; }
+:is(.kc-bp1, .kc-bp2) .kh { text-transform: uppercase; letter-spacing: .1em; font-weight: 400; }
+/* 1 «Штамп»: сегодня — угловой штамп, сетка — таблица, сегодня заштриховано */
+.kc-bp1 .cg { border-left: 1px solid color-mix(in srgb, var(--ln) 55%, transparent); border-top: 1px solid color-mix(in srgb, var(--ln) 55%, transparent); }
+.kc-bp1 .cg > span { border-right: 1px solid color-mix(in srgb, var(--ln) 55%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--ln) 55%, transparent); }
+.kc-bp1 .cw { background: color-mix(in srgb, var(--ln) 8%, transparent); color: var(--text); }
+.kc-bp1 .cd.now { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--ln) 38%, transparent) 0 1px, transparent 1px 4px); }
+.kc-bp1 .cd.now i { font-weight: 700; background: var(--sheet); padding: 0 2px; }
+.kc .bpt { display: grid; grid-template-columns: auto 1fr; border: 1px solid color-mix(in srgb, var(--ln) 60%, transparent); min-width: 0; gap: 0; align-items: stretch; }
+.kc .L.row > .bpt:not(.col) { align-self: stretch; }
+.bpt > * { border: 0 solid color-mix(in srgb, var(--ln) 60%, transparent); }
+.bpt .nb { grid-row: span 2; border-right-width: 1px; display: flex; flex-direction: column; justify-content: center; padding: 2px 7px; }
+.bpt .nb small, .bpt .c small { font-size: max(7.5px, calc(var(--ts) * .6)); letter-spacing: .1em; color: var(--dim); }
+.bpt .c { padding: 1px 6px; font-size: var(--ts); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; min-width: 0; }
+.bpt .c + .c { border-top-width: 1px; }
+.bpt .c b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.bpt.col { grid-template-columns: 1fr; }
+.bpt.col .nb { grid-row: auto; border-right-width: 0; border-bottom-width: 1px; }
+.kx-st { display: inline-flex; flex-wrap: wrap; border: 1px solid color-mix(in srgb, var(--ln) 60%, transparent); font-size: var(--xf); white-space: nowrap; flex: none !important; max-width: 100%; font-family: var(--vf); }
+.kx-st span { padding: 1px 6px; border-right: 1px solid color-mix(in srgb, var(--ln) 60%, transparent); }
+.kx-st span:last-child { border-right: 0; }
+.kx-st small { font-size: .7em; color: var(--dim); margin-right: 4px; letter-spacing: .1em; }
+/* 2 «Размеры»: сегодня обведено с выноской, размерная линия периода */
+.kc-bp2 .cd.now i { border: 1px solid var(--text); border-radius: 99px; font-weight: 700; }
+.kc-bp2 .cd.now i::after { content: ""; position: absolute; right: -5px; top: -3px; width: 6px; border-top: 1px solid var(--text); transform: rotate(-40deg); transform-origin: left; }
+.kc-bp2 .cd.past { opacity: .62; }
+.kc-bp2 .tb .kn { border-bottom: 1px solid color-mix(in srgb, var(--ln) 50%, transparent); padding-bottom: .04em; }
+.kx-dt { fill: var(--text); font-family: var(--vf); letter-spacing: .08em; paint-order: stroke; stroke: var(--sheet); stroke-width: 4px; }
+
+/* Пиксели: заглавные, блоки без скруглений */
+:is(.kc-px1, .kc-px2) .tx b, :is(.kc-px1, .kc-px2) .kh { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+:is(.kc-px1, .kc-px2) .tx span { text-transform: uppercase; letter-spacing: .06em; font-size: 10px; }
+:is(.kc-px1, .kc-px2) .cw { text-transform: uppercase; }
+/* 1 «3×5»: все числа пиксельным шрифтом, сегодня — жёлтый блок */
+.kc-px1 .cd i { min-width: 0; width: calc(100% - 2px); height: calc(100% - 2px); }
+.kc-px1 .cd i svg { shape-rendering: crispEdges; }
+.kc-px1 .cd.now i { background: var(--yel); }
+.kc-px1 .cw.we { color: var(--pink); }
+.kx-px3 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: var(--xf); color: var(--dim); letter-spacing: .06em; white-space: nowrap; }
+.kx-px3 span { display: flex; align-items: center; gap: 6px; }
+/* 2 «Блоки»: прошедшие мятные, сегодня мигает, выходные светлее */
+.kc-px2 .cd i { min-width: 0; width: calc(100% - 3px); height: calc(100% - 3px); background: var(--track); color: var(--dim); font-size: .92em; }
+.kc-px2 .cd.past i { background: var(--mint); color: var(--tile); }
+.kc-px2 .cd.we:not(.past):not(.now) i { background: color-mix(in srgb, var(--track) 70%, var(--text)); }
+.kc-px2 .cd.now i { background: var(--pink); color: var(--tile); font-weight: 700; animation: kcblink 1s steps(1) infinite; }
+.kc-px2 .cd.off i { background: color-mix(in srgb, var(--track) 50%, transparent); color: transparent; }
+.kc-px2 .cw.we { color: var(--yel); }
+@keyframes kcblink { 50% { background: var(--yel); } }
+@media (prefers-reduced-motion: reduce) { .kc-px2 .cd.now i { animation: none; } }
