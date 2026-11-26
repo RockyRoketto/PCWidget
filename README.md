@@ -4,7 +4,7 @@
 
 **Русский** · [English](README.en.md)
 
-**Версия 1.3.1**
+**Версия 1.3.2**
 
 ## [⬇ Скачать widget.exe](https://github.com/RockyRoketto/PCWidget/releases/latest/download/widget.exe)
 
