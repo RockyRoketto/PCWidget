@@ -61,17 +61,22 @@ type openFileName struct {
 
 // fileDialog показывает диалог «Сохранить» или «Открыть». Пустая строка — передумали.
 func fileDialog(save bool, title, name string) string {
+	return fileDialogOf(set.hwnd, save, title, name, "Профиль PC Widget (*.json)\x00*.json", "json")
+}
+
+// fileDialogOf — то же для любого окна и типа файла; kind — «подпись@маска» через NUL.
+func fileDialogOf(owner uintptr, save bool, title, name, kind, ext string) string {
 	buf := make([]uint16, maxPathW)
 	copy(buf[:maxPathW-1], windows.StringToUTF16(name))
 	// пары «подпись, маска» через NUL, в конце двойной NUL (StringToUTF16 NUL внутри не пропускает)
-	filter := append(utf16x.Encode([]rune("Профиль PC Widget (*.json)\x00*.json\x00Все файлы\x00*.*\x00")), 0)
+	filter := append(utf16x.Encode([]rune(kind+"\x00Все файлы\x00*.*\x00")), 0)
 	o := openFileName{
-		owner:   set.hwnd,
+		owner:   owner,
 		filter:  &filter[0],
 		file:    &buf[0],
 		maxFile: maxPathW,
 		title:   utf16(title),
-		defExt:  utf16("json"),
+		defExt:  utf16(ext),
 		flags:   ofnExplorer | ofnNoChangeDir | ofnHideReadOnly | ofnPathMustExist | ofnDontAddToRecent,
 	}
 	o.structSize = uint32(unsafe.Sizeof(o))

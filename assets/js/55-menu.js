@@ -17,7 +17,8 @@ function menuHTML() {
   }).join('');
   return '<div class="menu"><div class="mseg">' + seg + '</div><div class="mthemes">' + themes + '</div>' +
     (profs ? '<div class="mprof"><span>Профиль</span>' + profs + '</div>' : '') + '<hr>' +
-    item('pen', 'Изменить плитки', 'edit') + item('gear', 'Настройки', 'settings') + item('pin', 'Поверх всех окон', 'topmost', TOPMOST) + item('game', 'Игровой режим', 'game', SYS.game) + '<hr>' +
+    item('pen', 'Изменить плитки', 'edit') + item('gear', 'Настройки', 'settings') + item('pin', 'Поверх всех окон', 'topmost', TOPMOST) + item('game', 'Игровой режим', 'game', SYS.game) +
+    (SYS.lastGame ? item('game', 'Итог последней игры', 'lastgame') : '') + '<hr>' +
     (SYS.sensors && !SYS.driver ? item('install', 'Датчик температуры CPU…', 'driver') : '') +
     (SYS.installed ? '' : item('install', 'Установить на ПК…', 'install')) +
     item('eye', SYS.visible === false ? 'Показать' : 'Скрыть в трей', 'toggle') + item('power', 'Выход', 'exit') + '</div>';

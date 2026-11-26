@@ -77,6 +77,7 @@ func (c *collector) collect() Stats {
 	} else {
 		c.energy.pause()
 	}
+	sessions.record(&s)
 	if now.Sub(c.lastSav) > 30*time.Second {
 		c.traffic.save()
 		c.energy.save()

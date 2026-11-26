@@ -13,6 +13,8 @@ type GameCfg struct {
 	Rows     []string `json:"rows"`     // какие строки показывать
 	HideMain bool     `json:"hideMain"` // прятать главный виджет, пока режим включён
 	Key      string   `json:"key"`      // «Ctrl+Shift+F»; пусто = без горячей клавиши
+	// NoSummary — не показывать карточку итога после игры (по умолчанию показывается).
+	NoSummary bool `json:"noSummary"`
 }
 
 var (
@@ -43,7 +45,7 @@ func gameCfgOf(g *GameCfg) GameCfg {
 			}
 		}
 	}
-	d.HideMain = g.HideMain
+	d.HideMain, d.NoSummary = g.HideMain, g.NoSummary
 	if g.Key == "" {
 		d.Key = ""
 	} else if _, _, ok := parseHotkey(g.Key); ok {

@@ -40,6 +40,7 @@ func sysInfo() string {
 		"claude": claudeModState(claudeDir()), "claudeErr": claudeModErr,
 		"accent": lastAccent, "version": appVersion,
 		"game": ov.on, "gameCfg": gameCfg(), "gameKeyErr": ov.keyErr,
+		"lastGame": loadLastReport() != nil,
 	})
 	return string(b)
 }
@@ -174,6 +175,8 @@ func onSys(c string) {
 		offerUpdate()
 	case "game":
 		toggleGame()
+	case "lastgame":
+		showLastReport()
 	case "updcheck":
 		go updater.check(true)
 	case "autostart:1", "autostart:0":

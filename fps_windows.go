@@ -44,6 +44,13 @@ func (f *frameSource) setOn(on bool) {
 	f.trace, f.fc = t, fc
 }
 
+// counter — счётчик кадров, пока трассировка идёт; иначе nil.
+func (f *frameSource) counter() *frameCounter {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.fc
+}
+
 func filetimeNow() int64 {
 	ft := windows.NsecToFiletime(time.Now().UnixNano())
 	return int64(ft.HighDateTime)<<32 | int64(ft.LowDateTime)

@@ -220,6 +220,7 @@ func setGame(on bool) {
 	}
 	ov.on = on
 	frames.setOn(on)
+	sessions.setOn(on)
 	if on {
 		if ov.cr == nil && !ov.busy {
 			ov.busy = true

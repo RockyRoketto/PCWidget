@@ -102,6 +102,13 @@ func (c *frameCounter) pick(pid uint32, now int64) []int64 {
 	return nil
 }
 
+// stamps — копия отметок кадров процесса (для итога игры).
+func (c *frameCounter) stamps(pid uint32, now int64) []int64 {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return append([]int64(nil), c.pick(pid, now)...)
+}
+
 // stat считает показатели процесса pid на момент now (те же единицы, что у отметок).
 func (c *frameCounter) stat(pid uint32, now int64) *FrameStat {
 	c.mu.Lock()

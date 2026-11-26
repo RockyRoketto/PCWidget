@@ -7,7 +7,7 @@ var GAME_CORNERS = [['tl', 'Слева вверху'], ['tr', 'Справа вв
 
 function gameCfgNow() {
   var g = SYS.gameCfg || {};
-  return { corner: g.corner || 'tl', rows: g.rows || Object.keys(GAME_ROWS), hideMain: !!g.hideMain, key: g.key == null ? 'Ctrl+Shift+F' : g.key };
+  return { corner: g.corner || 'tl', rows: g.rows || Object.keys(GAME_ROWS), hideMain: !!g.hideMain, noSummary: !!g.noSummary, key: g.key == null ? 'Ctrl+Shift+F' : g.key };
 }
 
 function gameBlock() {
@@ -21,12 +21,16 @@ function gameBlock() {
   var hide = '<div class="seg">' + [[0, 'Остаётся'], [1, 'Прячется']].map(function (o) {
     return '<button data-ghide="' + o[0] + '" class="' + (g.hideMain === !!o[0] ? 'on' : '') + '">' + o[1] + '</button>';
   }).join('') + '</div>';
+  var sum = '<div class="seg">' + [[0, 'Показывать'], [1, 'Не нужен']].map(function (o) {
+    return '<button data-gsum="' + o[0] + '" class="' + (g.noSummary === !!o[0] ? 'on' : '') + '">' + o[1] + '</button>';
+  }).join('') + '</div>';
   return label('Игровой режим') +
     setRow('Показ поверх игры', 'Игра в окне или в окне без рамки. Полноэкранный эксклюзивный режим перекрыть нельзя', '<span class="sw"><input type="checkbox" data-gon aria-label="Игровой режим"' + (SYS.game ? ' checked' : '') + '><i></i></span>') +
     '<div class="ol">Горячая клавиша<input class="txt key-in" type="text" readonly data-gkey value="' + esc(g.key || '') + '" placeholder="Нет" aria-label="Горячая клавиша игрового режима"></div>' +
     '<div class="hint' + (SYS.gameKeyErr ? ' bad' : '') + '">' + esc(SYS.gameKeyErr || 'Щёлкни поле и нажми сочетание. Backspace — без клавиши') + '</div>' +
     '<div class="ol gsp">Угол экрана<span style="width:150px">' + corners + '</span></div>' +
     '<div class="ol gsp">Главный виджет<span style="width:170px">' + hide + '</span></div>' +
+    '<div class="ol gsp" title="Карточка с FPS и графиком, когда игру закрыли или режим выключен">Итог после игры<span style="width:170px">' + sum + '</span></div>' +
     '<div class="lab">Строки</div><div class="gchips">' + chips + '</div>';
 }
 
@@ -45,7 +49,7 @@ function comboOf(e) {
 
 // Обработчики раньше общих (фаза перехвата): элементы блока не должны попасть в CFG виджета.
 document.addEventListener('click', function (e) {
-  var b = e.target.closest && e.target.closest('[data-grow],[data-gcorner],[data-ghide]');
+  var b = e.target.closest && e.target.closest('[data-grow],[data-gcorner],[data-ghide],[data-gsum]');
   if (!b) return;
   e.stopPropagation();
   var g = gameCfgNow();
@@ -54,7 +58,9 @@ document.addEventListener('click', function (e) {
     g.rows = Object.keys(GAME_ROWS).filter(function (x) { return x === k ? on : g.rows.indexOf(x) >= 0; });
     b.classList.toggle('on', on);
   } else {
-    if (b.dataset.gcorner) g.corner = b.dataset.gcorner; else g.hideMain = b.dataset.ghide === '1';
+    if (b.dataset.gcorner) g.corner = b.dataset.gcorner;
+    else if (b.dataset.gsum) g.noSummary = b.dataset.gsum === '1';
+    else g.hideMain = b.dataset.ghide === '1';
     $$('button', b.parentNode).forEach(function (x) { x.classList.toggle('on', x === b); });
   }
   sendGame(g);
