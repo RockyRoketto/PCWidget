@@ -125,6 +125,7 @@ func createUI(s Settings, page string) bool {
 	cr.Resize()
 	cr.NavigateToString(page)
 	createPopup(hInst)
+	createHist(hInst)
 
 	pShowWindow.Call(h, swShowNA)
 	if !s.Topmost {
@@ -260,6 +261,8 @@ func onPage(m string) {
 		runOnUI(showMenu)
 	case m == "update":
 		runOnUI(offerUpdate)
+	case strings.HasPrefix(m, "hist:"):
+		showHist(m[5:])
 	case strings.HasPrefix(m, "menuhtml:"):
 		showMenuHTML(m[9:])
 	case strings.HasPrefix(m, "cfg:"):
