@@ -191,6 +191,7 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		return 0
 	case wmEnterSizeMove:
 		dragging = true
+		dragFrom = windowRect(hwnd)
 	case wmMoving:
 		// Тащат мышью: окно не уходит за край экрана (того, где курсор) и прилипает к краю.
 		var p point
@@ -214,6 +215,15 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		}
 		setStyle(app.style)
 		savePos()
+		// Отпустили у левого или правого края: странице стать Колонкой; оттащили от края — вернуться.
+		// Простой щелчок по виджету (окно не сдвинулось) режим не трогает.
+		if r := windowRect(hwnd); r != dragFrom {
+			if atSide(r, workAreaOf(hwnd)) {
+				sendCmd("edge:1")
+			} else {
+				sendCmd("edge:0")
+			}
+		}
 		return 0
 	case wmTray:
 		onTray(lp)

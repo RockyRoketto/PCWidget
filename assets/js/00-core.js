@@ -76,7 +76,7 @@ function paintTile(el) {
 
 function defaults() {
   return {
-    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', scale: 100, glass: 62, tileColors: {}, thin: {},
+    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
@@ -99,6 +99,7 @@ function mergeCfg(saved) {
   if (PALS[saved.pal] || saved.pal === 'win') c.pal = saved.pal;
   if (MODES[saved.mode]) c.mode = saved.mode;
   else if (saved.mode === 'compact' && MODES[saved.compact]) c.mode = saved.compact; // до ver 3
+  if (c.mode === 'column' && GRID_MODES[saved.edgeBack]) c.edgeBack = saved.edgeBack; // Колонкой стал у края экрана
   mergeLayout(c, saved);
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;

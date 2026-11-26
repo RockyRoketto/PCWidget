@@ -85,3 +85,15 @@ func TestDragRect(t *testing.T) {
 		}
 	}
 }
+
+func TestAtSide(t *testing.T) {
+	work := rect{L: 0, T: 0, R: 1920, B: 1040}
+	for _, c := range []struct {
+		r    rect
+		want bool
+	}{{rect{0, 300, 336, 900}, true}, {rect{1584, 300, 1920, 900}, true}, {rect{500, 0, 836, 600}, false}, {rect{1, 300, 337, 900}, false}} {
+		if atSide(c.r, work) != c.want {
+			t.Errorf("atSide(%v) != %v", c.r, c.want)
+		}
+	}
+}

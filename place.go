@@ -116,3 +116,6 @@ func dragRect(r, work rect, snap int32) rect {
 	}
 	return rect{x, y, x + w, y + h}
 }
+
+// atSide — окно стоит вплотную к левому или правому краю рабочей области (туда его прилепил магнит).
+func atSide(r, work rect) bool { return r.L <= work.L || r.R >= work.R }
