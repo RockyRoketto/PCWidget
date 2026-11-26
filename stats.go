@@ -80,6 +80,8 @@ type ProcStat struct {
 	CPU  []ProcItem `json:"cpu"`
 	RAM  []ProcItem `json:"ram"`
 	Disk []ProcItem `json:"disk"`
+	// Map — частная память процессов в МБ для карты в плитке «Память», список длиннее остальных.
+	Map []ProcItem `json:"map"`
 }
 
 func ptr(v float64) *float64 { return &v }

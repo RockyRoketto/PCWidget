@@ -42,7 +42,15 @@ TILE_OPTS.claude = function () { return thinOpt('claude') + '<div data-cl>' + cl
 function thinOpt(id) {
   return GRID_MODES[curMode()] ? '<div class="ol">Высота<span style="width:150px">' + segment('thin:' + id, [[0, 'Обычная'], [1, 'Тонкая']], CFG.thin[id] ? 1 : 0) + '</span></div>' : '';
 }
-['gpu', 'mem', 'net'].forEach(function (id) { TILE_OPTS[id] = function () { return thinOpt(id); }; });
+TILE_OPTS.net = function () { return thinOpt('net'); };
+function boolOpt(key, name) { return '<label class="ol">' + name + toggle(key, CFG[key], name) + '</label>'; }
+// У памяти вместо шкалы может быть карта процессов, у GPU — значок вентилятора (он есть и в Колонке).
+TILE_OPTS.mem = function () {
+  return thinOpt('mem') + (GRID_MODES[curMode()] ? boolOpt('memMap', 'Карта процессов') : '');
+};
+TILE_OPTS.gpu = function () {
+  return thinOpt('gpu') + (GRID_MODES[curMode()] || curMode() === 'column' ? boolOpt('gpuFan', 'Значок вентилятора') : '');
+};
 // У CPU вместо обычного индикатора могут быть столбики по потокам (в Панели, Широкой и Колонке).
 TILE_OPTS.cpu = function () {
   return thinOpt('cpu') + (GRID_MODES[curMode()] || curMode() === 'column' ? '<label class="ol">Столбики по потокам' + toggle('cores', CFG.cores, 'Столбики по потокам') + '</label>' : '');

@@ -4,10 +4,11 @@
 //   Лист — кривая (graph, net) или полоса (level);  Прибор — деления или столбики;  Заливка — фон ячейки.
 
 // kind: graph (история 0..100), net (история скоростей), level (заполненность), run (тонкая полоса в строке),
-// cores (загрузка по потокам).
+// cores (загрузка по потокам), map (карта памяти, 24-memmap.js).
 function makeViz(kind) {
   var t = CFG.theme;
   if (kind === 'cores') return coresViz();
+  if (kind === 'map') return memMapViz();
   if (t === 'fill') return fillViz(kind);
   if (t === 'gauge') return kind === 'net' ? histViz() : tickViz(kind === 'run');
   if (t === 'lcd') return kind === 'graph' || kind === 'net' ? histViz() : tickViz(kind === 'run');
@@ -119,7 +120,7 @@ function palAt(stops, t) {
 function placeFills(root) {
   if (CFG.theme !== 'fill' || !root.isConnected) return;
   var st = palStops(), dx = Math.sin(155 * Math.PI / 180), dy = -Math.cos(155 * Math.PI / 180);
-  var list = $$('.fill, .cores', root).map(function (f) {
+  var list = $$('.fill, .cores, .tmap', root).map(function (f) {
     var r = f.parentNode.getBoundingClientRect();
     return { f: f, w: r.width, p: (r.left + r.width / 2) * dx + (r.top + r.height / 2) * dy };
   }).filter(function (x) { return x.w; });

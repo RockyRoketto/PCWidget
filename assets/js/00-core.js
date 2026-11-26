@@ -76,7 +76,7 @@ function paintTile(el) {
 
 function defaults() {
   return {
-    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false,
+    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false, memMap: false, gpuFan: false,
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, antiburn: false, updates: true, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
@@ -106,7 +106,7 @@ function mergeCfg(saved) {
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
-  ['notify', 'antiburn', 'clockSec', 'cores'].forEach(function (k) { c[k] = saved[k] === true; });
+  ['notify', 'antiburn', 'clockSec', 'cores', 'memMap', 'gpuFan'].forEach(function (k) { c[k] = saved[k] === true; });
   c.updates = saved.updates !== false;
   ['wxDays', 'clock24', 'clockHand', 'clockDate'].forEach(function (k) { c[k] = saved[k] !== false; });
   if (CLOCKS[saved.clockView]) c.clockView = saved.clockView;

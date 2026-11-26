@@ -3,7 +3,7 @@
 // В профиль входят тема, тон, акцент, градиент, плотность, режим, плитки и их порядок, цвета плиток, размер.
 // Пороги, город, тариф и системное в профиль не входят. Ключи совпадают с profileKeys в profile.go.
 
-var PROF_KEYS = ['theme', 'tone', 'accent', 'pal', 'glass', 'mode', 'scale', 'rows', 'hide', 'mini', 'tileColors', 'thin', 'cores'];
+var PROF_KEYS = ['theme', 'tone', 'accent', 'pal', 'glass', 'mode', 'scale', 'rows', 'hide', 'mini', 'tileColors', 'thin', 'cores', 'memMap', 'gpuFan'];
 var PROF_MAX = 6, PROF_NAME = 32;
 
 function profName(s) {

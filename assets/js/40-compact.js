@@ -104,6 +104,11 @@ function buildCompact(mode) {
     if (bars !== it.bars) { it.vz.el.remove(); it.vz = rowViz(it.el, mode, bars); it.bars = bars; }
     if (it.vz) it.vz.set({ pct: d.pct || 0, mark: d.mark, cores: bars ? s.cpu.cores : null });
     it.el.classList.toggle('alarm', !!(it.sp.alarm && it.sp.alarm()));
+    // в колонке у GPU перед градусами значок вентилятора
+    if (mode === 'column' && it.id === 'gpu') {
+      if (fanOn(s.gpu)) { it.fan = it.fan || fanViz(); it.fan.inRow(it.el, it.s); it.fan.set(s.gpu.fan); }
+      else if (it.fan) { it.fan.remove(); it.fan = null; }
+    }
     if (it.sp.post) it.sp.post(it.el);
   }
   return {

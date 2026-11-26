@@ -51,3 +51,13 @@ body.theme-fill.tone-light {
 .theme-fill .cb.has-vz .md .num.warm, .theme-fill .cb.has-vz .md .num.hot { color: var(--text) !important; }
 .theme-fill .cb.has-vz:has(> .cores) .md .num.warm { color: var(--warm) !important; }
 .theme-fill .cb.has-vz:has(> .cores) .md .num.hot { color: var(--hot) !important; }
+/* карта памяти из цвета карточки; в тепле и жаре блоки берут цвет состояния */
+.theme-fill .tmap { --c: var(--tint, var(--solid, #2f7df0)); --k0: 34%; --k1: 44%; }
+.theme-fill.tone-light .tmap { --k0: 24%; --k1: 34%; }
+.theme-fill .is-warm:not(.tinted, .tinted *) .tmap { --c: var(--warm); }
+.theme-fill .is-hot .tmap, .theme-fill .alarm .tmap { --c: var(--hot); }
+.theme-fill .tmap > i { border-radius: 8px; }
+/* вентилятор белый (на светлой тёмный) поверх рельефа, без ободка */
+.theme-fill .fanv .ring { box-shadow: none; }
+.theme-fill .fanv.at-md, .theme-fill .fanv.at-row { text-shadow: var(--nshadow); }
+.theme-fill .fanv .lbl { color: var(--text); }

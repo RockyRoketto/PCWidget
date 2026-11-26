@@ -23,6 +23,7 @@ function loadTile(id, details) {
     c = n; bars = on;
   }
   use(false);
+  var fan = null; // значок вентилятора (только у GPU, по настройке)
   return {
     el: el, span: function () { return thinOn(id) ? 1 : 2; },
     update: function (s) {
@@ -30,6 +31,8 @@ function loadTile(id, details) {
       use(coresOn(d));
       var lv = level(d.temp, CFG.thr[thrKey]);
       c.aux(details(d));
+      if (fanOn(d)) { fan = fan || fanViz(); fan.place(c.el, el); fan.set(d.fan); }
+      else if (fan) { fan.remove(); fan = null; }
       if (d.temp != null) { c.big(Math.round(d.temp) + '°', '', lv); c.side(Math.round(d.load), '%'); }
       else { c.big(Math.round(d.load), '%'); c.side(null); }
       c.lv(lv); c.viz({ hist: HIST[id], max: 100, pct: d.load, cores: d.cores });
@@ -106,17 +109,29 @@ var TILE_BUILD = {
     });
   },
 
+  // Память: сколько занято и шкала; по настройке вместо них карта процессов (в тонкой не помещается).
   mem: function () {
-    var el = tileBox('mem'), c = makeCell({ kind: 'level', name: 'Память' });
-    el.appendChild(c.el);
+    var el = tileBox('mem'), c, map;
+    function use(on) {
+      if (map === on) return;
+      var n = makeCell(on ? { kind: 'map', name: 'Память', cls: 'mapc' } : { kind: 'level', name: 'Память' });
+      if (c) { el.replaceChild(n.el, c.el); packSig = ''; } // высота и цвет «Заливки» считаются заново
+      else el.appendChild(n.el);
+      c = n; map = on;
+    }
+    use(false);
     return {
-      el: el, span: function () { return thinOn('mem') ? 1 : 2; },
+      el: el, span: function () { return thinOn('mem') ? 1 : map && wide(el) ? 3 : 2; },
       update: function (s) {
         var m = s.mem; el.hidden = !m; if (!m) return;
+        use(memMapOn(s) && !thinNow(el));
         var on = Alarm.isOn('mem'), lv = on ? 'hot' : level(m.pct, CFG.thr.mem);
-        c.aux('из ' + Math.round(m.totalGB) + ' ГБ' + (m.pageUsedGB != null ? ' · подк. ' + num(m.pageUsedGB) : ''));
-        c.big(num(m.usedGB), 'ГБ'); c.side(Math.round(m.pct), '%');
-        c.lv(lv); c.viz({ pct: m.pct, mark: CFG.thr.mem }); c.alarm(on);
+        if (map) c.aux('<span class="' + lv + '">' + dec(m.usedGB, 1) + ' из ' + Math.round(m.totalGB) + ' ГБ' + (wide(el) ? ' · ' + Math.round(m.pct) + '%' : '') + '</span>');
+        else {
+          c.aux('из ' + Math.round(m.totalGB) + ' ГБ' + (m.pageUsedGB != null ? ' · подк. ' + num(m.pageUsedGB) : ''));
+          c.big(num(m.usedGB), 'ГБ'); c.side(Math.round(m.pct), '%');
+        }
+        c.lv(lv); c.viz({ pct: m.pct, mark: CFG.thr.mem, procs: map ? s.procs.map : null, used: m.usedGB * 1024 }); c.alarm(on);
       }
     };
   },

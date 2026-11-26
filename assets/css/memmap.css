@@ -1,0 +1,13 @@
+/* Карта памяти: вместо числа и шкалы в плитке «Память». Блоки ставит 24-memmap.js, зазор 2px — рамка
+   блока без фона. --k плотность блока (1 крупнейший, 0 мелкие), --c цвет. Темы правят цвет и форму. */
+.cb.mapc { padding: 9px 7px 7px; }
+.cb.mapc > .hd { padding-inline: 4px; }
+.cb.mapc > .md { display: none; }
+.tmap { --c: var(--a); --k0: 18%; --k1: 28%; flex: 1 1 0; min-height: 0; margin: 0 -1px -1px; }
+.tmap > i { position: absolute; display: flex; flex-direction: column; overflow: hidden; padding: 1px 4px; border: 1px solid transparent; border-radius: 6px; background: color-mix(in srgb, var(--c) calc(var(--k0) + var(--k, 0) * var(--k1)), transparent) padding-box; font-style: normal; white-space: nowrap; transition: left .5s, top .5s, width .5s, height .5s; }
+.tmap > i.other { background: var(--track) padding-box; color: var(--dim); }
+.tmap b, .tmap span { flex: none; display: block; overflow: hidden; text-overflow: ellipsis; font-size: 11px; line-height: 13px; }
+.tmap b { font-weight: 600; }
+.tmap span { opacity: .82; }
+.tmap b:empty, .tmap span:empty { display: none; }
+@media (prefers-reduced-motion: reduce) { .tmap > i { transition: none; } }

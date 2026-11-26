@@ -46,6 +46,14 @@ body.theme-lcd.tone-dark {
 .theme-lcd .cores { -webkit-mask: repeating-linear-gradient(0deg, #000 0 3px, transparent 3px 4px); }
 .theme-lcd .cores > i { background: color-mix(in srgb, var(--text) calc(var(--ghost) * 100%), transparent); }
 
+/* карта памяти — прямоугольные сегменты с тонким контуром */
+.theme-lcd .tmap { --k0: 8%; --k1: 20%; }
+.theme-lcd .tmap > i { border-radius: 2px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent); font-family: Bahnschrift, "Segoe UI", sans-serif; font-stretch: 87%; }
+.theme-lcd .tmap > i.other { box-shadow: inset 0 0 0 1px var(--hair); }
+/* вентилятор: за лопастями бледные клинья, как несветящиеся сегменты */
+.theme-lcd .fanv .ring { box-shadow: none; background: repeating-conic-gradient(from 45deg, color-mix(in srgb, var(--text) calc(var(--ghost) * 100%), transparent) 0 40deg, transparent 40deg 90deg); }
+.theme-lcd .fanv .lbl { font-family: Bahnschrift, "Segoe UI", sans-serif; }
+
 /* тревога: цифры мигают, как на табло, рамка ячейки цвета тревоги */
 @keyframes lcdblink { 50% { opacity: .15; } }
 .theme-lcd .alarm { animation: none; background-color: var(--tile) !important; box-shadow: inset 0 0 0 1.5px var(--hot); }

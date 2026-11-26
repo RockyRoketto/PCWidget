@@ -1,0 +1,17 @@
+/* Значок вентилятора GPU (26-fan.js). Цвет — акцент темы или свой цвет плитки, в тепле и жаре их цвет.
+   Места: at-hd у названия, at-md между числами, at-row своей строкой, at-cr в строке колонки.
+   .ring — неподвижный ободок, крутится только .rot. Темы правят вид. */
+.fanv { display: inline-flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
+.fanv .ring { display: block; width: 36px; height: 36px; padding: 1px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--track); }
+.fanv .rot { display: block; width: 100%; height: 100%; will-change: transform; }
+.fanv svg { display: block; width: 100%; height: 100%; fill: var(--a); }
+.fanv svg circle { fill: var(--text); }
+.fanv .lbl { font-size: 11px; line-height: 14px; font-weight: 400; color: var(--dim); text-transform: none; letter-spacing: 0; }
+.fanv .lbl b { display: block; color: var(--text); font-weight: 600; }
+.fanv.at-md { align-self: center; margin-inline: auto; }
+.md > .fanv.at-md + .v2:not([hidden]) { margin-left: 0; }
+.fanv.at-row { align-self: flex-start; }
+.fanv.at-hd .ring, .fanv.at-cr .ring { width: 16px; height: 16px; padding: 0; box-shadow: none; }
+.fanv.at-hd .lbl, .fanv.at-cr .lbl { display: none; }
+/* в строке колонки значок занимает свой столбец перед градусами */
+.mini.col .cr:has(> .fanv) { grid-template-columns: auto auto minmax(0, 1fr) auto; column-gap: 4px; }
