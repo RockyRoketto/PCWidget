@@ -191,6 +191,13 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		return 0
 	case wmEnterSizeMove:
 		dragging = true
+	case wmMoving:
+		// Тащат мышью: окно не уходит за край экрана (того, где курсор) и прилипает к краю.
+		var p point
+		pGetCursorPos.Call(uintptr(unsafe.Pointer(&p)))
+		r := (*rect)(unsafe.Pointer(lp))
+		*r = dragRect(*r, workAreaAt(int(p.X), int(p.Y)), int32(scalePx(12, dpiOf(hwnd))))
+		return 1
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)
 	case wmMouseActivate:

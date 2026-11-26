@@ -68,3 +68,20 @@ func TestSettingsRect(t *testing.T) {
 		}
 	}
 }
+
+func TestDragRect(t *testing.T) {
+	work := rect{L: 0, T: 0, R: 1920, B: 1040}
+	cases := []struct{ in, want rect }{
+		{rect{500, 300, 836, 900}, rect{500, 300, 836, 900}},     // посередине: как есть
+		{rect{1700, 300, 2036, 900}, rect{1584, 300, 1920, 900}}, // за правым краем: на край
+		{rect{1575, 300, 1911, 900}, rect{1584, 300, 1920, 900}}, // рядом с правым: прилип
+		{rect{-80, -20, 256, 580}, rect{0, 0, 336, 600}},         // за левым верхним углом
+		{rect{8, 500, 344, 1036}, rect{0, 504, 336, 1040}},       // у левого и нижнего: прилип к обоим
+		{rect{100, 100, 2100, 300}, rect{0, 100, 2000, 300}},     // шире экрана
+	}
+	for _, c := range cases {
+		if got := dragRect(c.in, work, 12); got != c.want {
+			t.Errorf("dragRect(%v) = %v; want %v", c.in, got, c.want)
+		}
+	}
+}

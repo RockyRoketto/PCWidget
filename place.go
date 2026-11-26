@@ -90,3 +90,29 @@ func settingsRect(a anchor, s setSpot, work rect) (x, y, h int) {
 }
 
 func overlaps(a, b rect) bool { return a.L < b.R && b.L < a.R && a.T < b.B && b.T < a.B }
+
+// dragRect — место окна, которое тащат мышью: целиком внутри рабочей области, а у края ближе snap
+// прилипает к нему (магнит). Размер окна не меняется.
+func dragRect(r, work rect, snap int32) rect {
+	w, h := r.R-r.L, r.B-r.T
+	x, y := r.L, r.T
+	if x-work.L < snap {
+		x = work.L
+	}
+	if work.R-(x+w) < snap {
+		x = work.R - w
+	}
+	if y-work.T < snap {
+		y = work.T
+	}
+	if work.B-(y+h) < snap {
+		y = work.B - h
+	}
+	if x < work.L { // окно шире экрана: левый край важнее
+		x = work.L
+	}
+	if y < work.T {
+		y = work.T
+	}
+	return rect{x, y, x + w, y + h}
+}
