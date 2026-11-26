@@ -1,14 +1,14 @@
-/* Тема «Лист»: одно стекло под всем виджетом (размытие делает DWM), без вложенных карточек и разделителей.
-   Индикатор цвета акцента: из Windows или свой. Плотность стекла — --glass. */
-body.theme-sheet { --R: 0; --r: 0; --r2: 0; --vw: 400; --vw2: 400; --tile: none; --tile2: none; --a: var(--accent); }
+/* Тема «Лист»: одно стекло под всем виджетом (размытие делает DWM), на нём едва заметные карточки:
+   плитки отделены друг от друга, но не спорят со стеклом. Индикатор цвета акцента: из Windows или свой. Плотность — --glass. */
+body.theme-sheet { --R: 0; --r: 10px; --r2: 8px; --vw: 400; --vw2: 400; --a: var(--accent); }
 body.theme-sheet.tone-dark {
-  --text: #fff; --dim: rgba(255, 255, 255, .66); --lab: rgba(255, 255, 255, .92); --sheet: rgba(18, 23, 32, var(--glass)); --track: rgba(255, 255, 255, .18); --hair: rgba(255, 255, 255, .12);
+  --text: #fff; --dim: rgba(255, 255, 255, .66); --lab: rgba(255, 255, 255, .92); --sheet: rgba(18, 23, 32, var(--glass)); --tile: rgba(255, 255, 255, .055); --tile2: var(--tile); --rim: rgba(255, 255, 255, .07); --track: rgba(255, 255, 255, .18); --hair: rgba(255, 255, 255, .12);
   --ctl: rgba(255, 255, 255, .08); --pop: rgba(30, 35, 46, .97); --edge: rgba(255, 255, 255, .13); --ok: #7fe0a6; --warm: #ffc65c; --hot: #ff7b6b;
 }
 body.theme-sheet.tone-light {
-  --text: #14202b; --dim: rgba(20, 32, 43, .66); --lab: #14202b; --sheet: rgba(246, 249, 251, var(--glass)); --track: rgba(20, 32, 43, .14); --hair: rgba(20, 32, 43, .12);
+  --text: #14202b; --dim: rgba(20, 32, 43, .66); --lab: #14202b; --sheet: rgba(246, 249, 251, var(--glass)); --tile: rgba(255, 255, 255, .5); --tile2: var(--tile); --rim: rgba(20, 32, 43, .07); --track: rgba(20, 32, 43, .14); --hair: rgba(20, 32, 43, .12);
   --ctl: rgba(20, 32, 43, .06); --pop: rgba(248, 250, 252, .97); --edge: rgba(20, 32, 43, .14); --ok: #17804a; --warm: #a85f00; --hot: #c8281d;
 }
-/* разделителей нет: ячейки отделяет воздух, группы в колонке — отступ */
+/* тонкая кромка вместо разделителей; группы в колонке — отступ */
+.theme-sheet .cb, .theme-sheet .cr { box-shadow: inset 0 0 0 1px var(--rim); }
 .theme-sheet .mini.col .cr.sep { margin-top: 6px; }
-.theme-sheet .cb.alarm, .theme-sheet .cr.alarm { border-radius: 8px; }

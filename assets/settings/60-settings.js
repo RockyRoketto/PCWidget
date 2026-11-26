@@ -49,7 +49,7 @@ var setState = { tab: 'look', open: '', sure: false };
 function colorOpts(key) {
   var cur = CFG.tileColors[key] || '', own = cur && TILE_TINTS.indexOf(cur) < 0;
   var b = function (v, name, cls) { return '<button class="tint sm' + (cls || '') + (cur === v ? ' on' : '') + '" data-tc="' + v + '" title="' + name + '" aria-label="' + name + '"' + (v ? ' style="background:' + v + '"' : '') + '></button>'; };
-  return '<div class="tints sm" data-for="' + key + '">' + b('', 'Цвет темы', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
+  return '<div class="lab">Цвет плитки</div><div class="tints sm" data-for="' + key + '">' + b('', 'Цвет темы', ' multi') + TILE_TINTS.map(function (c) { return b(c, 'Цвет ' + c); }).join('') +
     '<label class="tint sm custom' + (own ? ' on' : '') + '" title="Свой цвет"' + (own ? ' style="background:' + cur + '"' : '') + '><input type="color" data-tcc value="' + (cur || TILE_TINTS[1]) + '" aria-label="Свой цвет"></label></div>';
 }
 function modeCards() {
@@ -58,13 +58,8 @@ function modeCards() {
 }
 // Как переставлять: сразу на виджете, правка включена, пока открыта эта вкладка.
 function tilesHint(m) {
-  if (!GRID_MODES[m]) return '<p class="hint how">Перетаскивай ' + (m === 'column' ? 'строки' : 'блоки') + ' прямо на виджете. Крестик убирает.</p>';
-  var pic = function (body) { return '<svg viewBox="0 0 56 34" fill="currentColor">' + body + '</svg>'; };
-  var b = function (x, y, w, h, o) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" opacity="' + (o || .3) + '"/>'; };
-  var acc = function (x, y, w, h) { return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2.5" fill="var(--accent)"/>'; };
-  return '<p class="hint how">Перетаскивай плитки прямо на виджете. Крестик убирает.</p><div class="hows">' +
-    '<div>' + pic(b(2, 2, 52, 8) + b(2, 13, 25, 19) + acc(29, 13, 25, 19)) + '<span>На край плитки:<br>встанут рядом</span></div>' +
-    '<div>' + pic(b(2, 2, 52, 11) + acc(2, 15.5, 52, 3) + b(2, 21, 52, 11)) + '<span>Между ними:<br>во всю ширину</span></div></div>';
+  var what = GRID_MODES[m] ? 'плитки' : m === 'column' ? 'строки' : 'блоки';
+  return '<p class="hint how">Перетаскивай ' + what + ' прямо на виджете, крестик убирает. <button class="lnk" data-sys="tiles">Как в начале</button></p>';
 }
 
 function densityRow(text) {
@@ -107,8 +102,7 @@ function colorMarks(body) {
 
 var SET_BODY = {
   look: function () {
-    return label('Режим') + modeCards() +
-      label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
+    return label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
         return '<button class="card tcard' + (CFG.theme === k ? ' on' : '') + '" data-k="theme" data-v="' + k + '">' + themeSwatch(k) + THEMES[k] + '</button>'; }).join('') + '</div>' +
       label('Оформление') + segment('tone', Object.keys(TONES).map(function (k) { return [k, TONES[k]]; }), CFG.tone) +
       colorBlock() + densityBlock() +
@@ -116,13 +110,13 @@ var SET_BODY = {
   },
   tiles: function () {
     var m = curMode();
-    return label('Плитки режима') + segment('mode', Object.keys(MODES).map(function (k) { return [k, MODES[k]]; }), m) + tilesHint(m) + '<div class="tgrid">' +
+    return label('Режим') + modeCards() + tilesHint(m) + '<div class="tgrid">' +
       modeIds(m).map(function (id) {
-        var o = (TILE_OPTS[id] ? TILE_OPTS[id]() : '') + colorOpts(colorKey(id)), on = isOn(m, id), name = tileName(m, id);
-        return '<div class="trow' + (on ? '' : ' off') + (setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + colorKey(id) + '"><div class="m">' + I(id === 'space' ? 'disk' : id) +
-          '<span class="nm">' + name + '</span>' + '<button class="chev" data-open="' + id + '" title="Цвет и параметры">' + ICONS.chev + '</button>' +
-          toggle('tile:' + id, on, name) + '</div><div class="opts">' + o + '</div></div>';
-      }).join('') + '</div>' + setRow('Расположение', 'Порядок и набор плиток этого режима', ghost('tiles', 'Как в начале'));
+        var o = colorOpts(colorKey(id)) + (TILE_OPTS[id] ? TILE_OPTS[id]() : ''), on = isOn(m, id), name = tileName(m, id);
+        return '<div class="trow' + (on ? '' : ' off') + (setState.open === id ? ' open' : '') + '" data-id="' + id + '" data-m="' + colorKey(id) + '">' +
+          '<div class="m"><button class="tb" data-open="' + id + '" title="Цвет и параметры">' + I(id === 'space' ? 'disk' : id) +
+          '<span class="nm" title="' + name + '">' + name + '</span><i class="cdot"></i></button>' + toggle('tile:' + id, on, name) + '</div><div class="opts">' + o + '</div></div>';
+      }).join('') + '</div>';
   },
   alarm: function () {
     return Object.keys(THR_ROWS).filter(function (k) { return k !== 'claude' || claudeOn(); }).map(function (k) {
@@ -187,7 +181,10 @@ function buildSettings() {
     if (d.sys !== 'reset' && setState.sure) { setState.sure = false; if (!d.tab) render(); }
     if (b.hasAttribute('data-done')) post('close');
     else if (d.tab) { setState.tab = d.tab; render(true); post('tab:' + d.tab); }
-    else if (d.open) { setState.open = setState.open === d.open ? '' : d.open; $$('.trow', body).forEach(function (r) { r.classList.toggle('open', r.dataset.id === setState.open); }); }
+    else if (d.open) {
+      setState.open = setState.open === d.open ? '' : d.open;
+      $$('.trow', body).forEach(function (r) { r.classList.toggle('open', r.dataset.id === setState.open); if (r.dataset.id === setState.open) r.scrollIntoView({ block: 'nearest' }); });
+    }
     else if (d.sys === 'reset') { if (setState.sure) { setState.sure = false; CFG = defaults(); changed(); } else setState.sure = true; render(); }
     else if (d.sys === 'tiles') { resetTiles(curMode()); changed(); render(); }
     else if (d.sys) post('sys:' + d.sys);

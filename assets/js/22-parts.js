@@ -88,18 +88,18 @@ function palAt(stops, t) {
   var k = t < .48 ? t / .48 : (t - .48) / .52, a = rgbOf(stops[t < .48 ? 0 : 1]), b = rgbOf(stops[t < .48 ? 1 : 2]);
   return '#' + a.map(function (v, i) { return (256 + Math.round(v + (b[i] - v) * clamp(k, 0, 1))).toString(16).slice(1); }).join('');
 }
-// Каждая заливка сплошная: её цвет — точка общего на весь виджет градиента (155°) в центре её карточки.
-// Соседние карточки получают соседние оттенки. Зовётся после раскладки.
+// Цвет заливки — точка общего градиента (155°) в центре её карточки. Градиент растянут не на весь виджет,
+// а от первой залитой карточки до последней: так палитра используется целиком, а соседи получают соседние оттенки.
 function placeFills(root) {
   if (CFG.theme !== 'fill' || !root.isConnected) return;
-  var R = root.getBoundingClientRect(), st = palStops(), dx = Math.sin(155 * Math.PI / 180), dy = -Math.cos(155 * Math.PI / 180);
-  var L = Math.abs(R.width * dx) + Math.abs(R.height * dy) || 1;
-  $$('.fill', root).forEach(function (f) {
-    var host = f.parentNode, r = host.getBoundingClientRect();
-    if (!r.width) return;
-    var cx = r.left + r.width / 2 - R.left - R.width / 2, cy = r.top + r.height / 2 - R.top - R.height / 2;
-    f.style.setProperty('--solid', palAt(st, clamp((cx * dx + cy * dy) / L + .5, 0, 1)));
-  });
+  var st = palStops(), dx = Math.sin(155 * Math.PI / 180), dy = -Math.cos(155 * Math.PI / 180);
+  var list = $$('.fill', root).map(function (f) {
+    var r = f.parentNode.getBoundingClientRect();
+    return { f: f, w: r.width, p: (r.left + r.width / 2) * dx + (r.top + r.height / 2) * dy };
+  }).filter(function (x) { return x.w; });
+  if (!list.length) return;
+  var lo = Math.min.apply(null, list.map(function (x) { return x.p; })), hi = Math.max.apply(null, list.map(function (x) { return x.p; }));
+  list.forEach(function (x) { x.f.style.setProperty('--solid', palAt(st, hi > lo ? (x.p - lo) / (hi - lo) : .5)); });
 }
 
 // Состояние: тепло или горячо меняют цвет индикатора, тревога подсвечивает ячейку.

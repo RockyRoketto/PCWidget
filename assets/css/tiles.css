@@ -9,7 +9,7 @@
 .cb { position: relative; min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 4px; padding: 12px; border-radius: var(--r); background: var(--tile); }
 .cb > *:not(.fill) { position: relative; z-index: 1; }
 .hd { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 16px; white-space: nowrap; }
-.hd .nm { font-weight: 600; color: var(--lab); overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 5px; }
+.hd .nm { flex: none; font-weight: 600; color: var(--lab); overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 5px; }
 .hd .ax { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .md { display: flex; align-items: baseline; gap: 6px; margin-block: auto; white-space: nowrap; min-width: 0; }
 .md .v { font-size: 34px; line-height: 36px; font-weight: var(--vw); letter-spacing: -.02em; flex: none; }
@@ -23,8 +23,8 @@
 .cb.has-vz > .md { margin-block: 0 auto; }
 
 /* строки: диски, процессы, лимиты, сеть в половинке */
-.ls { flex: 1; display: grid; grid-auto-rows: 1fr; gap: 3px; margin-top: 2px; min-height: 0; }
-.ln { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-content: center; column-gap: 8px; row-gap: 3px; white-space: nowrap; min-width: 0; }
+.ls { flex: 1; display: grid; grid-auto-rows: 1fr; gap: 2px; margin-top: 0; min-height: 0; }
+.ln { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-content: center; column-gap: 8px; row-gap: 1px; white-space: nowrap; min-width: 0; }
 .ln > .n { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .ln > .m { font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
 .ln > .w { font-weight: 600; text-align: right; }

@@ -3,24 +3,27 @@
    Цифры крупные и внизу, поверх заливки. Окно прозрачно, карточки рисует страница. */
 body.theme-fill { --R: 0; --r: 16px; --r2: 11px; --vw: 600; --vw2: 600; --sheet: transparent; --aur: var(--pal); }
 body.theme-fill.tone-dark {
-  --text: #f7f9ff; --dim: rgba(232, 238, 255, .74); --lab: #f7f9ff; --tile: rgba(20, 24, 38, calc(.62 + .36 * var(--glass))); --tile2: var(--tile);
-  --track: rgba(255, 255, 255, .1); --hair: rgba(255, 255, 255, .1); --ctl: rgba(255, 255, 255, .08); --pop: #181c2a; --edge: rgba(255, 255, 255, .12);
-  --a: #fff; --ok: #8be3b5; --warm: #fff; --hot: #fff; --mixk: 100%; --crest: rgba(255, 255, 255, .45);
+  --text: #f7f9ff; --dim: rgba(232, 238, 255, .74); --lab: #f7f9ff; --tile: rgba(26, 27, 32, calc(.6 + .36 * var(--glass))); --tile2: var(--tile);
+  --track: rgba(255, 255, 255, .1); --hair: rgba(255, 255, 255, .1); --ctl: rgba(255, 255, 255, .08); --pop: #1d1e24; --edge: rgba(255, 255, 255, .12);
+  --a: #fff; --ok: #8be3b5; --warm: #ffc65c; --hot: #ff8a78; --mixk: 100%; --top: 38%; --bot: 88%;
 }
 body.theme-fill.tone-light {
   --text: #141c33; --dim: rgba(20, 28, 51, .7); --lab: #141c33; --tile: rgba(252, 253, 255, calc(.62 + .36 * var(--glass))); --tile2: var(--tile);
   --track: rgba(20, 28, 51, .08); --hair: rgba(20, 28, 51, .1); --ctl: rgba(20, 28, 51, .06); --pop: #fbfcff; --edge: rgba(20, 28, 51, .13);
-  --a: #2d4a8c; --ok: #17804a; --warm: #8a4b00; --hot: #a3160c; --mixk: 50%; --crest: rgba(255, 255, 255, .9);
+  --a: #2d4a8c; --ok: #17804a; --warm: #8a4b00; --hot: #a3160c; --mixk: 62%; --top: 30%; --bot: 72%;
 }
 .theme-fill .full, .theme-fill .mini { padding: 2px; }
-.theme-fill .fill i { position: absolute; display: block; background: color-mix(in srgb, var(--tint, var(--solid, #2f7df0)) var(--mixk), #fff); }
+.theme-fill .fill { --c: color-mix(in srgb, var(--tint, var(--solid, #2f7df0)) var(--mixk), #fff); }
+/* заливка мягкая: сверху прозрачнее, книзу плотнее; в строках слева направо */
+.theme-fill .fill i { position: absolute; display: block; background: linear-gradient(180deg, color-mix(in srgb, var(--c) var(--top), transparent), color-mix(in srgb, var(--c) var(--bot), transparent)); }
+.theme-fill .fill i.run { background: linear-gradient(90deg, color-mix(in srgb, var(--c) var(--top), transparent), color-mix(in srgb, var(--c) var(--bot), transparent)); }
 .theme-fill .is-warm .fill i, .theme-fill .is-hot .fill i, .theme-fill .alarm .fill i, .theme-fill .is-warm > .fill i, .theme-fill .is-hot > .fill i { background: var(--aur); }
 .theme-fill.tone-light .is-warm .fill i, .theme-fill.tone-light .is-hot .fill i, .theme-fill.tone-light .alarm .fill i { opacity: .6; }
 .theme-fill .cb > .fill { top: 30px; }
 /* рельеф истории сплошной, гребень тонкой линией */
 .theme-fill .fill i.area { inset: 0; }
 .theme-fill .fill svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.theme-fill .fill path { fill: none; stroke: var(--crest); stroke-width: 1.25; }
+.theme-fill .fill path { fill: none; stroke: color-mix(in srgb, var(--c) 70%, #fff); stroke-width: 1.5; }
 .theme-fill .fill i.lvl { left: 0; right: 0; bottom: 0; transition: height .5s; }
 .theme-fill .fill i.run { left: 0; top: 0; bottom: 0; transition: width .5s; }
 /* цифры крупные и внизу */
