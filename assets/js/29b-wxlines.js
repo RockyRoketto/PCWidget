@@ -16,6 +16,8 @@ function wxOutline(src, lw) {
   return o;
 }
 function wxGlow(g, k, b) { g.shadowColor = 'rgba(' + k.p + ',1)'; g.shadowBlur = b; }
+// Контур месяца: внешняя дуга и вырез; s — увеличение (1 — радиус 20).
+function wxMoonPath(g, cx, cy, s) { g.beginPath(); g.arc(cx, cy, 20 * s, .9, 5.4); g.arc(cx + 9 * s, cy - 6 * s, 16 * s, 4.75, 1.45, true); g.closePath(); }
 
 WX_KINDS.phos = {
   kit: function (k) {
@@ -27,20 +29,19 @@ WX_KINDS.phos = {
     k.dka = k.cla * .8;
   },
   sky: function (o, g, t, dt, k, f) {
-    var cx = o.W - 58, cy = 42, r = 24, a = t / 700, i;
+    var c = wxSpot(o, 70, 18), cx = c.x, cy = c.y, r = 42, a = t / 700, i; // крупный круг, верхняя половина за краем
     g.save(); wxGlow(g, k, 10); g.lineWidth = 2.4; g.strokeStyle = 'rgba(' + k.p + ',' + .55 * f + ')';
     g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke();
     g.lineWidth = 2; g.beginPath();
-    for (i = 0; i < 12; i++) { var an = i * Math.PI / 6 + t / 30000; g.moveTo(cx + Math.cos(an) * 34, cy + Math.sin(an) * 34); g.lineTo(cx + Math.cos(an) * 42, cy + Math.sin(an) * 42); }
+    for (i = 0; i < 12; i++) { var an = i * Math.PI / 6 + t / 30000; g.moveTo(cx + Math.cos(an) * 56, cy + Math.sin(an) * 56); g.lineTo(cx + Math.cos(an) * 68, cy + Math.sin(an) * 68); }
     g.globalAlpha = .6; g.stroke(); g.globalAlpha = 1;
     g.fillStyle = 'rgba(' + k.p + ',' + f + ')'; g.shadowBlur = 14; // точка луча бежит по кругу и оставляет след
     g.beginPath(); g.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 3.4, 0, 7); g.fill();
     g.restore();
   },
   night: function (o, g, t, dt, k) {
-    var cx = o.W - 50, cy = 34;
-    g.save(); wxGlow(g, k, 8); g.lineWidth = 2; g.strokeStyle = 'rgba(' + k.p + ',.55)';
-    g.beginPath(); g.arc(cx, cy, 20, .9, 5.4); g.arc(cx + 9, cy - 6, 16, 4.75, 1.45, true); g.closePath(); g.stroke(); g.restore();
+    var c = wxSpot(o, 52, 20);
+    g.save(); wxGlow(g, k, 8); g.lineWidth = 2; g.strokeStyle = 'rgba(' + k.p + ',.5)'; wxMoonPath(g, c.x, c.y, 2.5); g.stroke(); g.restore();
     g.fillStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) { g.globalAlpha = (.2 + s.s * .45) * (.5 + .5 * Math.sin(t / (700 + s.s * 900) + s.ph)); g.fillRect(Math.round(s.x), Math.round(s.y), 3, 3); });
     g.globalAlpha = 1;
@@ -100,13 +101,13 @@ WX_KINDS.line = {
     k.cla = .5; k.dka = .42;
   },
   sky: function (o, g, t, dt, k, f) {
-    var cx = Math.max(o.W * .55, o.W - 150), cy = 50, r = 26, i; // левее значка погоды: чертёж не прячется под ним
+    var c = wxSpot(o, 62, 14), cx = c.x, cy = c.y, r = 40, i; // деталь крупнее листа: верх за краем, размер под ней
     g.save(); g.strokeStyle = g.fillStyle = 'rgba(' + k.p + ',' + .65 * f + ')'; g.lineWidth = 2;
     g.beginPath(); g.arc(cx, cy, r, 0, 7); g.stroke();
     g.lineWidth = 1.2; g.setLineDash([16, 4, 3, 4]); g.beginPath(); // осевые линии
     g.moveTo(cx - r - 18, cy); g.lineTo(cx + r + 18, cy); g.moveTo(cx, cy - r - 18); g.lineTo(cx, cy + r + 18); g.stroke();
     g.setLineDash([]); g.lineWidth = 1.6; g.beginPath(); // засечки по окружности, медленно поворачиваются
-    for (i = 0; i < 16; i++) { var an = i * Math.PI / 8 + t / 50000, r2 = i % 4 ? 38 : 44; g.moveTo(cx + Math.cos(an) * 32, cy + Math.sin(an) * 32); g.lineTo(cx + Math.cos(an) * r2, cy + Math.sin(an) * r2); }
+    for (i = 0; i < 16; i++) { var an = i * Math.PI / 8 + t / 50000, r2 = i % 4 ? 52 : 58; g.moveTo(cx + Math.cos(an) * 46, cy + Math.sin(an) * 46); g.lineTo(cx + Math.cos(an) * r2, cy + Math.sin(an) * r2); }
     g.stroke();
     var dy = cy + r + 30; g.lineWidth = 1.2; g.beginPath(); // размер: диаметр со стрелками
     g.moveTo(cx - r, cy + 6); g.lineTo(cx - r, dy + 6); g.moveTo(cx + r, cy + 6); g.lineTo(cx + r, dy + 6); g.moveTo(cx - r, dy); g.lineTo(cx + r, dy); g.stroke();
@@ -115,9 +116,8 @@ WX_KINDS.line = {
     g.restore();
   },
   night: function (o, g, t, dt, k) {
-    var cx = o.W - 50, cy = 36;
-    g.save(); g.lineWidth = 2; g.strokeStyle = 'rgba(' + k.p + ',.6)';
-    g.beginPath(); g.arc(cx, cy, 20, .9, 5.4); g.arc(cx + 9, cy - 6, 16, 4.75, 1.45, true); g.closePath(); g.stroke();
+    var c = wxSpot(o, 52, 20);
+    g.save(); g.lineWidth = 2; g.strokeStyle = 'rgba(' + k.p + ',.55)'; wxMoonPath(g, c.x, c.y, 2.5); g.stroke();
     g.lineWidth = 1.4; g.strokeStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) {
       var r = 2 + s.s * 3; g.globalAlpha = (.2 + s.s * .4) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph));

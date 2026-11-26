@@ -12,19 +12,21 @@ WX_KINDS.pix = {
   },
   // Солнце: круг и восемь лучей, лучи через полсекунды то длинные, то короткие.
   sky: function (o, g, t, dt, k) {
-    var sx = o.W - 64, sy = 56, ph = Math.floor(t / 500) % 2;
+    var c = wxSpot(o, 76, 20), sx = c.x, sy = c.y, ph = Math.floor(t / 500) % 2; // восходит из-за верхнего края
+    g.save(); if (o.W < 440) g.globalAlpha = .45; // в узкой солнце заходит за цифры — редкими клетками
     g.fillStyle = 'rgb(' + k.sun + ')';
-    g.beginPath(); g.arc(sx, sy, 30, 0, 7); g.fill();
+    g.beginPath(); g.arc(sx, sy, 40, 0, 7); g.fill();
     for (var i = 0; i < 8; i++) {
-      var a = i * Math.PI / 4, r0 = 42, r1 = (i + ph) % 2 ? 62 : 52;
+      var a = i * Math.PI / 4, r0 = 52, r1 = (i + ph) % 2 ? 76 : 64;
       g.save(); g.translate(sx, sy); g.rotate(a); g.fillRect(r0, -5, r1 - r0, 10); g.restore();
     }
+    g.restore();
   },
   // Ночью: месяц и звёзды по одной клетке, мигают шагами; часть звёзд жёлтые.
   night: function (o, g, t, dt, k) {
-    var mx = o.W - 64, my = 56;
-    g.fillStyle = 'rgb(' + k.p + ')'; g.beginPath(); g.arc(mx, my, 30, 0, 7); g.fill();
-    g.save(); g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(mx - 16, my - 10, 26, 0, 7); g.fill(); g.restore();
+    var c = wxSpot(o, 56, 16), mx = c.x, my = c.y; // крупный месяц, виден только низ; редкими клетками, чтобы не спорить с цифрами
+    g.save(); g.globalAlpha = o.W < 440 ? .35 : .55; g.fillStyle = 'rgb(' + k.p + ')'; g.beginPath(); g.arc(mx, my, 56, 0, 7); g.fill();
+    g.globalAlpha = 1; g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(mx - 28, my - 18, 50, 0, 7); g.fill(); g.restore();
     o.stars.forEach(function (s) {
       if (Math.sin(Math.floor(t / 400) * (1 + s.s) + s.ph) < -.3) return; // погасла на этом шаге
       g.fillStyle = 'rgb(' + (s.s > .7 ? k.sun : k.p) + ')';

@@ -24,7 +24,7 @@ WX_KINDS.tick = {
     k.cla *= 1.4; k.dka *= 1.2; // в полоску закрыто меньше места — плотнее
   },
   sky: function (o, g, t, dt, k, f) {
-    var cx = o.W - 56, cy = 40, i, a = t / 40000;
+    var c = wxSpot(o, 70, 14), cx = c.x, cy = c.y, i, a = t / 40000; // циферблат наполовину за верхним краем
     g.lineWidth = 2; g.strokeStyle = g.fillStyle = 'rgba(' + k.sun + ',' + .5 * f + ')';
     g.beginPath(); g.arc(cx, cy, 24, 0, 7); g.globalAlpha = .45; g.fill(); g.globalAlpha = 1;
     g.beginPath();
@@ -33,9 +33,9 @@ WX_KINDS.tick = {
     g.save(); g.setLineDash([6, 8]); g.lineDashOffset = t / 300; g.globalAlpha = .5; g.beginPath(); g.arc(cx, cy, 68, 0, 7); g.stroke(); g.restore();
   },
   night: function (o, g, t, dt, k) {
-    var cx = o.W - 50, cy = 34;
-    g.fillStyle = 'rgba(' + k.p + ',.3)'; g.beginPath(); g.arc(cx, cy, 20, 0, 7); g.fill();
-    g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(cx + 9, cy - 6, 18, 0, 7); g.fill(); g.globalCompositeOperation = 'source-over';
+    var c = wxSpot(o, 52, 14), cx = c.x, cy = c.y; // крупный месяц, виден только низ
+    g.fillStyle = 'rgba(' + k.p + ',.24)'; g.beginPath(); g.arc(cx, cy, 52, 0, 7); g.fill();
+    g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(cx + 23, cy - 16, 47, 0, 7); g.fill(); g.globalCompositeOperation = 'source-over';
     g.strokeStyle = 'rgb(' + k.p + ')'; g.lineWidth = 1.6;
     o.stars.forEach(function (s) {
       var r = 2 + s.s * 3; g.globalAlpha = (.15 + s.s * .35) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph));
@@ -96,7 +96,7 @@ WX_KINDS.fill = {
     k.a0 = k.dark ? .22 : .16; k.a1 = k.dark ? .55 : .4; // верх и низ заливки
   },
   sky: function (o, g, t, dt, k, f) {
-    var cx = o.W - 40, cy = 20, b = 1 + .03 * Math.sin(t / 2200);
+    var c = wxSpot(o, 110, -16), cx = c.x, cy = c.y, b = 1 + .03 * Math.sin(t / 2200);
     [[110, .45], [70, 1]].forEach(function (d) {
       var r = d[0] * b, gr = g.createLinearGradient(0, cy - r, 0, cy + r);
       gr.addColorStop(0, 'rgba(' + k.sun + ',' + k.a0 * d[1] * f + ')'); gr.addColorStop(1, 'rgba(' + k.sun + ',' + k.a1 * d[1] * f + ')');
@@ -104,9 +104,12 @@ WX_KINDS.fill = {
     });
   },
   night: function (o, g, t, dt, k) {
-    var cx = o.W - 44, cy = 30, gr = g.createLinearGradient(0, cy - 36, 0, cy + 36);
-    gr.addColorStop(0, 'rgba(' + k.p + ',' + k.a0 * .5 + ')'); gr.addColorStop(1, 'rgba(' + k.p + ',' + k.a1 * .6 + ')');
-    g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, 36, 0, 7); g.fill();
+    var c = wxSpot(o, 90, -20); // луна — большой бледный круг из-за верхнего края, с ореолом
+    [[90, .35], [62, .7]].forEach(function (d) {
+      var r = d[0], gr = g.createLinearGradient(0, c.y - r, 0, c.y + r);
+      gr.addColorStop(0, 'rgba(' + k.p + ',' + k.a0 * d[1] * .6 + ')'); gr.addColorStop(1, 'rgba(' + k.p + ',' + k.a1 * d[1] * .6 + ')');
+      g.fillStyle = gr; g.beginPath(); g.arc(c.x, c.y, r, 0, 7); g.fill();
+    });
     g.fillStyle = 'rgb(' + k.p + ')';
     o.stars.forEach(function (s) { g.globalAlpha = (.15 + s.s * .3) * (.55 + .45 * Math.sin(t / (900 + s.s * 900) + s.ph)); g.beginPath(); g.arc(s.x, s.y, 1 + s.s * 1.4, 0, 7); g.fill(); });
     g.globalAlpha = 1;
