@@ -38,6 +38,7 @@ var (
 	pTrackPopupMenu         = user32.NewProc("TrackPopupMenu")
 	pDestroyMenu            = user32.NewProc("DestroyMenu")
 	pLoadIcon               = user32.NewProc("LoadIconW")
+	pLoadImage              = user32.NewProc("LoadImageW")
 	pLoadCursor             = user32.NewProc("LoadCursorW")
 	pGetSystemMetrics       = user32.NewProc("GetSystemMetrics")
 	pGetDpiForWindow        = user32.NewProc("GetDpiForWindow")

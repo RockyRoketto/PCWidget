@@ -14,6 +14,11 @@ const (
 	nifTip    = 0x4
 	trayID    = 1
 
+	imageIcon  = 1
+	lrShared   = 0x8000
+	smCxSmIcon = 49
+	smCySmIcon = 50
+
 	nimModify = 1
 	nifInfo   = 0x10
 	niifWarn  = 0x02
@@ -74,9 +79,21 @@ func appIcon() uintptr {
 	return ico
 }
 
+// smallIcon — тот же значок сразу в мелком размере системы: у него свой рисунок,
+// уменьшенный из 32 px получается мутным.
+func smallIcon() uintptr {
+	hInst, _, _ := pGetModuleHandle.Call(0)
+	cx, _, _ := pGetSystemMetrics.Call(smCxSmIcon)
+	cy, _, _ := pGetSystemMetrics.Call(smCySmIcon)
+	if ico, _, _ := pLoadImage.Call(hInst, uintptr(unsafe.Pointer(utf16("APP"))), imageIcon, cx, cy, lrShared); ico != 0 {
+		return ico
+	}
+	return appIcon()
+}
+
 func trayAdd() {
 	n := trayData()
-	ico := appIcon()
+	ico := smallIcon()
 	n.uFlags = nifMsg | nifIcon | nifTip
 	n.uCallbackMessage = wmTray
 	n.hIcon = ico
