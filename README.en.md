@@ -4,7 +4,7 @@
 
 [Русский](README.md) · **English**
 
-**Version 1.1**
+**Version 1.2**
 
 ## [⬇ Download widget.exe](https://github.com/RockyRoketto/PCWidget/releases/latest/download/widget.exe)
 
@@ -18,11 +18,16 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 
 ## Features
 
-- **Tiles:** CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime. Optional clock, calendar, weather and Claude Code limits.
-- **Themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient). Each comes in light, dark and "follow Windows". Any tile can have its own color.
+- **Tiles:** CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime. Optional clock, calendar, weather, energy, focus timer and Claude Code limits.
+- **Themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient), LCD (segmented digits). Each comes in light, dark and "follow Windows". Any tile can have its own color.
 - **Modes:** Panel, Wide, Column, Strip, Square. Dragged to the left or right screen edge, the widget turns into a column.
 - **Layout:** drag tiles with the mouse, hide them, make them half or full width.
 - **Alerts:** temperature and usage thresholds, optional Windows notifications.
+- **Hover charts:** rest the mouse on the CPU, GPU, memory, network or energy tile to see 10 minutes or an hour with minimum, average and maximum.
+- **Game mode:** FPS, 1% low and frame time over a windowed or borderless game (Ctrl+Shift+F). Nothing is injected into the game; exclusive fullscreen cannot be overlaid.
+- **Energy:** CPU and GPU consumption in Wh per day and month, with the cost at your tariff. Other PC parts are not counted.
+- **Focus:** a pomodoro timer with sound and a notification.
+- **Profiles:** up to six appearance sets, transferable as a file.
 - **Extras:** sits on the desktop and survives Win+D, optional always-on-top, scaling, screen burn-in protection.
 
 ![Modes: Wide, Column, Square](media/modes.png)
