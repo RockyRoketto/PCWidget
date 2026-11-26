@@ -30,14 +30,14 @@ func setStyle(style string) { app.style = style; setStyleFor(app.hwnd, style) }
 // parseStyle разбирает «тема:светлость»; неизвестная тема = Лист, светлость по умолчанию тёмная.
 func parseStyle(style string) (theme string, light bool) {
 	theme, tone, _ := strings.Cut(style, ":")
-	if theme != "gauge" && theme != "fill" && theme != "lcd" {
+	if theme != "gauge" && theme != "fill" && theme != "lcd" && theme != "osc" && theme != "bp" {
 		theme = "sheet"
 	}
 	return theme, tone == "light"
 }
 
 // setStyleFor: Лист — размытие под окном (accent acrylic) и системное скругление;
-// Прибор, Заливка и ЖК-табло — окно полностью прозрачно, панель и карточки со скруглением рисует страница.
+// остальные темы — окно полностью прозрачно, панель и карточки со скруглением рисует страница.
 // Не получилось размытие — окно остаётся просто полупрозрачным (подложку рисует страница).
 func setStyleFor(h uintptr, style string) {
 	theme, light := parseStyle(style)

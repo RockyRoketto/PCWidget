@@ -80,7 +80,10 @@ function wxDraw(o, t, dt) {
   wxFit(o);
   var k = o.kit, st = o.st, g = o.g;
   if (o.off) { if (!o.offg || o.offg.canvas !== o.off) o.offg = o.off.getContext('2d'); g = o.offg; } // матрица: сцена во внеэкранный холст
-  g.clearRect(0, 0, o.W, o.H); o.drawn = true;
+  if (k.style.persist && !o.off && o.drawn) { // послесвечение: прошлый кадр не стирается, а гаснет
+    g.save(); g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,' + (1 - Math.pow(1 - k.style.persist, dt)) + ')'; g.fillRect(0, 0, o.W, o.H); g.restore();
+  } else g.clearRect(0, 0, o.W, o.H);
+  o.drawn = true;
   var K = k.kind, f = function (n) { return K[n] || WX_KINDS.soft[n]; };
   if (wxSky(o)) f(o.night ? 'night' : 'sky')(o, g, t, dt, k, st === 'sun' ? 1 : .6);
   if (st === 'cloud') f('cloud')(o, g, t, dt, k);

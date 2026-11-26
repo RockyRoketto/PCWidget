@@ -25,6 +25,14 @@ var SKINS = {
   lcd: {
     dark: { bg: '#121410', tile: '#1d2318', text: '#c8d9a6', dim: 'rgba(200,217,166,.62)', track: 'rgba(200,217,166,.1)', ok: '#9fd68a', warm: '#e8c25e', hot: '#ff8a6a', head: '#e9ece4', mute: 'rgba(233,236,228,.6)', inset: .55, ghost: .08 },
     light: { bg: '#2e322c', tile: '#a9b597', text: '#1b2617', dim: 'rgba(27,38,23,.68)', track: 'rgba(27,38,23,.14)', head: '#e9ece4', mute: 'rgba(233,236,228,.6)', ok: '#1d5c2a', warm: '#7a4700', hot: '#a3160c', inset: .28, ghost: .1 }
+  },
+  osc: {
+    dark: { bg: '#121614', tile: '#06110b', rim: '#1f4a2e', grid: '#163a24', text: '#7dffb0', dim: 'rgba(93,255,154,.6)', track: 'rgba(93,255,154,.12)', ok: '#5dff9a', warm: '#ffd84d', hot: '#ff5a4d', head: '#d8f5e2', mute: 'rgba(216,245,226,.6)' },
+    light: { bg: '#2a302c', tile: '#e3eee5', rim: '#b4cdb9', grid: '#c6dbca', text: '#0a4d28', dim: 'rgba(10,77,40,.64)', track: 'rgba(11,106,54,.12)', ok: '#0b7a3e', warm: '#a86a00', hot: '#cc1f1a', head: '#e3eee5', mute: 'rgba(227,238,229,.62)' }
+  },
+  bp: {
+    dark: { bg: '#1b4f8f', tile: 'rgba(255,255,255,.04)', rim: 'rgba(214,231,251,.45)', grid: 'rgba(255,255,255,.08)', text: '#f2f7ff', dim: 'rgba(214,231,251,.7)', track: 'rgba(214,231,251,.22)', ok: '#b6f0cd', warm: '#ffd36b', hot: '#ff7a6b' },
+    light: { bg: '#f7f9fc', tile: 'rgba(42,95,168,.03)', rim: 'rgba(42,95,168,.45)', grid: 'rgba(42,95,168,.08)', text: '#143a6b', dim: 'rgba(20,58,107,.66)', track: 'rgba(42,95,168,.2)', ok: '#17804a', warm: '#a85f00', hot: '#d0281d' }
   }
 };
 
@@ -43,8 +51,8 @@ function skinFor(ui, accent) {
   var k = Object.assign({ id: id, light: tone === 'light' }, tone === 'light' ? ON_LIGHT : ON_DARK, SKINS[id][tone]);
   k.head = k.head || k.text; k.mute = k.mute || k.dim;
   k.accent = themeVars()['--accent'];
-  k.font = id === 'gauge' ? GAUGE : id === 'lcd' ? MONO : SANS;
-  k.R = id === 'gauge' || id === 'lcd' ? 4 : id === 'fill' ? 16 : 10;
+  k.font = id === 'gauge' ? GAUGE : id === 'lcd' || id === 'osc' || id === 'bp' ? MONO : SANS;
+  k.R = id === 'gauge' || id === 'lcd' || id === 'osc' ? 4 : id === 'bp' ? 0 : id === 'fill' ? 16 : 10;
   if (id === 'fill') k.stops = palStops().map(function (c) { return k.mix ? mixTo(c, 255, k.mix) : c; });
   return k;
 }
@@ -67,6 +75,17 @@ function cell(g, k, x, y, w, h, fillFrom) {
     gr.addColorStop(0, alpha(c, k.top)); gr.addColorStop(1, alpha(c, k.bot));
     g.save(); g.beginPath(); g.roundRect(x, y, w, h, k.R); g.clip(); g.fillStyle = gr; g.fillRect(x, top, w, y + h - top); g.restore();
   }
+  if (k.grid) { // экран осциллографа и миллиметровка чертежа: сетка внутри ячейки
+    g.save(); g.beginPath(); g.roundRect(x, y, w, h, k.R); g.clip(); g.strokeStyle = k.grid; g.lineWidth = 1; g.beginPath();
+    for (var gx = x + 12; gx < x + w; gx += 12) { g.moveTo(Math.round(gx) + .5, y); g.lineTo(Math.round(gx) + .5, y + h); }
+    for (var gy = y + 12; gy < y + h; gy += 12) { g.moveTo(x, Math.round(gy) + .5); g.lineTo(x + w, Math.round(gy) + .5); }
+    g.stroke(); g.restore();
+  }
+  if (k.id === 'bp') { // засечки по углам рамки
+    g.fillStyle = k.rim;
+    [[x, y], [x + w - 9, y], [x, y + h - 2], [x + w - 9, y + h - 2]].forEach(function (p) { g.fillRect(p[0], p[1], 9, 2); });
+    [[x, y], [x + w - 2, y], [x, y + h - 9], [x + w - 2, y + h - 9]].forEach(function (p) { g.fillRect(p[0], p[1], 2, 9); });
+  }
   if (k.id === 'lcd') { // стекло табло чуть утоплено в рамку
     g.save(); g.beginPath(); g.roundRect(x, y, w, h, k.R); g.clip();
     var s = g.createLinearGradient(0, y, 0, y + 5);
@@ -81,15 +100,15 @@ function text(g, k, s, x, y, size, color, opt) {
   g.fillStyle = color; g.textAlign = opt.align || 'left'; g.textBaseline = 'alphabetic';
   g.fillText(s, x, y, opt.max);
 }
-// Заголовок: на «ЖК-табло» заглавными вразрядку.
+// Заголовок: на «ЖК-табло» и «Осциллографе» заглавными вразрядку.
 function title(g, k, s, x, y, size, color, opt) {
-  var lcd = k.id === 'lcd';
+  var lcd = k.id === 'lcd' || k.id === 'osc';
   if (lcd) g.letterSpacing = '.8px';
   text(g, k, lcd || k.id === 'gauge' ? s.toUpperCase() : s, x, y, lcd || k.id === 'gauge' ? size - 1 : size, color, opt);
   g.letterSpacing = '0px';
 }
 // Мелкие подписи: моноширинный в ячейку не влезает, у «ЖК-табло» они узким шрифтом.
-function small(k) { return k.id === 'lcd' ? GAUGE : k.font; }
+function small(k) { return k.id === 'lcd' || k.id === 'osc' || k.id === 'bp' ? GAUGE : k.font; }
 
 // Семисегментная цифра: сегменты a b c d e f g по порядку, несветящиеся видны бледно.
 var SEG7 = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abfgcd' };
@@ -125,7 +144,7 @@ function number(g, k, s, x, y, color, max) {
 function bar(g, k, parts, x, y, w, h) {
   var total = parts.reduce(function (a, p) { return a + p[0]; }, 0) || 1;
   var shown = parts.filter(function (p) { return p[0] > 0; });
-  if (k.id === 'gauge' || k.id === 'lcd') {
+  if (k.id === 'gauge' || k.id === 'lcd' || k.id === 'osc') {
     var n = Math.floor((w + 2) / 5), sum = 0, j = 0;
     for (var i = 0; i < n; i++) {
       var pos = (i + .5) / n * total;

@@ -1,6 +1,6 @@
 /* Панель игрового режима: поверх игры, без размытия (окно слоистое), поэтому подложка плотнее, чем у виджета.
    Материал — текущей темы: Лист — тёмное стекло, Прибор — приборная панель, Заливка — карточка с рельефом,
-   ЖК-табло — табло в рамке. */
+   ЖК-табло — табло в рамке, Осциллограф — экран прибора, Чертёж — синька с миллиметровкой. */
 #ov { width: max-content; min-width: 156px; padding: 4px; border-radius: 12px; background: var(--sheet); }
 #ov .in { position: relative; padding: 7px 11px 8px; border-radius: 9px; overflow: hidden; }
 #ov .r { position: relative; z-index: 1; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; line-height: 19px; }
@@ -34,3 +34,13 @@
 .theme-lcd #ov .in { background: var(--tile); border-radius: var(--r); box-shadow: inset 0 1px 3px var(--glass-in); }
 .theme-lcd #ov .r .n { text-transform: uppercase; letter-spacing: .06em; }
 .theme-lcd #ov .r .v { font-weight: 400; }
+
+.theme-osc #ov { border-radius: var(--R); }
+.theme-osc #ov .in { background: var(--tile); border-radius: var(--r); box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-osc #ov .r .n { text-transform: uppercase; letter-spacing: .04em; }
+.theme-osc #ov .r .v { font-weight: 400; }
+.theme-osc #ov .r .v, .theme-osc #ov .r .n, .theme-bp #ov .r .v, .theme-bp #ov .r .n { text-shadow: none; }
+
+.theme-bp #ov .in { box-shadow: inset 0 0 0 1px var(--hair); border-radius: 0; }
+.theme-bp #ov .r .n { font-style: italic; }
+.theme-bp #ov .r .v { font-weight: 400; }

@@ -1,0 +1,98 @@
+/* Тема «Чертёж»: синька с миллиметровкой, тонкие белые линии, цифры моноширинным. Плитки — рамки с угловыми засечками,
+   подписи «Поз. N — название» наклонным, пик графика отмечен выноской, загрузка — размерной линией со штриховкой
+   (21-viz2.js). Тревога — красная обводка рамки и значение, обведённое в кружок.
+   Светлая: белая калька с синими линиями. Окно прозрачно, лист рисует страница. */
+body.theme-bp {
+  --R: 2px; --r: 0; --r2: 0; --vw: 400; --vw2: 400;
+  --font: "Segoe UI", system-ui, sans-serif; --vf: "Cascadia Mono", Consolas, "Lucida Console", monospace;
+}
+body.theme-bp.tone-dark {
+  --text: #f2f7ff; --dim: rgba(214, 231, 251, .7); --lab: #d6e7fb; --ln: #d6e7fb; --sheet: #1b4f8f; --tile: transparent; --tile2: rgba(255, 255, 255, .04);
+  --mm: #ffffff14; --mm2: #ffffff26; --track: rgba(214, 231, 251, .22); --hair: rgba(214, 231, 251, .4); --ctl: rgba(255, 255, 255, .1); --pop: #1b4f8f; --edge: rgba(214, 231, 251, .35);
+  --a: #ffffff; --ok: #b6f0cd; --warm: #ffd36b; --hot: #ff7a6b;
+}
+body.theme-bp.tone-light {
+  --text: #143a6b; --dim: rgba(20, 58, 107, .66); --lab: #1d4f91; --ln: #2a5fa8; --sheet: #f7f9fc; --tile: transparent; --tile2: rgba(42, 95, 168, .04);
+  --mm: rgba(42, 95, 168, .08); --mm2: rgba(42, 95, 168, .16); --track: rgba(42, 95, 168, .22); --hair: rgba(42, 95, 168, .4); --ctl: rgba(42, 95, 168, .08); --pop: #f7f9fc; --edge: rgba(42, 95, 168, .3);
+  --a: #1d56a8; --ok: #17804a; --warm: #a85f00; --hot: #d0281d;
+}
+/* лист: миллиметровка 12px, каждая пятая линия плотнее */
+.theme-bp #root, .theme-bp #ov, .theme-bp #hcard {
+  background-color: var(--sheet);
+  background-image: linear-gradient(var(--mm2) 1px, transparent 1px), linear-gradient(90deg, var(--mm2) 1px, transparent 1px),
+    linear-gradient(var(--mm) 1px, transparent 1px), linear-gradient(90deg, var(--mm) 1px, transparent 1px);
+  background-size: 60px 60px, 60px 60px, 12px 12px, 12px 12px;
+}
+/* рамка с засечками по углам */
+.theme-bp .cb, .theme-bp .cr {
+  box-shadow: inset 0 0 0 1px var(--hair);
+  background: linear-gradient(var(--ln), var(--ln)) 0 0 / 9px 2px no-repeat, linear-gradient(var(--ln), var(--ln)) 0 0 / 2px 9px no-repeat,
+    linear-gradient(var(--ln), var(--ln)) 100% 0 / 9px 2px no-repeat, linear-gradient(var(--ln), var(--ln)) 100% 0 / 2px 9px no-repeat,
+    linear-gradient(var(--ln), var(--ln)) 0 100% / 9px 2px no-repeat, linear-gradient(var(--ln), var(--ln)) 0 100% / 2px 9px no-repeat,
+    linear-gradient(var(--ln), var(--ln)) 100% 100% / 9px 2px no-repeat, linear-gradient(var(--ln), var(--ln)) 100% 100% / 2px 9px no-repeat;
+}
+.theme-bp .hd .nm, .theme-bp .cr > .n { font-style: italic; font-weight: 400; }
+.theme-bp .num small { font-family: var(--font); font-style: italic; font-weight: 400; }
+.theme-bp .md .v { letter-spacing: 0; }
+.theme-bp .hd .ax, .theme-bp .md .c2, .theme-bp .cp { font-style: italic; }
+/* позиции, как на чертеже: номер плитки перед названием */
+.theme-bp .full .grid { counter-reset: pos; }
+.theme-bp .tile:not(.gap) { counter-increment: pos; }
+.theme-bp .cb .hd .nm::before { content: "Поз. " counter(pos) " — "; font-size: 11px; color: var(--dim); white-space: pre; }
+.theme-bp .tile[data-h="1"] .cb .hd .nm::before { content: counter(pos) " — "; }
+
+/* график: тонкая линия без заливки, нулевая линия штрихом; пик — выноска с полкой */
+.theme-bp .graph { background: repeating-linear-gradient(90deg, var(--hair) 0 6px, transparent 6px 9px) bottom / 100% 1px no-repeat; }
+.theme-bp .graph .l { stroke: var(--ln); stroke-width: 1.1; }
+.theme-bp .graph .a { display: none; }
+.bpg { position: relative; display: flex; flex: 1 1 24px; min-height: 24px; max-height: 56px; }
+.bpg > .graph { flex: 1; max-height: none; }
+.bpg .pk { position: absolute; z-index: 2; width: 0; height: 0; pointer-events: none; }
+.bpg .pk i { position: absolute; left: -2.5px; top: -2.5px; width: 5px; height: 5px; border-radius: 50%; background: var(--a); }
+.bpg .pk b { position: absolute; left: 0; bottom: 0; width: 12px; height: 10px; background: linear-gradient(to top right, transparent calc(50% - .6px), var(--a) 0 calc(50% + .6px), transparent 0); }
+.bpg .pk span { position: absolute; left: 12px; bottom: 10px; padding: 0 2px; border-bottom: 1px solid var(--a); font: 10px/11px var(--vf); color: var(--text); white-space: nowrap; }
+/* у правого края выноска влево, у верхнего — вниз */
+.bpg .pk.l b { left: -12px; background: linear-gradient(to top left, transparent calc(50% - .6px), var(--a) 0 calc(50% + .6px), transparent 0); }
+.bpg .pk.l span { left: auto; right: 12px; }
+.bpg .pk.d b { bottom: auto; top: 0; background: linear-gradient(to bottom right, transparent calc(50% - .6px), var(--a) 0 calc(50% + .6px), transparent 0); }
+.bpg .pk.d.l b { background: linear-gradient(to bottom left, transparent calc(50% - .6px), var(--a) 0 calc(50% + .6px), transparent 0); }
+.bpg .pk.d b { height: 6px; }
+.bpg .pk.d span { bottom: auto; top: 6px; border-bottom: 0; border-top: 1px solid var(--a); }
+/* загрузка: штриховка до значения, над ней размерная линия со стрелками от нуля до значения */
+.bpd { position: relative; flex: none; width: 100%; height: 16px; }
+.bpd::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px; box-shadow: inset 0 0 0 1px var(--hair); }
+.bpd > i { position: absolute; left: 0; bottom: 0; height: 7px; width: 0; box-shadow: inset 0 0 0 1px var(--a); transition: width .5s;
+  background: repeating-linear-gradient(-45deg, var(--a) 0 1px, transparent 1px 4px); }
+.bpd > b { position: absolute; left: 0; top: 3px; width: 0; height: 0; border-top: 1px solid var(--a); transition: width .5s; }
+.bpd > b::before, .bpd > b::after { content: ""; position: absolute; top: -4px; border: 3.5px solid transparent; }
+.bpd > b::before { left: 0; border-left: 7px solid var(--a); border-right: 0; }
+.bpd > b::after { right: 0; border-right: 7px solid var(--a); border-left: 0; }
+.bpd > b.short::before, .bpd > b.short::after { display: none; }
+.bpd > u { position: absolute; top: -1px; bottom: 0; width: 1px; background: var(--a); text-decoration: none; }
+.bpd > u.z { left: 0; }
+.bpd > s { position: absolute; top: -2px; bottom: -2px; width: 0; border-left: 1.5px dashed var(--hot); }
+.bpd.thin { height: 5px; }
+.bpd.thin::before, .bpd.thin > i { height: 5px; }
+.bpd.thin > b, .bpd.thin > u { display: none; }
+.theme-bp .ln > .bpd { grid-column: 1 / -1; }
+.theme-bp .tile[data-h="1"] .cb > .bpd { position: absolute; left: 12px; bottom: 4px; width: calc(100% - 24px); height: 5px; }
+.theme-bp .tile[data-h="1"] .cb > .bpd::before, .theme-bp .tile[data-h="1"] .cb > .bpd > i { height: 5px; }
+.theme-bp .tile[data-h="1"] .cb > .bpd > :is(b, u) { display: none; }
+.theme-bp .tile[data-h="1"] .cb > .bpg { position: absolute; left: 12px; right: 12px; bottom: 3px; height: 12px; min-height: 0; }
+.theme-bp .tile[data-h="1"] .cb > .bpg .pk { display: none; }
+/* столбики и карта памяти контуром со штриховкой */
+.theme-bp .cores > i { background: none; box-shadow: inset 0 0 0 1px var(--track); }
+.theme-bp .cores b { background: repeating-linear-gradient(-45deg, var(--core, var(--a)) 0 1px, transparent 1px 3px); box-shadow: inset 0 0 0 1px var(--core, var(--a)); }
+.theme-bp .cores > i.w > b { --core: var(--warm); } .theme-bp .cores > i.h > b { --core: var(--hot); }
+.theme-bp .tmap > i { border-radius: 0; background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--c) calc(20% + var(--k, 0) * 30%), transparent) 0 1px, transparent 1px 5px) padding-box; box-shadow: inset 0 0 0 1px var(--c); }
+.theme-bp .tmap > i.other { background: none; box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-bp .fanv .ring { box-shadow: inset 0 0 0 1px var(--ln); }
+.theme-bp .fanv svg { fill: none; stroke: var(--a); stroke-width: 2; }
+
+/* тревога: рамка красная, значение обведено в кружок */
+.theme-bp .alarm { animation: none; background-color: transparent !important; box-shadow: inset 0 0 0 1.5px var(--hot); --ln: var(--hot); }
+.theme-bp .alarm .md .v, .theme-bp .alarm.cr > .v { color: var(--hot); border: 1.5px solid var(--hot); border-radius: 50%; padding: 0 9px; margin: -3px -11px -3px -11px; }
+.theme-bp .alarm .md .v { margin-left: -6px; }
+/* половинка: моноширинные цифры шире обычных */
+.theme-bp .tile:not(.w2) .wx .wl .v { font-size: 32px; }
+.theme-bp .tile[data-h="1"]:not(.w2) > .one.lines .ln > .w { font-size: 14px; }

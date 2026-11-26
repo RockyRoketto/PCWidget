@@ -53,3 +53,19 @@
 .theme-fill .hc-s { border-radius: var(--r2); }
 .theme-fill .hc-g .ar { opacity: .9; }
 .theme-fill .hc-v { font-weight: 600; font-size: 20px; }
+/* Осциллограф: экран в рамке, сетка делениями, луч светится */
+.theme-osc #hcard { background: var(--tile); border-radius: var(--R); box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-osc .hc-nm, .theme-osc .hc-n { text-transform: uppercase; letter-spacing: .04em; font-weight: 400; font-size: 11px; }
+.theme-osc .hc-s { border-radius: var(--r2); box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-osc .hc-g .gl { stroke: var(--axis); stroke-dasharray: 1 3; }
+.theme-osc .hc-g .ln { filter: drop-shadow(0 0 var(--glow) var(--a)); }
+.theme-osc .hc-g .ar { opacity: .07; }
+.theme-osc .hc-v { font-size: 17px; }
+/* Чертёж: миллиметровка (theme-bp.css), рамки, тонкая линия без заливки */
+.theme-bp #hcard { border-radius: var(--R); }
+.theme-bp .hc-s { border-radius: 0; background: transparent; box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-bp .hc-nm, .theme-bp .hc-n { font-style: italic; font-weight: 400; }
+.theme-bp .hc-g .gl { stroke-dasharray: 6 3; }
+.theme-bp .hc-g .ln { stroke: var(--ln); stroke-width: 1.1; }
+.theme-bp .hc-g .ar { display: none; }
+.theme-bp .hc-v { font-size: 17px; }

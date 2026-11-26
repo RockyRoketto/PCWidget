@@ -13,7 +13,9 @@ var FAN_SHAPE = {
   sheet: [7, 'M32 29C29 18 35 7 46 7C51 18 45 28 34.5 32Z'],
   gauge: [5, 'M30 27L27 9Q35 5 43 10L35 28Z'],
   fill: [5, 'M31 28C22 17 29 4 43 7C51 17 45 28 35 31Z'],
-  lcd: [4, 'M28 24V7h15l-7 17Z']
+  lcd: [4, 'M28 24V7h15l-7 17Z'],
+  osc: [3, 'M30 27L26 6Q36 3 44 8L35 28Z'],
+  bp: [6, 'M31 28L30 8L42 10L35 29Z']
 };
 function fanSvg() {
   var s = FAN_SHAPE[CFG.theme] || FAN_SHAPE.sheet, blades = '';

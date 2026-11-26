@@ -114,8 +114,8 @@ function dress(k) {
   s.background = k.bg;
   s.setProperty('--text', k.head);
   s.setProperty('--mute', k.mute);
-  s.setProperty('--btn', k.id === 'lcd' || !k.light ? 'rgba(255,255,255,.1)' : 'rgba(20,32,43,.09)');
-  s.setProperty('--r', (k.id === 'fill' ? 11 : k.id === 'sheet' ? 7 : 4) + 'px');
+  s.setProperty('--btn', k.id === 'lcd' || k.id === 'osc' || !k.light ? 'rgba(255,255,255,.1)' : 'rgba(20,32,43,.09)');
+  s.setProperty('--r', (k.id === 'fill' ? 11 : k.id === 'sheet' ? 7 : k.id === 'bp' ? 0 : 4) + 'px');
   s.setProperty('--font', k.font);
   // тёмный акцент на тёмной рамке не виден: у светлого «ЖК-табло» кнопка цвета стекла
   var a = k.id === 'lcd' && k.light ? k.tile : k.accent;

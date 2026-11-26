@@ -12,6 +12,8 @@ func TestParseStyle(t *testing.T) {
 		{"fill:light", "fill", true},
 		{"gauge", "gauge", false},
 		{"lcd:light", "lcd", true},
+		{"osc:dark", "osc", false},
+		{"bp:light", "bp", true},
 		{"glass", "sheet", false}, // старая тема
 		{"", "sheet", false},
 	}

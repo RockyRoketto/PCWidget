@@ -1,0 +1,69 @@
+/* Тема «Осциллограф»: экран прибора в тёмной рамке. Цифры и подписи моноширинные цвета луча, у графиков сетка
+   с делениями и яркой центральной линией, у линий лёгкое свечение. Плитки — каналы: CH1 процессор (зелёный луч),
+   CH2 видеокарта (жёлтый), остальные голубые. Память сегментами. Тревога: луч красный, на плитке пометка TRIG.
+   Светлая: светлый экран (как у прибора с отражающим экраном), рамка та же. Окно прозрачно, рамку рисует страница. */
+body.theme-osc {
+  --R: 10px; --r: 4px; --r2: 3px; --vw: 400; --vw2: 400;
+  --font: "Cascadia Mono", Consolas, "Lucida Console", monospace; --vf: "Cascadia Mono", Consolas, monospace;
+}
+body.theme-osc.tone-dark {
+  --text: #7dffb0; --dim: rgba(93, 255, 154, .58); --lab: #5dff9a; --sheet: #121614; --tile: #06110b; --tile2: var(--tile);
+  --track: rgba(93, 255, 154, .1); --hair: #1f4a2e; --grid: #163a24; --axis: #2f6e45; --ctl: rgba(93, 255, 154, .08); --pop: #071409; --edge: #1f4a2e;
+  --a: #5dff9a; --ch2: #ffd84d; --ch3: #5ee3ff; --ok: #5dff9a; --warm: #ffd84d; --hot: #ff5a4d; --glow: 2px;
+}
+body.theme-osc.tone-light {
+  --text: #0a4d28; --dim: rgba(10, 77, 40, .62); --lab: #0b6a36; --sheet: #2a302c; --tile: #e3eee5; --tile2: var(--tile);
+  --track: rgba(11, 106, 54, .1); --hair: #b4cdb9; --grid: #c6dbca; --axis: #8db497; --ctl: rgba(11, 106, 54, .08); --pop: #e3eee5; --edge: #b4cdb9;
+  --a: #0b8a44; --ch2: #a86a00; --ch3: #0a6f8f; --ok: #0b7a3e; --warm: #a86a00; --hot: #cc1f1a; --glow: 1px;
+}
+/* экран чуть утоплен в рамку */
+.theme-osc .cb, .theme-osc .cr { box-shadow: inset 0 0 0 1px var(--hair), inset 0 1px 4px rgba(0, 0, 0, .35); }
+.theme-osc.tone-light .cb, .theme-osc.tone-light .cr { box-shadow: inset 0 0 0 1px var(--hair), inset 0 1px 3px rgba(0, 0, 0, .18); }
+.theme-osc .hd .nm, .theme-osc .cr > .n { text-transform: uppercase; letter-spacing: .04em; font-weight: 400; }
+.theme-osc .num small { font-weight: 400; }
+.theme-osc .md .v { letter-spacing: 0; }
+.theme-osc.tone-dark .md .num, .theme-osc.tone-dark .cr > .v { text-shadow: 0 0 6px rgba(93, 255, 154, .35); }
+/* подробности узким шрифтом: моноширинный в шапку не влезает */
+.theme-osc .hd .ax, .theme-osc .md .c2, .theme-osc .cr > .s:not(.num) { font-family: Bahnschrift, "Segoe UI", sans-serif; font-stretch: 87%; }
+
+/* каналы: номер перед названием, цвет луча у индикатора */
+.theme-osc .full .grid { counter-reset: ch; }
+.theme-osc .tile:has(.cb.has-vz) { counter-increment: ch; }
+.theme-osc .cb.has-vz .hd .nm::before { content: "CH" counter(ch); margin-right: 4px; padding: 0 3px; border-radius: 2px; font-size: 10px; line-height: 13px; color: var(--tile); background: var(--a); }
+.theme-osc .tile[data-m=gpu] { --a: var(--ch2); }
+.theme-osc .tile:not([data-m=cpu], [data-m=gpu]) { --a: var(--ch3); }
+
+/* график: сетка 10×4 делений, центральная линия ярче, на ней мелкие риски; луч светится */
+.theme-osc .graph {
+  background:
+    linear-gradient(90deg, var(--axis) 1px, transparent 1px) 0 calc(50% + 2px) / 2% 5px repeat-x,
+    linear-gradient(transparent calc(50% - .5px), var(--axis) 0 calc(50% + .5px), transparent 0),
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 10% 100%;
+  box-shadow: inset 0 0 0 1px var(--grid);
+}
+.theme-osc .graph .l { stroke-width: 1.4; filter: drop-shadow(0 0 var(--glow) var(--a)) drop-shadow(0 0 calc(var(--glow) * 3) color-mix(in srgb, var(--a) 50%, transparent)); }
+.theme-osc .graph .a { opacity: .07; }
+.theme-osc .hist { background: linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 100% 25%; }
+.theme-osc .hist path { filter: drop-shadow(0 0 var(--glow) var(--a)); }
+/* шкалы — сегменты, пустые видны бледно, горящие светятся */
+.theme-osc .tk { background: repeating-linear-gradient(90deg, var(--track) 0 3px, transparent 3px 5px); }
+.theme-osc .tk > i { filter: drop-shadow(0 0 var(--glow) var(--a)); }
+.theme-osc .bar, .theme-osc .bar i { border-radius: 0; }
+.theme-osc .cores { -webkit-mask: repeating-linear-gradient(0deg, #000 0 3px, transparent 3px 4px); }
+.theme-osc .tmap > i { border-radius: 1px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 55%, transparent); font-family: Bahnschrift, "Segoe UI", sans-serif; font-stretch: 87%; }
+.theme-osc .tmap > i.other { box-shadow: inset 0 0 0 1px var(--hair); }
+.theme-osc .fanv .ring { box-shadow: inset 0 0 0 1px var(--axis); }
+.theme-osc .fanv .lbl { font-family: Bahnschrift, "Segoe UI", sans-serif; }
+
+/* тревога: луч красный (base.css), рамка экрана красная, пометка TRIG у правого края шапки */
+.theme-osc .alarm { animation: none; background-color: var(--tile) !important; box-shadow: inset 0 0 0 1.5px var(--hot); }
+.theme-osc .cb.alarm::after, .theme-osc .cr.alarm::after {
+  content: "TRIG"; position: absolute; z-index: 2; top: 9px; right: 10px; padding: 0 4px; border-radius: 2px;
+  font: 10px/14px var(--vf); letter-spacing: .06em; color: var(--tile); background: var(--hot);
+}
+.theme-osc .cr.alarm::after { top: 2px; right: 4px; font-size: 9px; line-height: 11px; }
+/* половинка: моноширинные цифры шире обычных */
+.theme-osc .tile:not(.w2) .wx .wl .v { font-size: 32px; }
+.theme-osc .tile[data-h="1"]:not(.w2) > .one.lines .ln > .w { font-size: 14px; }
+.theme-osc .tile[data-h="1"] .hd .nm { font-family: Bahnschrift, "Segoe UI", sans-serif; font-stretch: 87%; letter-spacing: 0; }

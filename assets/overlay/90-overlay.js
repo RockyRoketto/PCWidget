@@ -39,7 +39,7 @@ function ovTheme() {
   document.body.className = bodyClass();
   setThemeVars(document.body.style);
   // Время кадра: у Листа кривая, у Прибора и табло столбики, у Заливки рельеф во всю карточку.
-  ovViz = CFG.theme === 'fill' ? fillViz('graph') : CFG.theme === 'sheet' ? lineViz() : histViz();
+  ovViz = CFG.theme === 'fill' ? fillViz('graph') : CFG.theme === 'sheet' || CFG.theme === 'osc' || CFG.theme === 'bp' ? lineViz() : histViz();
   ovRender();
 }
 
