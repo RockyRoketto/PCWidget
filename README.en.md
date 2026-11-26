@@ -6,6 +6,10 @@
 
 **Version 1.0**
 
+## [⬇ Download widget.exe](https://github.com/RockyRoketto/PCWidget/releases/latest/download/widget.exe)
+
+Windows 10/11, 64-bit. [Requirements](#requirements) · [How to install](#installation) · [All releases](https://github.com/RockyRoketto/PCWidget/releases)
+
 A Windows desktop widget showing CPU and GPU load and temperatures, memory, network, disks and processes. A single exe that lives in the tray; everything is configured from the widget itself.
 
 ![Three themes: Sheet, Gauge, Fill](media/themes.png)

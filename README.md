@@ -6,6 +6,10 @@
 
 **Версия 1.0**
 
+## [⬇ Скачать widget.exe](https://github.com/RockyRoketto/PCWidget/releases/latest/download/widget.exe)
+
+Windows 10/11, 64-бит. [Что нужно](#требования) · [Как установить](#установка) · [Все версии](https://github.com/RockyRoketto/PCWidget/releases)
+
 Виджет на рабочий стол Windows: загрузка и температуры процессора и видеокарты, память, сеть, диски и процессы. Один exe, живёт в трее, всё настраивается из самого виджета.
 
 ![Три темы: Лист, Прибор, Заливка](media/themes.png)
