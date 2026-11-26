@@ -79,7 +79,8 @@ function defaults() {
     ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
-    notify: false, antiburn: false, updates: true, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0
+    notify: false, antiburn: false, updates: true, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
+    profiles: []
   };
 }
 
@@ -119,6 +120,7 @@ function mergeCfg(saved) {
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   var tf = Number(saved.tariff); if (isFinite(tf) && tf > 0 && tf <= 1000) c.tariff = Math.round(tf * 100) / 100;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
+  c.profiles = cleanProfiles(saved.profiles); // 07-profiles.js
   return c;
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }

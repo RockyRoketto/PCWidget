@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -33,6 +34,7 @@ const (
 	cmdExit      = 9
 	cmdTheme     = 10 // 10..13
 	cmdMode      = 20 // 20..24
+	cmdProfile   = 30 // 30..35
 )
 
 // Порядок совпадает с ключами в странице (assets/js/00-core.js).
@@ -145,6 +147,10 @@ func showNativeMenu() {
 	pAppendMenu.Call(m, mfString, cmdToggle, uintptr(unsafe.Pointer(utf16(toggleText))))
 	pAppendMenu.Call(m, mfPopup, submenu(cmdMode, modeText, modeKeys, curMode), uintptr(unsafe.Pointer(utf16("Размер"))))
 	pAppendMenu.Call(m, mfPopup, submenu(cmdTheme, themeText, themeKeys, app.brief.Theme), uintptr(unsafe.Pointer(utf16("Тема"))))
+	profs := profileNames()
+	if len(profs) > 0 {
+		pAppendMenu.Call(m, mfPopup, submenu(cmdProfile, profs, profs, ""), uintptr(unsafe.Pointer(utf16("Профиль"))))
+	}
 	pAppendMenu.Call(m, mfString, cmdSettings, uintptr(unsafe.Pointer(utf16("Настройки…"))))
 	pAppendMenu.Call(m, topFlags, cmdTopmost, uintptr(unsafe.Pointer(utf16("Поверх всех окон"))))
 	pAppendMenu.Call(m, mfSeparator, 0, 0)
@@ -191,6 +197,8 @@ func showNativeMenu() {
 		sendCmd("theme:" + themeKeys[id-cmdTheme])
 	case id >= cmdMode && id < cmdMode+uintptr(len(modeKeys)):
 		sendCmd("mode:" + modeKeys[id-cmdMode])
+	case id >= cmdProfile && id < cmdProfile+uintptr(len(profs)):
+		sendCmd("profile:" + strconv.Itoa(int(id-cmdProfile)))
 	case id == cmdExit:
 		app.settings.save()
 		pDestroyWindow.Call(app.hwnd)

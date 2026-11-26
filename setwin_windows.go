@@ -207,6 +207,8 @@ func onSetPage(m string) {
 		}
 	case strings.HasPrefix(m, "sys:"):
 		runOnUI(func() { onSys(m[4:]) })
+	case strings.HasPrefix(m, "prof:"): // профиль в файл и из файла
+		runOnUI(func() { onProfile(m[5:]) })
 	}
 }
 

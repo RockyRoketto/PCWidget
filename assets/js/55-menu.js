@@ -12,7 +12,11 @@ function menuHTML() {
   var item = function (icon, text, cmd, on) {
     return '<button class="mi" data-cmd="' + cmd + '">' + I(icon) + '<span>' + text + '</span>' + (on ? '<span class="i ck">' + ICONS.check + '</span>' : '') + '</button>';
   };
-  return '<div class="menu"><div class="mseg">' + seg + '</div><div class="mthemes">' + themes + '</div><hr>' +
+  var cur = curProfile(), profs = CFG.profiles.map(function (p, i) {
+    return '<button data-cmd="profile:' + i + '" class="' + (cur === i ? 'on' : '') + '">' + esc(p.name) + '</button>';
+  }).join('');
+  return '<div class="menu"><div class="mseg">' + seg + '</div><div class="mthemes">' + themes + '</div>' +
+    (profs ? '<div class="mprof"><span>Профиль</span>' + profs + '</div>' : '') + '<hr>' +
     item('pen', 'Изменить плитки', 'edit') + item('gear', 'Настройки', 'settings') + item('pin', 'Поверх всех окон', 'topmost', TOPMOST) + '<hr>' +
     (SYS.sensors && !SYS.driver ? item('install', 'Датчик температуры CPU…', 'driver') : '') +
     (SYS.installed ? '' : item('install', 'Установить на ПК…', 'install')) +
