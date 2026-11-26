@@ -39,6 +39,7 @@ func sysInfo() string {
 		"topmost": app.settings.Topmost, "visible": app.visible,
 		"claude": claudeModState(claudeDir()), "claudeErr": claudeModErr,
 		"accent": lastAccent, "version": appVersion,
+		"game": ov.on, "gameCfg": gameCfg(), "gameKeyErr": ov.keyErr,
 	})
 	return string(b)
 }
@@ -171,6 +172,8 @@ func onSys(c string) {
 		openProjectPage(repoURL)
 	case "update":
 		offerUpdate()
+	case "game":
+		toggleGame()
 	case "updcheck":
 		go updater.check(true)
 	case "autostart:1", "autostart:0":

@@ -1,0 +1,36 @@
+/* Панель игрового режима: поверх игры, без размытия (окно слоистое), поэтому подложка плотнее, чем у виджета.
+   Материал — текущей темы: Лист — тёмное стекло, Прибор — приборная панель, Заливка — карточка с рельефом,
+   ЖК-табло — табло в рамке. */
+#ov { width: max-content; min-width: 156px; padding: 4px; border-radius: 12px; background: var(--sheet); }
+#ov .in { position: relative; padding: 7px 11px 8px; border-radius: 9px; overflow: hidden; }
+#ov .r { position: relative; z-index: 1; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; line-height: 19px; }
+#ov .r .n { font-size: 11px; color: var(--dim); white-space: nowrap; }
+#ov .r .v { font-family: var(--vf); font-size: 15px; font-weight: 600; white-space: nowrap; }
+#ov .r .v small { font-family: var(--font); font-size: 11px; font-weight: 500; color: var(--dim); margin-left: 2px; }
+#ov .r.big { align-items: center; margin-bottom: 1px; }
+#ov .r.big .v { font-size: 34px; line-height: 38px; letter-spacing: -.02em; }
+#ov .r.big .n { font-size: 12px; font-weight: 600; color: var(--lab); letter-spacing: .04em; }
+#ov .gr { position: relative; z-index: 1; height: 22px; margin: 2px 0 4px; width: 0; min-width: 100%; } /* ширину панели задают строки, не график */
+#ov .gr .graph { height: 22px; min-height: 22px; }
+#ov .gr .hist, #ov .gr .tk { height: 22px; }
+/* цифры поверх любой картинки игры */
+#ov .r .v, #ov .r .n { text-shadow: 0 1px 2px var(--ovshadow, rgba(0, 0, 0, .45)); }
+
+.theme-sheet.tone-dark #ov { --sheet: rgba(14, 18, 26, max(.78, var(--glass))); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.theme-sheet.tone-light #ov { --sheet: rgba(246, 249, 251, max(.86, var(--glass))); box-shadow: inset 0 0 0 1px rgba(20, 32, 43, .1); --ovshadow: rgba(255, 255, 255, .5); }
+.theme-sheet #ov { padding: 0; }
+
+.theme-gauge #ov { border-radius: var(--R); }
+.theme-gauge #ov .in { background: var(--tile); border-radius: var(--r); }
+.theme-gauge #ov .r .n { text-transform: uppercase; letter-spacing: .05em; }
+.theme-gauge #ov .r .v, .theme-gauge #ov .r .n, .theme-lcd #ov .r .v, .theme-lcd #ov .r .n { text-shadow: none; }
+
+.theme-fill #ov { padding: 0; background: var(--tile); border-radius: var(--r); }
+.theme-fill #ov .gr { position: static; height: 0; margin: 0; }
+.theme-fill #ov .fill { --c: color-mix(in srgb, var(--solid, #2f7df0) var(--mixk), #fff); }
+.theme-fill.tone-light #ov { --ovshadow: rgba(255, 255, 255, .6); }
+
+.theme-lcd #ov { border-radius: var(--R); }
+.theme-lcd #ov .in { background: var(--tile); border-radius: var(--r); box-shadow: inset 0 1px 3px var(--glass-in); }
+.theme-lcd #ov .r .n { text-transform: uppercase; letter-spacing: .06em; }
+.theme-lcd #ov .r .v { font-weight: 400; }
