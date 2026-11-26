@@ -30,7 +30,7 @@ function loadTile(id, details) {
       var d = s[id]; el.hidden = !d; if (!d) return;
       use(coresOn(d));
       var lv = level(d.temp, CFG.thr[thrKey]);
-      c.aux(details(d));
+      c.aux(details(d, !wide(el) && fanOn(d))); // в половинке значок вентилятора отнимает место у подписи
       if (fanOn(d)) { fan = fan || fanViz(); fan.place(c.el, el); fan.set(d.fan); }
       else if (fan) { fan.remove(); fan = null; }
       if (d.temp != null) { c.big(Math.round(d.temp) + '°', '', lv); c.side(Math.round(d.load), '%'); }
@@ -104,8 +104,8 @@ var TILE_BUILD = {
 
   cpu: function () { return loadTile('cpu', cpuDetails); },
   gpu: function () {
-    return loadTile('gpu', function (d) {
-      return [d.memUsed != null && d.memTotal != null ? dec(d.memUsed / 1024, 1) + '/' + Math.round(d.memTotal / 1024) + ' ГБ' : '', d.power != null ? Math.round(d.power) + ' Вт' : ''].filter(Boolean).join(' · ');
+    return loadTile('gpu', function (d, short) {
+      return [d.memUsed != null && d.memTotal != null ? dec(d.memUsed / 1024, 1) + (short ? '' : '/' + Math.round(d.memTotal / 1024)) + ' ГБ' : '', d.power != null ? Math.round(d.power) + ' Вт' : ''].filter(Boolean).join(' · ');
     });
   },
 
@@ -128,7 +128,7 @@ var TILE_BUILD = {
         var on = Alarm.isOn('mem'), lv = on ? 'hot' : level(m.pct, CFG.thr.mem);
         if (map) c.aux('<span class="' + lv + '">' + dec(m.usedGB, 1) + ' из ' + Math.round(m.totalGB) + ' ГБ' + (wide(el) ? ' · ' + Math.round(m.pct) + '%' : '') + '</span>');
         else {
-          c.aux('из ' + Math.round(m.totalGB) + ' ГБ' + (m.pageUsedGB != null ? ' · подк. ' + num(m.pageUsedGB) : ''));
+          c.aux('из ' + Math.round(m.totalGB) + ' ГБ' + (m.pageUsedGB != null && wide(el) ? ' · подк. ' + num(m.pageUsedGB) : ''));
           c.big(num(m.usedGB), 'ГБ'); c.side(Math.round(m.pct), '%');
         }
         c.lv(lv); c.viz({ pct: m.pct, mark: CFG.thr.mem, procs: map ? s.procs.map : null, used: m.usedGB * 1024 }); c.alarm(on);

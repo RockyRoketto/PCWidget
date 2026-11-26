@@ -59,3 +59,7 @@ body.theme-lcd.tone-dark {
 .theme-lcd .alarm { animation: none; background-color: var(--tile) !important; box-shadow: inset 0 0 0 1.5px var(--hot); }
 .theme-lcd .alarm .md .v, .theme-lcd .alarm.cr > .v { color: var(--hot); animation: lcdblink 1s steps(1) infinite; }
 @media (prefers-reduced-motion: reduce) { .theme-lcd .alarm .md .v, .theme-lcd .alarm.cr > .v { animation: none; } }
+/* половинка: семисегментные цифры шире обычных, погоде и тонкой сети нужен кегль меньше */
+.theme-lcd .tile:not(.w2) .wx .wl .v { font-size: 34px; }
+.theme-lcd .tile:not(.w2) .wx .wi { width: 36px; height: 36px; }
+.theme-lcd .tile[data-h="1"]:not(.w2) > .one.lines .ln > .w { font-size: 14px; }

@@ -43,6 +43,16 @@
 .tile:not(.w2) > .one.lines .ln > .w small { font-family: var(--font); }
 .tile[data-m=net]:not(.w2) .ln > .n { font-size: 16px; }
 
+/* ---- половинка: что не влезает в одну строку ---- */
+/* пик и «ПК включён»: название сверху, значение под ним */
+.tile:not(.w2) .cb.r1 > .hd { flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-width: 0; }
+.tile:not(.w2) .cb.r1 .nm { font-size: 11px; line-height: 14px; }
+/* процессы: на вкладки и название места нет, вкладки занимают всю шапку */
+.tile:not(.w2) .cb > .hd:has(.tabs) > .nm { display: none; }
+.tile:not(.w2) .hd .ax:has(.tabs) { flex: 1; }
+.tile:not(.w2) .hd .tabs { display: flex; }
+.tile:not(.w2) .hd .tabs button { flex: 1; }
+
 /* ---- тонкая плитка: одна строка, индикатор по нижнему краю ---- */
 .tile[data-h="1"] .cb:not(.r1) { flex-direction: row; align-items: center; gap: 10px; padding-block: 0; }
 .tile[data-h="1"] .cb:not(.r1) > .hd { flex: 1; min-width: 0; align-items: center; }
@@ -51,7 +61,7 @@
 .tile[data-h="1"] .md .v2 { font-size: 16px; line-height: 28px; margin-left: 0; }
 .tile[data-h="1"] .md .v small, .tile[data-h="1"] .md .v2 small { font-size: 11px; }
 .tile[data-h="1"] .md .c2 { display: none; }
-.tile[data-h="1"]:not(.w2) .hd .ax { display: none; }
+.tile[data-h="1"]:not(.w2) .cb:not(.r1) .hd .ax { display: none; }
 .tile[data-h="1"] .cb > .bar, .tile[data-h="1"] .cb > .tk { position: absolute; left: 12px; right: 12px; bottom: 5px; width: auto; height: 3px; }
 .tile[data-h="1"] .cb > .graph, .tile[data-h="1"] .cb > .hist { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; min-height: 0; opacity: .55; z-index: 0; }
 .theme-fill .tile[data-h="1"] .cb > .fill { top: 0; }

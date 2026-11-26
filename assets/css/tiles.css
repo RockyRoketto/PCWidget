@@ -59,7 +59,7 @@
 .cb.wx { gap: 8px; }
 .wtop { display: flex; justify-content: space-between; gap: 10px; flex: 1; min-height: 0; }
 .wl { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
-.wx .wl .v { font-size: 48px; line-height: 44px; font-weight: var(--vw); letter-spacing: -.03em; }
+.wx .wl .v { white-space: nowrap; font-size: 48px; line-height: 44px; font-weight: var(--vw); letter-spacing: -.03em; }
 .wtx { display: grid; gap: 1px; min-width: 0; white-space: nowrap; }
 .wcity { font-weight: 600; color: var(--lab); overflow: hidden; text-overflow: ellipsis; }
 .wtx .wdesc { font-size: 11px; line-height: 14px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
