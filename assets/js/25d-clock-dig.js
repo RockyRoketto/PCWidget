@@ -15,7 +15,7 @@ function ckDrums(now, before, cls, z) {
 }
 // Уровень: число на ячейке, которая заливается снизу на долю p.
 function ckLevel(v, p, col, z) {
-  return '<i class="lvl" style="font-size:' + z + 'px"><b style="height:' + ckF(p) + '%;background:var(--' + col + ')"></b><u>' + v + '</u></i>';
+  return '<i class="ck-lvl" style="font-size:' + z + 'px"><b style="height:' + ckF(p) + '%;background:var(--' + col + ')"></b><u>' + v + '</u></i>';
 }
 
 var CK_DIG = {

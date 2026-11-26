@@ -45,10 +45,10 @@
 .fi-big { font-weight: 800; line-height: 1; letter-spacing: -.03em; -webkit-background-clip: text; background-clip: text; color: transparent; }
 .lvls { display: flex; gap: 6px; align-items: flex-end; }
 .lvls.col { flex-direction: column; align-items: center; gap: 5px; }
-.lvl { position: relative; display: grid; place-items: center; width: 1.5em; height: 1.4em; border-radius: .28em; overflow: hidden; font-style: normal; font-weight: 800; letter-spacing: -.03em; background: color-mix(in srgb, var(--text) 9%, transparent); }
-.lvls.col .lvl { width: 2.6em; height: 1.2em; }
-.lvl b { position: absolute; left: 0; right: 0; bottom: 0; opacity: .9; transition: height .5s; }
-.lvl u { position: relative; text-decoration: none; line-height: 1; color: var(--text); text-shadow: 0 1px 3px color-mix(in srgb, var(--pop) 70%, transparent); }
+.ck-lvl { position: relative; display: grid; place-items: center; width: 1.5em; height: 1.4em; border-radius: .28em; overflow: hidden; font-style: normal; font-weight: 800; letter-spacing: -.03em; background: color-mix(in srgb, var(--text) 9%, transparent); }
+.lvls.col .ck-lvl { width: 2.6em; height: 1.2em; }
+.ck-lvl b { position: absolute; left: 0; right: 0; bottom: 0; opacity: .9; transition: height .5s; }
+.ck-lvl u { position: relative; text-decoration: none; line-height: 1; color: var(--text); text-shadow: 0 1px 3px color-mix(in srgb, var(--pop) 70%, transparent); }
 
 /* ЖК-табло */
 .lc-top { display: flex; justify-content: space-between; align-items: center; width: 88%; font-size: 11px; letter-spacing: .08em; }
