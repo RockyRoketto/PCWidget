@@ -105,6 +105,14 @@ function colorMarks(body) {
   if (lab && $('[data-val]', lab)) $('[data-val]', lab).textContent = name;
 }
 
+// «О программе»: версия, обновления, страница проекта.
+function aboutRows() {
+  var note = SYS.updateBusy ? SYS.updateNote : SYS.update ? '<span class="s-ok">Вышла версия ' + esc(SYS.update) + '</span>' : SYS.updateNote || 'RockyRoketto · лицензия MIT';
+  var act = SYS.updateBusy ? '' : SYS.update ? ghost('update', 'Обновить') : ghost('updcheck', 'Проверить');
+  return setRow('PC Widget ' + esc(SYS.version || ''), note, act + ghost('github', 'GitHub')) +
+    setRow('Проверять обновления', '', toggle('updates', CFG.updates, 'Проверять обновления'));
+}
+
 var SET_BODY = {
   look: function () {
     return label('Тема') + '<div class="cards c3">' + Object.keys(THEMES).map(function (k) {
@@ -139,7 +147,7 @@ var SET_BODY = {
       setRow('Положение окна', '', ghost('corner', 'Вернуть в угол')) +
       setRow('Настройки', setState.sure ? 'Плитки, тема и пороги станут как в начале' : '', ghost('reset', setState.sure ? 'Точно сбросить?' : 'Сбросить')) +
       (SYS.installed ? setRow('PC Widget', 'Установлен на этот ПК', ghost('uninstall', 'Удалить…')) : setRow('PC Widget', 'Запущен без установки', ghost('install', 'Установить…'))) +
-      label('О программе') + setRow('PC Widget ' + esc(SYS.version || ''), 'RockyRoketto · лицензия MIT', ghost('github', 'GitHub'));
+      label('О программе') + aboutRows();
   }
 };
 

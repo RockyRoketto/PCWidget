@@ -26,6 +26,11 @@ func main() {
 		runUninstall()
 		return
 	}
+	// Скачанный exe сразу ставится в Program Files и запускается оттуда.
+	if shouldAutoInstall(os.Args[1:], installed(), os.Getenv("PCWIDGET_DEBUG") != "") {
+		autoInstall()
+		return
+	}
 	if !singleInstance() {
 		return
 	}
@@ -37,6 +42,8 @@ func main() {
 		fatal("Не удалось создать окно. Нужен WebView2 Runtime (на Windows 11 он есть всегда):\nhttps://developer.microsoft.com/microsoft-edge/webview2/")
 	}
 	go syncAutostart()
+	go cleanUpdate()
+	go updater.run()
 	col := newCollector()
 	go statsLoop(col)
 	runLoop()

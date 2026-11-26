@@ -18,6 +18,20 @@ function applyBody() {
   $$('[data-id]', rootEl).forEach(paintTile);
   if (view) placeFills(view.el);
   postOnce('style', styleKey()); // размытие, углы и прозрачность окна
+  syncBadge();
+}
+
+// Значок в углу виджета: вышла новая версия. Щелчок предлагает обновиться.
+var badge = null;
+function syncBadge() {
+  if (!SYS.update) { if (badge) { rootEl.removeChild(badge); badge = null; } return; }
+  if (!badge) {
+    badge = mk('<button class="upd" data-nodrag><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V4M4 7.5 8 3.5l4 4"/></svg></button>');
+    badge.addEventListener('click', function () { post('update'); });
+    rootEl.appendChild(badge);
+  }
+  badge.title = 'Вышла версия ' + SYS.update + ': обновить';
+  badge.setAttribute('aria-label', badge.title);
 }
 
 // Перестраивает виджет.
@@ -82,12 +96,13 @@ window.__sys = function (sys) {
   var acc = SYS.accent;
   SYS = sys; TOPMOST = sys.topmost;
   if (sys.accent !== acc && CFG) applyBody(); // в Windows сменили цвет акцента
+  else if (view) syncBadge();
 };
 // Windows переключилась между светлой и тёмной: тема «как в Windows» следует за ней.
 if (darkMQ) darkMQ.addEventListener('change', function () { if (CFG && CFG.tone === 'auto' && view) applyBody(); });
 
 // Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
-var LIGHT = { antiburn: 1, edgeBack: 1, glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1 };
+var LIGHT = { antiburn: 1, updates: 1, edgeBack: 1, glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1 };
 function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
 window.__cfg = function (c) {
   var old = CFG;

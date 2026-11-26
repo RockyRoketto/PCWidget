@@ -22,6 +22,17 @@ func isInstalled(exe, programFiles string) bool {
 	return strings.EqualFold(filepath.Clean(filepath.Dir(exe)), filepath.Clean(installDir(programFiles)))
 }
 
+// shouldAutoInstall: запущенный не из папки установки exe ставит себя сам.
+// --portable и отладка (PCWIDGET_DEBUG) запускают его на месте.
+func shouldAutoInstall(args []string, installed, debug bool) bool {
+	for _, a := range args {
+		if strings.EqualFold(a, "--portable") {
+			return false
+		}
+	}
+	return !installed && !debug
+}
+
 // cliMode разбирает аргументы командной строки: "", "install" или "uninstall".
 func cliMode(args []string) string {
 	for _, a := range args {

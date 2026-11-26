@@ -31,7 +31,9 @@ var menu struct {
 }
 
 func sysInfo() string {
+	upd, updBusy, updNote := updater.state()
 	b, _ := json.Marshal(map[string]any{
+		"update": upd, "updateBusy": updBusy, "updateNote": updNote,
 		"installed": installed(), "autostart": app.settings.autostartEnabled(),
 		"driver": pawnInstalled(), "sensors": hub != nil && hub.available(),
 		"topmost": app.settings.Topmost, "visible": app.visible,
@@ -166,7 +168,11 @@ func onSys(c string) {
 	case "corner":
 		moveToCorner()
 	case "github":
-		openProjectPage()
+		openProjectPage(repoURL)
+	case "update":
+		offerUpdate()
+	case "updcheck":
+		go updater.check(true)
 	case "autostart:1", "autostart:0":
 		setAutostart(c == "autostart:1")
 	case "claudemod:1", "claudemod:0":
@@ -176,8 +182,8 @@ func onSys(c string) {
 
 // openProjectPage открывает страницу проекта через проводник: виджет работает от администратора,
 // а браузер должен запуститься с обычными правами.
-func openProjectPage() {
-	c := exec.Command(filepath.Join(os.Getenv("SystemRoot"), "explorer.exe"), repoURL)
+func openProjectPage(url string) {
+	c := exec.Command(filepath.Join(os.Getenv("SystemRoot"), "explorer.exe"), url)
 	if c.Start() == nil {
 		go c.Wait()
 	}

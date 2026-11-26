@@ -255,6 +255,8 @@ func onPage(m string) {
 		pPostMessage.Call(app.hwnd, wmNCLButtonDown, htCaption, 0)
 	case m == "menu":
 		runOnUI(showMenu)
+	case m == "update":
+		runOnUI(offerUpdate)
 	case strings.HasPrefix(m, "menuhtml:"):
 		showMenuHTML(m[9:])
 	case strings.HasPrefix(m, "cfg:"):
@@ -289,6 +291,7 @@ type uiBrief struct {
 	Mode    string `json:"mode"`
 	Compact string `json:"compact"`
 	Scale   int    `json:"scale"`
+	Updates *bool  `json:"updates"` // проверять ли обновления; нет в настройках = да
 }
 
 func readBrief() {
@@ -308,6 +311,7 @@ func readBrief() {
 	if app.brief.Scale < 50 || app.brief.Scale > 300 {
 		app.brief.Scale = 100
 	}
+	updater.setOn(app.brief.Updates == nil || *app.brief.Updates)
 }
 
 // onCfg сохраняет настройки интерфейса, присланные страницей.

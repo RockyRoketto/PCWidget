@@ -76,6 +76,36 @@ func copyFile(src, dst string) error {
 	return os.Rename(tmp, dst)
 }
 
+// autoInstall: обычный запуск скачанного exe. Если уже стоит версия новее, запускаем её, а не откатываем.
+func autoInstall() {
+	dst := filepath.Join(installDir(os.Getenv("ProgramFiles")), exeName)
+	if _, err := os.Stat(dst); err == nil && newerVersion(installedVersion(), appVersion) {
+		startInstalled(dst)
+		return
+	}
+	runInstall()
+}
+
+// installedVersion — номер из записи «Приложения и возможности»; у 1.0 его нет.
+func installedVersion() string {
+	k, err := registry.OpenKey(registry.LOCAL_MACHINE, uninstallKey, registry.QUERY_VALUE)
+	if err != nil {
+		return ""
+	}
+	defer k.Close()
+	v, _, _ := k.GetStringValue("DisplayVersion")
+	return v
+}
+
+func startInstalled(dst string) {
+	c := exec.Command(dst)
+	c.Dir = filepath.Dir(dst)
+	c.SysProcAttr = &syscall.SysProcAttr{CreationFlags: windows.DETACHED_PROCESS}
+	if err := c.Start(); err != nil {
+		fatal("Установлено, но запустить не удалось: " + err.Error())
+	}
+}
+
 // runInstall: запуск с --install. Копирует exe в Program Files, создаёт задачу автозапуска, запись для
 // «Приложения и возможности» и запускает установленную копию.
 func runInstall() {
@@ -89,6 +119,8 @@ func runInstall() {
 	dir := installDir(pf)
 	dst := filepath.Join(dir, exeName)
 	src := selfExe()
+	_, statErr := os.Stat(dst)
+	fresh := statErr != nil // при обновлении про драйвер повторно не спрашиваем
 	killOthers()
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		fatal("Не удалось создать " + dir + ": " + err.Error())
@@ -100,19 +132,14 @@ func runInstall() {
 	}
 	writeUninstallEntry(dst)
 	// Всё нужное ставится сразу: драйвер для температуры CPU (с согласием владельца), чтобы не искать его в меню.
-	if !pawnInstalled() && askPawnIO() {
+	if fresh && !pawnInstalled() && askPawnIO() {
 		if err := runPawnIOInstall(); err != nil {
 			msgBox("Драйвер PawnIO поставить не удалось (нужен winget и интернет). "+
 				"Позже это можно сделать из меню виджета.", windows.MB_OK|windows.MB_ICONWARNING)
 		}
 	}
 	// Задачу создаёт сама установленная копия при старте (syncAutostart, с учётом настройки в меню).
-	c := exec.Command(dst)
-	c.Dir = dir
-	c.SysProcAttr = &syscall.SysProcAttr{CreationFlags: windows.DETACHED_PROCESS}
-	if err := c.Start(); err != nil {
-		fatal("Установлено, но запустить не удалось: " + err.Error())
-	}
+	startInstalled(dst)
 }
 
 func writeUninstallEntry(exe string) {
@@ -123,6 +150,7 @@ func writeUninstallEntry(exe string) {
 	defer k.Close()
 	_ = k.SetStringValue("DisplayName", "PC Widget")
 	_ = k.SetStringValue("DisplayIcon", exe)
+	_ = k.SetStringValue("DisplayVersion", appVersion)
 	_ = k.SetStringValue("InstallLocation", filepath.Dir(exe))
 	_ = k.SetStringValue("UninstallString", fmt.Sprintf(`"%s" --uninstall`, exe))
 	_ = k.SetDWordValue("NoModify", 1)

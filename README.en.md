@@ -4,7 +4,7 @@
 
 [Русский](README.md) · **English**
 
-**Version 1.0**
+**Version 1.1**
 
 ## [⬇ Download widget.exe](https://github.com/RockyRoketto/PCWidget/releases/latest/download/widget.exe)
 
@@ -41,7 +41,15 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 
 1. Download `widget.exe` from [Releases](../../releases) or build it yourself.
 2. Run it. The file is not code-signed, so SmartScreen may warn you: choose "More info", then "Run anyway".
-3. To start the widget with Windows, open its menu (right-click the widget or the tray icon) and choose **«Установить (автозапуск)…»** (Install with autostart). The program copies itself to `Program Files\PCWidget` and creates a scheduled task.
+3. That is all: the program installs itself to `Program Files\PCWidget`, adds itself to startup (a scheduled task) and starts. You can delete the downloaded file afterwards.
+
+Autostart can be turned off in the settings. To run without installing, pass `--portable`.
+
+## Updates
+
+Shortly after start and every 6 hours the widget checks GitHub for a new version. If there is one, a blue arrow badge appears in the widget's corner: click it (or use **«Настройки → Система → О программе → Обновить»**) and confirm. The widget downloads the new version, verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
+
+Moving from version 1.0 is manual, once: download `widget.exe` and run it.
 
 ### CPU temperature
 
@@ -49,7 +57,7 @@ CPU temperature, clock and power need the [PawnIO](https://pawnio.eu/) driver. T
 
 ## Uninstall
 
-Use the menu item **«Удалить PC Widget…»** (Remove PC Widget) or "Apps & features" in Windows. Settings remain in `%APPDATA%\pcwidget` and the unpacked sensor libraries in `%LOCALAPPDATA%\pcwidget`; delete these folders by hand if you wish. The PawnIO driver is removed separately.
+Use **«Настройки → Система → Удалить…»** (Settings → System → Remove), the menu item **«Удалить PC Widget…»** or "Apps & features" in Windows. Settings remain in `%APPDATA%\pcwidget` and the unpacked sensor libraries in `%LOCALAPPDATA%\pcwidget`; delete these folders by hand if you wish. The PawnIO driver is removed separately.
 
 ## Network and privacy
 
@@ -58,6 +66,7 @@ There is no telemetry. The widget only connects to:
 | Where | Why | When |
 |---|---|---|
 | `1.1.1.1:443` | ping and packet loss (connection only, no data sent) | every 5 seconds |
+| `api.github.com`, `github.com` | checking for a new version, and downloading it with your consent | after start and every 6 hours, can be turned off |
 | `open-meteo.com` | weather for the city you type in | only while the weather tile is enabled |
 
 **The Claude tile** is off by default. It reads local Claude Code files in `~/.claude` (logs, to count tokens, and the session list). It does not read your login token and makes no network requests. The button that connects usage limits adds a small mod to `~/.claude/skills/pcwidget-limits`; disconnecting or uninstalling the widget removes it.
