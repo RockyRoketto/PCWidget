@@ -69,8 +69,7 @@ function fillViz(kind) {
     var e = mk('<div class="fill"><i class="lvl"></i></div>'), li = e.firstChild;
     return { el: e, bg: true, set: function (o) { li.style.height = 'calc(' + clamp(o.pct, 0, 100) + '% + 8px)'; } };
   }
-  var el = mk('<div class="fill"><i class="area"></i><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke"/></svg></div>');
-  var ar = el.firstChild, crest = $('path', el);
+  var el = mk('<div class="fill"><i class="area"></i></div>'), ar = el.firstChild;
   return {
     el: el, bg: true,
     set: function (o) {
@@ -79,7 +78,6 @@ function fillViz(kind) {
       var st = 100 / (HN - 1), x0 = 100 - (h.length - 1) * st, m = o.max * (kind === 'net' ? 1.55 : 1); // рельеф сети ниже цифр
       var P = h.map(function (v, i) { return [(x0 + i * st).toFixed(1), (100 - Math.min(v / m, 1) * 96).toFixed(1)]; });
       ar.style.clipPath = 'polygon(' + P.map(function (p) { return p[0] + '% ' + p[1] + '%'; }).join(',') + ',100% 100%,' + x0.toFixed(1) + '% 100%)';
-      crest.setAttribute('d', 'M' + P.map(function (p) { return p.join(','); }).join('L'));
     }
   };
 }
