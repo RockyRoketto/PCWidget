@@ -45,7 +45,7 @@ TILE_BUILD.claude = function () {
   }
   return {
     el: el,
-    span: function () { return n > 3 ? 3 : 2; },
+    span: function () { return thinOn('claude') ? 1 : n > 3 ? 3 : 2; },
     update: function (s) {
       var c = s.claude; el.hidden = !c; if (!c) return;
       var list = limitsOf(s), t = tokParts(todayTokens(c)), al = Alarm.isOn('claude'), dot = chatDot(c);
@@ -66,7 +66,7 @@ TILE_BUILD.claude = function () {
         one.name('Claude' + dot); one.aux('сегодня ' + t.join(' '));
         lines(list.map(function (l) {
           var r = resetText(l);
-          return { n: limitName(l.kind), m: r ? 'до ' + r : '', v: unitHtml(Math.round(l.pct), '%'), pct: l.pct, mark: CFG.thr.claude, lv: limitLevel(l.pct) };
+          return { n: thinNow(el) ? LIMIT_SHORT[l.kind] || limitName(l.kind) : limitName(l.kind), m: r ? 'до ' + r : '', v: unitHtml(Math.round(l.pct), '%'), pct: l.pct, mark: CFG.thr.claude, lv: limitLevel(l.pct) };
         }));
       }
       [one, a, b, tok].forEach(function (x) { x.alarm(al); });

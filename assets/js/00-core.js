@@ -76,7 +76,7 @@ function paintTile(el) {
 
 function defaults() {
   return {
-    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', scale: 100, glass: 62, tileColors: {},
+    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', scale: 100, glass: 62, tileColors: {}, thin: {},
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, city: '', wxDays: true, clock24: true, clockSec: false, clockView: 'digital', clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu'
@@ -112,6 +112,7 @@ function mergeCfg(saved) {
   var hex = function (v) { return typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : ''; };
   if (hex(saved.accent)) c.accent = hex(saved.accent);
   if (saved.tileColors) TILE_IDS.forEach(function (k) { if (hex(saved.tileColors[k])) c.tileColors[k] = hex(saved.tileColors[k]); });
+  if (saved.thin) Object.keys(THIN_OK).forEach(function (k) { if (saved.thin[k]) c.thin[k] = 1; });
   if (saved.procN === 5) c.procN = 5;
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);

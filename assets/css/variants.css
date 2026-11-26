@@ -1,0 +1,68 @@
+/* Плитки по размеру: высота в модулях (data-h от раскладки) и ширина (w2 — во всю ширину).
+   Часы и календарь занимают место, которое им дали; тонкие плитки (в модуль) — одна строка. */
+
+/* ---- часы ---- */
+.tile.w2[data-m=clock] .md .v { font-size: 48px; line-height: 50px; }
+.tile[data-h="3"]:not(.w2)[data-m=clock] .md .v { font-size: 44px; line-height: 48px; }
+.tile[data-m=clock] .cb.sec .md .v { font-size: 34px; }
+.tile:not(.w2)[data-m=clock] .cb.sec .md .v { font-size: 27px; }
+/* стрелки во всю ширину: справа день недели и дата, дата на циферблате не нужна */
+.aside { display: none; }
+.tile.w2 .face:has(.dial) { display: flex; align-items: center; justify-content: center; gap: 24px; }
+.tile.w2 .face .dial { margin: 0; flex: none; }
+.tile.w2 .dial .dt { display: none; }
+.tile.w2 .aside { display: grid; gap: 2px; min-width: 0; white-space: nowrap; }
+.awd { font: var(--vw) 24px/30px var(--vf); }
+.adt { color: var(--dim); font-size: 13px; }
+
+/* ---- календарь ---- */
+.tile[data-h="3"]:not(.w2) .face.day .cday { flex-direction: column; align-items: flex-start; gap: 6px; }
+.tile[data-h="3"] .face.day .cnum { font-size: 64px; }
+.tile.w2 .face.day .cday { gap: 16px; }
+.tile.w2 .face.day .cnum { font-size: 56px; }
+/* неделя и месяц во всю ширину: сегодня крупно слева, сетка справа */
+.tile.w2 .face.cal:not(.day) { flex-direction: row; align-items: center; gap: 16px; }
+.tile.w2 .ctoday { display: flex !important; flex-direction: column; align-items: flex-start; gap: 4px; width: 104px; flex: none; }
+.tile.w2 .ctoday .cnum { font-size: 56px; }
+.tile.w2 .face.cal .chead { display: none; }
+.tile.w2 .cmain { flex: 1; }
+.tile.w2 .face.month .cmain { align-self: stretch; }
+/* неделя в высокой половинке: сегодня над неделей */
+.tile[data-h="3"]:not(.w2) .face.week { gap: 10px; }
+.tile[data-h="3"]:not(.w2) .face.week .ctoday { display: flex !important; }
+.tile[data-h="3"]:not(.w2) .face.week .ctoday .cnum { font-size: 40px; }
+.tile[data-h="3"]:not(.w2) .face.week .chead { display: none; }
+
+/* ---- пустая половина: видна только при правке ---- */
+.tile.gap { pointer-events: none; }
+.editing .tile.gap { pointer-events: auto; cursor: default; }
+.editing .tile.gap::before { opacity: .5; }
+
+/* ---- сеть и Claude в половинке: числа крупнее строк дисков ---- */
+.tile:not(.w2) > .one.lines .ln > .w { font: var(--vw2) 20px/24px var(--vf); }
+.tile:not(.w2) > .one.lines .ln > .w small { font-family: var(--font); }
+.tile[data-m=net]:not(.w2) .ln > .n { font-size: 16px; }
+
+/* ---- тонкая плитка: одна строка, индикатор по нижнему краю ---- */
+.tile[data-h="1"] .cb:not(.r1) { flex-direction: row; align-items: center; gap: 10px; padding-block: 0; }
+.tile[data-h="1"] .cb:not(.r1) > .hd { flex: 1; min-width: 0; align-items: center; }
+.tile[data-h="1"] .cb > .md, .theme-fill .tile[data-h="1"] .cb > .md { margin: 0; flex: none; gap: 6px; }
+.tile[data-h="1"] .md .v { font-size: 24px; line-height: 28px; }
+.tile[data-h="1"] .md .v2 { font-size: 16px; line-height: 28px; margin-left: 0; }
+.tile[data-h="1"] .md .v small, .tile[data-h="1"] .md .v2 small { font-size: 11px; }
+.tile[data-h="1"] .md .c2 { display: none; }
+.tile[data-h="1"]:not(.w2) .hd .ax { display: none; }
+.tile[data-h="1"] .cb > .bar, .tile[data-h="1"] .cb > .tk { position: absolute; left: 12px; right: 12px; bottom: 5px; width: auto; height: 3px; }
+.tile[data-h="1"] .cb > .graph, .tile[data-h="1"] .cb > .hist { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; min-height: 0; opacity: .55; z-index: 0; }
+.theme-fill .tile[data-h="1"] .cb > .fill { top: 0; }
+/* строки в тонкой: сеть и лимиты в одну линию без шкал */
+.tile[data-h="1"] .cb.lines > .ls { flex: none; display: flex; gap: 12px; }
+.tile[data-h="1"] .cb.lines .ln { display: flex; gap: 4px; align-items: baseline; padding: 0; margin: 0; background: none; }
+.tile[data-h="1"] .cb.lines .ln > .m, .tile[data-h="1"] .cb.lines .ln > :is(.bar, .tk, .fill) { display: none; }
+.tile[data-h="1"] .cb.lines .ln:nth-child(n+3) { display: none; }
+.tile[data-h="1"] .cb.lines .ln > .w { font: var(--vw2) 18px/22px var(--vf); }
+.tile[data-h="1"]:not(.w2) > .one.lines > .hd { display: none; }
+.tile[data-h="1"]:not(.w2) > .one.lines > .ls { flex: 1; justify-content: space-between; }
+.tile[data-h="1"]:not(.w2) > .one.lines .ln > .w { font-size: 16px; }
+.tile[data-h="1"]:not(.w2) > .one.lines .ln > .w small { font-size: 10px; margin-left: 1px; }
+.tile[data-h="1"] > .two .hd .ax { display: none; }

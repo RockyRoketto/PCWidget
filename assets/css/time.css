@@ -42,12 +42,16 @@ body { --flip: color-mix(in srgb, var(--text) 13%, transparent); --flip2: color-
 .pin { fill: var(--sheet, #111); stroke: var(--sec); stroke-width: 2; }
 .theme-gauge .dial .sech line, .theme-gauge .dial .dd { stroke: var(--hot); }
 .cr .dial { width: min(100%, 144px); }
-/* календарь: месяц заполняет плитку в три модуля целиком */
-.face.month { height: 100%; display: flex; flex-direction: column; }
-.face-cb:has(.cal) { justify-content: flex-start; }
+/* календарь: месяц заполняет плитку целиком, день и неделя по центру высоты */
+.face.cal { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+.face.month { justify-content: flex-start; }
+.face-cb:has(.cal) { justify-content: stretch; }
+.cmain { display: flex; flex-direction: column; min-width: 0; }
+.face.month .cmain { flex: 1; }
+.ctoday { display: none !important; }
 .chead { font-weight: 600; color: var(--lab); margin-bottom: 4px; white-space: nowrap; }
-.chead::first-letter, .cday b::first-letter { text-transform: uppercase; }
-.cgrid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11.5px; }
+.chead::first-letter, .cday b::first-letter, .awd::first-letter { text-transform: uppercase; }
+.cgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 11.5px; }
 .face.month .cgrid { flex: 1; grid-auto-rows: 1fr; }
 .cw { font-size: 10px; color: var(--dim); }
 .cd { display: grid; place-items: center; min-height: 0; }
@@ -57,7 +61,9 @@ body { --flip: color-mix(in srgb, var(--text) 13%, transparent); --flip2: color-
 .cd.off { opacity: .32; }
 .cd.now i { background: var(--accent); color: var(--on-accent); font-weight: 700; }
 .theme-gauge .cd i { border-radius: 3px; }
-.face.week .cd { height: 24px; }
+.face.week .cgrid { font-size: 13px; }
+.face.week .cd { height: 26px; }
+.face.week .cd i { min-width: 20px; height: 22px; line-height: 22px; }
 .cday { display: flex; align-items: center; gap: 12px; }
 .cday .cnum { font-size: 46px; line-height: 1; font-weight: var(--vw); }
 .cday div { min-width: 0; }

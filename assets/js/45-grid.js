@@ -39,6 +39,7 @@ function repack(root) {
         var c = per / u.length, st = x.b.el.style;
         st.gridColumn = 'span ' + c; st.gridRow = 'span ' + h;
         x.b.el.classList.toggle('first', li === 0);
+        x.b.el.setAttribute('data-h', h); // лица часов и календаря, тонкие плитки подстраиваются под высоту
         sig.push(x.id + c + h);
       });
     });
@@ -50,13 +51,19 @@ function repack(root) {
   return true;
 }
 
+// Пустая половина ряда: видна только при правке (пунктиром), в неё можно перетащить плитку.
+function gapItem(ri) {
+  var el = mk('<div class="tile gap" data-id="' + GAP + ri + '"></div>');
+  return { id: GAP + ri, b: { el: el, span: function () { return 1; }, update: function () {} } };
+}
+
 // Переставляет уже построенные плитки по модели (при перетаскивании).
 function reflowFull(grid) {
   var by = {};
-  gridView.forEach(function (r) { r.items.forEach(function (x) { by[x.id] = x; }); });
+  gridView.forEach(function (r) { r.items.forEach(function (x) { if (isGap(x.id)) x.b.el.remove(); else by[x.id] = x; }); });
   gridView = [];
-  CFG.rows.forEach(function (row) {
-    var items = shownIn(row).map(function (id) { return by[id]; }).filter(Boolean);
+  CFG.rows.forEach(function (row, ri) {
+    var items = shownIn(row).map(function (id) { return id === GAP ? gapItem(ri) : by[id]; }).filter(Boolean);
     items.forEach(function (x) { grid.appendChild(x.b.el); });
     if (items.length) gridView.push({ items: items });
   });
@@ -66,8 +73,9 @@ function reflowFull(grid) {
 function buildFull() {
   var el = mk('<div class="full m-' + CFG.mode + (editing ? ' editing' : '') + '"><div class="grid"></div></div>'), grid = $('.grid', el);
   gridView = []; packSig = '';
-  CFG.rows.forEach(function (row) {
+  CFG.rows.forEach(function (row, ri) {
     var items = shownIn(row).map(function (id) {
+      if (id === GAP) { var g = gapItem(ri); grid.appendChild(g.b.el); return g; }
       var b = TILE_BUILD[id]();
       b.el.setAttribute('data-id', id);
       if (editing) { b.el.setAttribute('data-nodrag', ''); b.el.appendChild(editButton()); }
@@ -101,7 +109,7 @@ function editEvents(el, sel, hide, calc, move, reflow) {
   });
   el.addEventListener('pointerdown', function (e) {
     var n = e.button === 0 && !e.target.closest('.ed') && e.target.closest(sel);
-    if (n) dragTile(el, n, e, sel, calc, move, reflow);
+    if (n && !n.classList.contains('gap')) dragTile(el, n, e, sel, calc, move, reflow);
   });
 }
 
@@ -170,7 +178,7 @@ function dragTile(el, n, e, sel, calc, move, reflow) {
   // Перестановка только если курсор постоял над новым местом (DWELL) и после прошлой перестановки прошла пауза (COOL):
   // иначе плитки прыгают туда-сюда, пока едут из-под курсора.
   // Направляющая: подсвечивает плитку-цель и показывает, как встанет перетаскиваемая (обмен, рядом, выше, ниже).
-  var GUIDE = { swap: 'g-swap', before: 'g-t', after: 'g-b', left: 'g-l', right: 'g-r' };
+  var GUIDE = { swap: 'g-swap', before: 'g-t', after: 'g-b', left: 'g-l', right: 'g-r', edgeL: 'g-l', edgeR: 'g-r' };
   function guide(d) {
     $$(sel, el).forEach(function (t) { t.classList.toggle('g-swap', false); t.classList.toggle('g-t', false); t.classList.toggle('g-b', false); t.classList.toggle('g-l', false); t.classList.toggle('g-r', false); });
     if (!d) return;

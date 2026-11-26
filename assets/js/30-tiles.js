@@ -6,6 +6,9 @@
 
 function tileBox(id, m) { return mk('<div class="tile" data-m="' + (m || id) + '"></div>'); }
 function wide(el) { return el.classList.contains('w2'); }
+// Тонкая: высота в модуль. Плитка рисуется тонкой, только если и ряд вышел в модуль (data-h, 45-grid.js).
+function thinOn(id) { return !!(THIN_OK[id] && CFG.thin[id]); }
+function thinNow(el) { return el.getAttribute('data-h') === '1'; }
 function cpuDetails(d) { return [d.freq != null ? dec(d.freq / 1000, 1) + ' ГГц' : '', d.power != null ? Math.round(d.power) + ' Вт' : ''].filter(Boolean).join(' · '); }
 
 // CPU и GPU: градусы крупно слева, загрузка справа, история загрузки. Без датчика — загрузка крупно.
@@ -13,7 +16,7 @@ function loadTile(id, details) {
   var el = tileBox(id), c = makeCell({ kind: 'graph', name: id.toUpperCase() }), thrKey = id + 'Temp';
   el.appendChild(c.el);
   return {
-    el: el, span: function () { return 2; },
+    el: el, span: function () { return thinOn(id) ? 1 : 2; },
     update: function (s) {
       var d = s[id]; el.hidden = !d; if (!d) return;
       var lv = level(d.temp, CFG.thr[thrKey]);
@@ -98,7 +101,7 @@ var TILE_BUILD = {
     var el = tileBox('mem'), c = makeCell({ kind: 'level', name: 'Память' });
     el.appendChild(c.el);
     return {
-      el: el, span: function () { return 2; },
+      el: el, span: function () { return thinOn('mem') ? 1 : 2; },
       update: function (s) {
         var m = s.mem; el.hidden = !m; if (!m) return;
         var on = Alarm.isOn('mem'), lv = on ? 'hot' : level(m.pct, CFG.thr.mem);
@@ -115,7 +118,7 @@ var TILE_BUILD = {
     one.el.appendChild(box); two.appendChild(dn.el); two.appendChild(up.el); el.appendChild(one.el); el.appendChild(two);
     var lines = makeLines(box);
     return {
-      el: el, span: function () { return 2; },
+      el: el, span: function () { return thinOn('net') ? 1 : 2; },
       update: function (s) {
         var n = s.net; el.hidden = !n; if (!n) return;
         var q = Math.sqrt, mx = Math.max.apply(null, HIST.down.concat(HIST.up, [102400])), a = rateParts(n.down), b = rateParts(n.up);

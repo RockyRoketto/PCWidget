@@ -33,7 +33,12 @@ var TILE_OPTS = {
     (GRID_MODES[curMode()] ? '<label class="ol">Прогноз на неделю' + toggle('wxDays', CFG.wxDays, 'Прогноз на неделю') + '</label><div class="hint">Виден, когда плитка во всю ширину</div>' : ''); },
   procs: function () { return !GRID_MODES[curMode()] ? '' : '<div class="ol">Строк в списке<span style="width:110px">' + segment('procN', [[3, '3'], [5, '5']], CFG.procN) + '</span></div>'; }
 };
-TILE_OPTS.claude = function () { return '<div data-cl>' + claudeOpts() + '</div>'; };
+TILE_OPTS.claude = function () { return thinOpt('claude') + '<div data-cl>' + claudeOpts() + '</div>'; };
+// Высота плитки: обычная или тонкая (в один модуль). Только в Панели и Широкой.
+function thinOpt(id) {
+  return GRID_MODES[curMode()] ? '<div class="ol">Высота<span style="width:150px">' + segment('thin:' + id, [[0, 'Обычная'], [1, 'Тонкая']], CFG.thin[id] ? 1 : 0) + '</span></div>' : '';
+}
+['cpu', 'gpu', 'mem', 'net'].forEach(function (id) { TILE_OPTS[id] = function () { return thinOpt(id); }; });
 // Лимиты пишет маленький мод внутри Claude Code; кнопка кладёт его в ~/.claude/skills или убирает.
 function claudeOpts() {
   var c = S && S.claude, has = !!(c && c.limits), fresh = has && Date.now() / 1000 - c.limitsAt < 7 * 86400;
@@ -59,7 +64,7 @@ function modeCards() {
 // Как переставлять: сразу на виджете, правка включена, пока открыта эта вкладка.
 function tilesHint(m) {
   var what = GRID_MODES[m] ? 'плитки' : m === 'column' ? 'строки' : 'блоки';
-  return '<p class="hint how">Перетаскивай ' + what + ' прямо на виджете, крестик убирает. <button class="lnk" data-sys="tiles">Как в начале</button></p>';
+  return '<p class="hint how">Перетаскивай ' + what + ' прямо на виджете, крестик убирает.' + (GRID_MODES[m] ? ' Длинную к краю — станет короткой.' : '') + ' <button class="lnk" data-sys="tiles">Как в начале</button></p>';
 }
 
 function densityRow(text) {
@@ -205,6 +210,7 @@ function buildSettings() {
     else if (d.acc) { CFG.accent = d.acc; changed(); colorMarks(body); }
     else if (d.pal) { CFG.pal = d.pal; changed(); colorMarks(body); }
     else if (d.k === 'theme' || d.k === 'tone') { CFG[d.k] = d.v; changed(); render(); }
+    else if (d.k && d.k.indexOf('thin:') === 0) { var tid = d.k.slice(5); if (d.v === '1') CFG.thin[tid] = 1; else delete CFG.thin[tid]; changed(); pick(b); }
     else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
     else if (d.k) { CFG[d.k] = /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });

@@ -75,7 +75,8 @@ function hand(cls, len) { return '<g class="' + cls + '"><line class="stem" y1="
 function analogFace() {
   var el = mk('<div class="face"><svg class="dial" viewBox="-100 -100 200 200">' + dialSvg() +
     (CFG.clockDate ? '<text class="dt" x="30" y="0"><tspan class="wd"></tspan><tspan class="dd" dx="4"></tspan></text>' : '') + hand('hh', 50) + hand('mh', 82) +
-    '<circle class="hub" r="5.5"/>' + (CFG.clockHand ? '<g class="sech"><line y1="17" y2="-97"/></g><circle class="pin" r="4"/>' : '') + '</svg></div>');
+    '<circle class="hub" r="5.5"/>' + (CFG.clockHand ? '<g class="sech"><line y1="17" y2="-97"/></g><circle class="pin" r="4"/>' : '') + '</svg>' +
+    '<div class="aside"><b class="awd"></b><span class="adt"></span></div></div>'); // справа от циферблата, когда плитка во всю ширину
   var hh = $('.hh', el), mh = $('.mh', el), sh = $('.sech', el), prev = null, last = '', day = '';
   function rot(n, a) { n.style.transform = 'rotate(' + a + 'deg)'; }
   return {
@@ -96,6 +97,8 @@ function analogFace() {
       rot(mh, m * 6 + Math.floor(s / 10)); rot(hh, d.getHours() % 12 * 30 + m / 2);
       if (day === d.toDateString()) return;
       day = d.toDateString();
+      $('.awd', el).textContent = ruDate(d, { weekday: 'long' });
+      $('.adt', el).textContent = ruDate(d, { day: 'numeric', month: 'long' });
       if (!$('.wd', el)) return;
       $('.wd', el).textContent = ruDate(d, { weekday: 'short' }).toUpperCase();
       $('.dd', el).textContent = d.getDate();
@@ -116,16 +119,18 @@ function calDays(d, view) {
   return out;
 }
 function monthName(d) { return ruDate(d, { month: 'long' }) + ' ' + d.getFullYear(); }
+// Сегодня крупно: весь вид «День», а у недели и месяца во всю ширину — слева от сетки.
+function todayHtml(d, cls) {
+  return '<div class="' + cls + '"><span class="num cnum">' + d.getDate() + '</span><div><b>' + ruDate(d, { weekday: 'long' }) + '</b><span>' + monthName(d) + '</span></div></div>';
+}
 function calHtml(d) {
-  if (CFG.calView === 'day') {
-    return '<div class="cday"><span class="num cnum">' + d.getDate() + '</span><div><b>' + ruDate(d, { weekday: 'long' }) + '</b><span>' + monthName(d) + '</span></div></div>';
-  }
-  return '<div class="chead">' + monthName(d) + '</div><div class="cgrid">' +
+  if (CFG.calView === 'day') return todayHtml(d, 'cday');
+  return todayHtml(d, 'cday ctoday') + '<div class="cmain"><div class="chead">' + monthName(d) + '</div><div class="cgrid">' +
     WDAYS.map(function (w, i) { return '<span class="cw' + (i > 4 ? ' we' : '') + '">' + w + '</span>'; }).join('') +
     calDays(d, CFG.calView).map(function (x) {
       var off = CFG.calView === 'month' && x.getMonth() !== d.getMonth(), now = x.toDateString() === d.toDateString();
       return '<span class="cd' + (x.getDay() % 6 ? '' : ' we') + (off ? ' off' : '') + (now ? ' now' : '') + '"><i>' + x.getDate() + '</i></span>';
-    }).join('') + '</div>';
+    }).join('') + '</div></div>';
 }
 function calendarFace() {
   var el = mk('<div class="face cal ' + CFG.calView + '"></div>'), day = '';
