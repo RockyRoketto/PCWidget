@@ -91,6 +91,14 @@ func settingsRect(a anchor, s setSpot, work rect) (x, y, h int) {
 
 func overlaps(a, b rect) bool { return a.L < b.R && b.L < a.R && a.T < b.B && b.T < a.B }
 
+// underCursor переносит окно r туда, где ему быть по курсору: (cx, cy) минус точка (gx, gy), за которую взяли.
+// Считать от предложенного системой места нельзя: она отталкивается от прошлого, уже прилипшего,
+// и медленным движением окно от края не оторвать.
+func underCursor(r rect, cx, cy, gx, gy int32) rect {
+	x, y := cx-gx, cy-gy
+	return rect{x, y, x + r.R - r.L, y + r.B - r.T}
+}
+
 // dragRect — место окна, которое тащат мышью: целиком внутри рабочей области, а у края ближе snap
 // прилипает к нему (магнит). Размер окна не меняется.
 func dragRect(r, work rect, snap int32) rect {

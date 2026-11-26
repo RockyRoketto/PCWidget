@@ -193,12 +193,17 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 	case wmEnterSizeMove:
 		dragging = true
 		dragFrom = windowRect(hwnd)
+		var c point
+		pGetCursorPos.Call(uintptr(unsafe.Pointer(&c)))
+		grab, grabDPI = point{X: c.X - dragFrom.L, Y: c.Y - dragFrom.T}, dpiOf(hwnd)
 	case wmMoving:
 		// Тащат мышью: окно не уходит за край экрана (того, где курсор) и прилипает к краю.
 		var p point
 		pGetCursorPos.Call(uintptr(unsafe.Pointer(&p)))
 		r := (*rect)(unsafe.Pointer(lp))
-		*r = dragRect(*r, workAreaAt(int(p.X), int(p.Y)), int32(scalePx(12, dpiOf(hwnd))))
+		dpi := dpiOf(hwnd) // на мониторе с другим масштабом точка хвата растёт вместе с окном
+		at := underCursor(*r, p.X, p.Y, grab.X*int32(dpi)/int32(grabDPI), grab.Y*int32(dpi)/int32(grabDPI))
+		*r = dragRect(at, workAreaAt(int(p.X), int(p.Y)), int32(scalePx(12, dpi)))
 		return 1
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)

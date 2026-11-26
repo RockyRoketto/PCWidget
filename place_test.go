@@ -86,6 +86,21 @@ func TestDragRect(t *testing.T) {
 	}
 }
 
+// Прилипший к краю виджет отрывается, даже если вести мышь по пикселю: место считается от курсора,
+// а система предлагает «прошлое место плюс шаг».
+func TestDragLeavesEdge(t *testing.T) {
+	work := rect{L: 0, T: 0, R: 1920, B: 1040}
+	r := rect{L: 1584, T: 300, R: 1920, B: 900}
+	const gx, gy = 100, 20
+	for cx := int32(1584 + gx); cx >= 1500+gx; cx-- {
+		offered := rect{r.L - 1, r.T, r.R - 1, r.B}
+		r = dragRect(underCursor(offered, cx, 300+gy, gx, gy), work, 12)
+	}
+	if r != (rect{1500, 300, 1836, 900}) {
+		t.Errorf("окно осталось у края: %v", r)
+	}
+}
+
 func TestAtSide(t *testing.T) {
 	work := rect{L: 0, T: 0, R: 1920, B: 1040}
 	for _, c := range []struct {
