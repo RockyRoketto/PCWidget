@@ -101,6 +101,7 @@ function mergeCfg(saved) {
   else if (saved.mode === 'compact' && MODES[saved.compact]) c.mode = saved.compact; // до ver 3
   if (c.mode === 'column' && GRID_MODES[saved.edgeBack]) c.edgeBack = saved.edgeBack; // Колонкой стал у края экрана
   mergeLayout(c, saved);
+  mergeFocus(c, saved);
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {
     var v = Number(saved.thr[k]); if (isFinite(v) && v >= 50 && v <= 100) c.thr[k] = v;
   });
@@ -175,4 +176,17 @@ function updateRecords(s) {
   if (s.gpu) { mx('gpuLoad', s.gpu.load); mx('gpuTemp', s.gpu.temp); }
   if (s.mem) mx('mem', s.mem.pct);
   if (s.net) { mx('down', s.net.down); mx('up', s.net.up); }
+}
+
+// ---- фокус-таймер: длительности (минуты) и состояние идущего отрезка ----
+// focusRun: null — не начат; { ph: work|short|long, n: номер фокуса, start: отметка пуска (0 — пауза), done: прошло до паузы, мс }.
+var FOCUS_DEF = { work: 25, short: 5, long: 15, cycles: 4, auto: false };
+var FOCUS_LIM = { work: [1, 180], short: [1, 60], long: [1, 90], cycles: [1, 12] };
+function focusCfg() { return CFG.focus || FOCUS_DEF; }
+function mergeFocus(c, saved) {
+  var f = saved.focus || {}, r = saved.focusRun;
+  c.focus = { auto: f.auto === true };
+  Object.keys(FOCUS_LIM).forEach(function (k) { var v = Math.round(Number(f[k])), l = FOCUS_LIM[k]; c.focus[k] = isFinite(v) && v >= l[0] && v <= l[1] ? v : FOCUS_DEF[k]; });
+  c.focusRun = r && /^(work|short|long)$/.test(r.ph) && r.n >= 1 && r.n <= c.focus.cycles && r.start >= 0 && r.done >= 0 && r.start <= Date.now() + 60000 ?
+    { ph: r.ph, n: Math.round(r.n), start: Number(r.start), done: Number(r.done) } : null;
 }
