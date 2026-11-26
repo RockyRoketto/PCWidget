@@ -54,6 +54,7 @@ func (c *collector) collect() Stats {
 	s.Weather = weather.get()
 	s.WeatherState = weather.state()
 	s.Claude = claude.get()
+	s.Frames = frames.get()
 
 	if down, up, dDown, dUp, ok := c.net.read(); ok {
 		c.traffic.add(now, dDown, dUp)
