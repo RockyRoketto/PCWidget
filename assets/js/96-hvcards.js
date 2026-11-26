@@ -1,11 +1,10 @@
 'use strict';
-// Карточки по наведению для остальных плиток: Диски, Погода, Часы и Календарь, ПК включён, Claude; у Сети — пинг и трафик.
+// Карточки по наведению для остальных плиток: Диски, Погода, Часы и Календарь, ПК включён, Claude; у Сети — трафик.
 // Графики собирает 95-hover.js (parts), здесь — блоки без графика (more): строки, полосы заполнения, дни прогноза.
 
 HV_GET.dr = function (s) { return hvDiskSum(s, 'read'); };
 HV_GET.dw = function (s) { return hvDiskSum(s, 'write'); };
-HV_GET.ping = function (s) { return s.net && s.net.ping; };
-['dr', 'dw', 'ping'].forEach(function (k) { HSER[k] = { f: [], c: [], sum: 0, n: 0, lo: null, hi: null, k: 0 }; });
+['dr', 'dw'].forEach(function (k) { HSER[k] = { f: [], c: [], sum: 0, n: 0, lo: null, hi: null, k: 0 }; });
 function hvDiskSum(s, f) {
   var a = (s.disks || []).filter(function (d) { return d[f] != null; });
   return a.length ? a.reduce(function (t, d) { return t + d[f]; }, 0) : null;
@@ -19,13 +18,11 @@ function hvBar(name, val, pct, lv, note) {
   return '<div class="hc-bar' + (lv ? ' ' + lv : '') + '"><div class="hc-r"><span>' + name + '</span><b class="num ' + (lv || '') + '">' + val + '</b></div>' +
     '<div class="hc-tr"><i style="width:' + clamp(pct, 0, 100).toFixed(1) + '%"></i></div>' + (note ? '<div class="hc-nt">' + note + '</div>' : '') + '</div>';
 }
-var hvMs = function (v) { return Math.round(v) + ' мс'; };
 function hvDeg2(v) { return String(Math.round(v)).replace('-', '−') + '°'; }
 function hvCap(t) { return t ? t.charAt(0).toUpperCase() + t.slice(1) : ''; }
 function hvTime(d) { return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: !CFG.clock24 }); }
 
-// ---- Сеть: пинг графиком, трафик за день и месяц ----
-HV_CARDS.net.parts.push({ k: 'ping', name: 'Пинг', fmt: hvMs, scale: function (st) { return [0, niceUp(Math.max(st.hi, 50))]; } });
+// ---- Сеть: трафик за день и месяц, потери — только когда есть ----
 HV_CARDS.net.more = function (s) {
   var n = s.net; if (!n) return '';
   var dl = function (a, b) { return '↓ ' + sizeText(a) + ' · ↑ ' + sizeText(b); };
@@ -36,9 +33,9 @@ HV_CARDS.net.more = function (s) {
 // ---- Диски: чтение и запись графиком, заполнение каждого ----
 HV_CARDS.disks = { name: 'Диски', parts: [hvRate('dr', 'Чтение'), hvRate('dw', 'Запись')], more: function (s) {
   return hvBox('Место', (s.disks || []).map(function (d) {
-    var lv = level(d.usedPct, CFG.thr.disk), used = d.totalGB - d.freeGB;
+    var lv = level(d.usedPct, CFG.thr.disk);
     return hvBar(esc(d.name) + (d.temp != null ? ' <small class="' + level(d.temp, 60) + '">' + Math.round(d.temp) + '°</small>' : ''), Math.round(d.usedPct) + '%', d.usedPct, lv,
-      'занято ' + gbParts(used).join(' ') + ' из ' + gbParts(d.totalGB).join(' ') + ' · свободно ' + gbParts(d.freeGB).join(' ') + (d.busy != null ? ' · активность ' + Math.round(d.busy) + '%' : ''));
+      'свободно ' + gbParts(d.freeGB).join(' ') + ' из ' + gbParts(d.totalGB).join(' '));
   }).join(''));
 } };
 
@@ -54,32 +51,27 @@ HV_CARDS.weather = { name: function (s) { return s.weather ? esc(s.weather.city)
   return hvBox('', now) + (days ? hvBox('Неделя', '<div class="hc-days">' + days + '</div>') : '');
 } };
 
-// ---- Часы и Календарь: дата целиком, неделя, день года ----
+// ---- Часы и Календарь: дата целиком, неделя, полоса года ----
 function isoWeek(d) {
   var t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), wd = t.getUTCDay() || 7;
   t.setUTCDate(t.getUTCDate() + 4 - wd);
   return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5 + 1) / 7);
 }
 HV_CARDS.date = { name: 'Сегодня', parts: [], more: function (s) {
-  var d = new Date(), y = d.getFullYear(), start = new Date(y, 0, 1), n = Math.round((new Date(y, d.getMonth(), d.getDate()) - start) / 864e5) + 1;
-  var len = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 366 : 365, left = len - n;
-  var mLen = new Date(y, d.getMonth() + 1, 0).getDate();
+  var d = new Date(), y = d.getFullYear(), pct = (d - new Date(y, 0, 1)) / (new Date(y + 1, 0, 1) - new Date(y, 0, 1)) * 100;
   var big = '<div class="hc-date"><b>' + esc(hvCap(ruDate(d, { weekday: 'long' }))) + '</b><span>' + esc(ruDate(d, { day: 'numeric', month: 'long', year: 'numeric' })) + '</span></div>';
-  return hvBox('', big) + hvBox('', hvRow('Неделя', isoWeek(d)) + hvRow('День года', n + ' из ' + len) +
-    hvBar('Год', Math.round(n / len * 100) + '%', n / len * 100, '', left ? 'до нового года ' + left + ' ' + plural(left, 'день', 'дня', 'дней') : 'последний день года') +
-    hvBar('Месяц', d.getDate() + ' из ' + mLen, d.getDate() / mLen * 100, ''));
+  return hvBox('', big) + hvBox('', hvRow('Неделя', isoWeek(d)) + hvBar('Год', Math.floor(pct) + '%', pct, ''));
 } };
-function plural(n, a, b, c) { var m = n % 100, k = n % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
 
-// ---- ПК включён: с какого момента, простой ----
+// ---- ПК включён: с какого момента ----
 HV_CARDS.uptime = { name: 'ПК включён', parts: [], more: function (s) {
   if (!s.uptime) return '';
   var on = new Date(Date.now() - s.uptime * 1000), today = on.toDateString() === new Date().toDateString();
   return hvBox('', hvRow('Включён', (today ? 'сегодня' : ruDate(on, { day: 'numeric', month: 'short' })) + ', ' + hvTime(on)) +
-    hvRow('Работает', uptimeText(s.uptime)) + (s.idle >= 60 ? hvRow('Без мыши и клавиатуры', uptimeText(s.idle)) : ''));
+    hvRow('Работает', uptimeText(s.uptime)));
 } };
 
-// ---- Claude: лимиты со временем сброса, токены за неделю, контекст ----
+// ---- Claude: лимиты со временем сброса, токены за неделю ----
 HV_CARDS.claude = { name: 'Claude', parts: [], more: function (s) {
   var c = s.claude; if (!c) return '';
   var lim = limitsOf(s).map(function (l) {
@@ -94,8 +86,7 @@ HV_CARDS.claude = { name: 'Claude', parts: [], more: function (s) {
   }).join('');
   var week = days.reduce(function (t, d) { return t + d.tokens; }, 0);
   return hvBox('Лимиты', lim) +
-    (days.length ? hvBox('Токены', hvRow('Сегодня', tokParts(todayTokens(c)).join(' ')) + hvRow('За 7 дней', tokParts(week).join(' ')) + '<div class="hc-cols">' + cols + '</div>') : '') +
-    hvBox('', hvRow('Контекст чата', c.ctx ? Math.round(c.ctx.pct) + '%' : '') + hvRow('Чаты', c.open ? c.open + (c.busy ? ', работают ' + c.busy : '') + (c.wait ? ', ждут ' + c.wait : '') : ''));
+    (days.length ? hvBox('', hvRow('Токены за 7 дней', tokParts(week).join(' ')) + '<div class="hc-cols">' + cols + '</div>') : '');
 } };
 
 ['disks', 'disk', 'space'].forEach(function (k) { HV_IDS[k] = 'disks'; });

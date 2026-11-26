@@ -12,29 +12,21 @@
 .hc-tt { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
 .hc-n { color: var(--lab); font-size: 12px; }
 .hc-v { font-size: 18px; line-height: 20px; }
+.hc-n small { font-size: 11px; color: var(--dim); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+.hc-n small .warm { color: var(--warm); } .hc-n small .hot { color: var(--hot); }
 .hc-ch { position: relative; height: 64px; }
 .hc-g { display: block; width: 100%; height: 100%; overflow: visible; }
 .hc-g path { vector-effect: non-scaling-stroke; }
-.hc-g .gl { stroke: var(--hair); stroke-width: 1; }
 .hc-g .ln { fill: none; stroke: var(--a); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
 .hc-g .ar { fill: var(--a); opacity: .16; }
 .hc-g .cl { fill: var(--a); }
 .hc-g .warm { fill: var(--warm); } .hc-g .hot { fill: var(--hot); }
-.hc-g .thr { stroke: var(--hot); stroke-width: 1; stroke-dasharray: 4 3; }
-.hc-y, .hc-tl { position: absolute; font-size: 10px; line-height: 12px; color: var(--dim); pointer-events: none; }
-.hc-y { left: 0; top: -1px; }
-.hc-tl { right: 0; transform: translateY(-100%); color: var(--hot); padding-bottom: 1px; }
-.hc-x { display: flex; justify-content: space-between; font-size: 10px; line-height: 14px; color: var(--dim); margin-top: 2px; }
-.hc-st { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 4px; margin-top: 4px; padding-top: 5px; border-top: 1px solid var(--hair); font-size: 11px; color: var(--dim); }
-.hc-st span { white-space: nowrap; } .hc-st span:nth-child(2) { text-align: center; } .hc-st span:nth-child(3) { text-align: right; }
-.hc-st b { font-size: 13px; font-weight: 600; color: var(--text); margin-left: 2px; }
 
 /* Прибор: панель с окошками, столбики узким шрифтом, сетка — деления */
 .theme-gauge #hcard { border-radius: var(--R); box-shadow: inset 0 0 0 1px var(--edge); background: var(--sheet); }
 .theme-gauge .hc-s { border-radius: var(--r); }
-.theme-gauge .hc-g .gl { stroke-dasharray: 1 4; }
 .theme-gauge .hc-nm, .theme-gauge .hc-n { text-transform: uppercase; letter-spacing: .05em; font-size: 11px; }
-.theme-gauge .hc-v, .theme-gauge .hc-st b { font-stretch: 87%; }
+.theme-gauge .hc-v { font-stretch: 87%; }
 /* ЖК-табло: тёмная рамка и стекло, сегменты */
 .theme-lcd #hcard { background: var(--sheet); border-radius: var(--R); }
 .theme-lcd .hc-nm { color: #e9ece4; text-transform: uppercase; letter-spacing: .08em; }
@@ -46,7 +38,6 @@
 .theme-lcd .hc-g rect.on { fill: var(--a); }
 .theme-lcd .hc-g rect.off { fill: var(--a); opacity: var(--ghost); }
 .theme-lcd .hc-g rect.on.warm { fill: var(--warm); } .theme-lcd .hc-g rect.on.hot { fill: var(--hot); }
-.theme-lcd .hc-g .gl { stroke: none; }
 .theme-lcd .hc-v { font-size: 20px; }
 /* Заливка: карточки с крупным радиусом, рельеф градиентом */
 .theme-fill #hcard { border-radius: var(--r); }
@@ -57,7 +48,6 @@
 .theme-osc #hcard { background: var(--tile); border-radius: var(--R); box-shadow: inset 0 0 0 1px var(--hair); }
 .theme-osc .hc-nm, .theme-osc .hc-n { text-transform: uppercase; letter-spacing: .04em; font-weight: 400; font-size: 11px; }
 .theme-osc .hc-s { border-radius: var(--r2); box-shadow: inset 0 0 0 1px var(--hair); }
-.theme-osc .hc-g .gl { stroke: var(--axis); stroke-dasharray: 1 3; }
 .theme-osc .hc-g .ln { filter: drop-shadow(0 0 var(--glow) var(--a)); }
 .theme-osc .hc-g .ar { opacity: .07; }
 .theme-osc .hc-v { font-size: 17px; }
@@ -65,7 +55,6 @@
 .theme-bp #hcard { border-radius: var(--R); }
 .theme-bp .hc-s { border-radius: 0; background: transparent; box-shadow: inset 0 0 0 1px var(--hair); }
 .theme-bp .hc-nm, .theme-bp .hc-n { font-style: italic; font-weight: 400; }
-.theme-bp .hc-g .gl { stroke-dasharray: 6 3; }
 .theme-bp .hc-g .ln { stroke: var(--ln); stroke-width: 1.1; }
 .theme-bp .hc-g .ar { display: none; }
 .theme-bp .hc-v { font-size: 17px; }
@@ -73,7 +62,6 @@
 .theme-pixel .hc-s { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rim); }
 .theme-pixel .hc-nm, .theme-pixel .hc-n { text-transform: uppercase; letter-spacing: .06em; font-weight: 400; font-size: 11px; }
 .theme-pixel .hc-g { shape-rendering: crispEdges; }
-.theme-pixel .hc-g .gl { stroke: var(--track); stroke-dasharray: 2 2; }
 .theme-pixel .hc-g .ln { stroke-width: 2; stroke-linejoin: miter; }
 .theme-pixel .hc-g .ar { opacity: .12; }
 .theme-pixel .hc-v { font-size: 17px; }
@@ -147,5 +135,5 @@
 .theme-pixel .hc-day.now { border-radius: 0; box-shadow: inset 0 0 0 2px var(--rim); background: none; }
 .theme-pixel .hc-r, .theme-pixel .hc-date b { text-transform: uppercase; letter-spacing: .04em; }
 .theme-pixel .hc-date b { font-weight: 400; }
-/* моноширинные цифры шире: скорости «293 КБ/с» в три столбца не влезают в 288 */
+/* моноширинные цифры шире: «Приём макс 293 КБ/с» и значение рядом не влезают в 288 */
 .theme-lcd .hc, .theme-osc .hc, .theme-bp .hc, .theme-pixel .hc { width: 340px; }

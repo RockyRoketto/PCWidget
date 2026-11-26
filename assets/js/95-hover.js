@@ -89,14 +89,13 @@ var HV_CARDS = {
   energy: { name: 'Энергия', parts: [{ k: 'pow', name: 'Мощность', fmt: hvW, scale: function (st) { return [0, Math.max(50, Math.ceil(st.hi / 50) * 50)]; } }] }
 };
 var HV_IDS = { cpu: 'cpu', gpu: 'gpu', mem: 'mem', net: 'net', energy: 'energy', down: 'net', up: 'net' };
-var HV_RANGES = { '10m': ['10 мин', '−10 мин', '−5'], '1h': ['Час', '−60 мин', '−30'] };
+var HV_RANGES = { '10m': '10 мин', '1h': 'Час' };
 
 // ---- график в материале темы. Поле 240×64: Лист — линия, Заливка — рельеф, Прибор — столбики, ЖК — сегменты ----
 var HV_W = 240, HV_H = 64;
 function hvChart(a, lo, hi, thr) {
   var t = CFG.theme, y = function (v) { return HV_H - clamp((v - lo) / (hi - lo), 0, 1) * (HV_H - 2); };
   var lv = function (v) { return thr == null ? '' : level(v, thr); };
-  var grid = [.25, .5, .75].map(function (f) { return '<path class="gl" d="M0,' + (HV_H * f) + 'H' + HV_W + '"/>'; }).join('');
   var body = '';
   var seg = t === 'lcd' || t === 'pixel';
   if (t === 'gauge' || seg) {
@@ -129,8 +128,7 @@ function hvChart(a, lo, hi, thr) {
         '<path class="ar" style="fill:url(#hvg)" d="' + area + '"/>';
     } else body = '<path class="ar" d="' + area + '"/><path class="ln" d="' + line + '"/>';
   }
-  var mark = thr != null && thr > lo && thr < hi ? '<path class="thr" d="M0,' + y(thr).toFixed(1) + 'H' + HV_W + '"/>' : '';
-  return '<svg class="hc-g" viewBox="0 0 ' + HV_W + ' ' + HV_H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + body + mark + '</svg>';
+  return '<svg class="hc-g" viewBox="0 0 ' + HV_W + ' ' + HV_H + '" preserveAspectRatio="none" aria-hidden="true">' + body + '</svg>';
 }
 
 function hvPart(p, range) {
@@ -138,22 +136,17 @@ function hvPart(p, range) {
   if (!st) return '';
   var thr = p.thr ? p.thr() : null, sc = p.scale(st, thr), cur = HSER[p.k].f[HSER[p.k].f.length - 1];
   var f = function (v) { return segs(esc(p.fmt(v))); }, lvOf = function (v) { return thr == null ? '' : level(v, thr); };
-  var thrTop = thr != null && thr > sc[0] && thr < sc[1] ? (1 - (thr - sc[0]) / (sc[1] - sc[0])) * 100 : null;
-  var r = HV_RANGES[range];
-  return '<div class="hc-s"><div class="hc-tt"><span class="hc-n">' + p.name + '</span>' +
+  // только название, максимум за период, значение сейчас и сам график
+  return '<div class="hc-s"><div class="hc-tt"><span class="hc-n">' + p.name + ' <small>макс <span class="num ' + lvOf(st.hi) + '">' + f(st.hi) + '</span></small></span>' +
     (cur != null ? '<span class="num hc-v ' + lvOf(cur) + '">' + f(cur) + '</span>' : '') + '</div>' +
-    '<div class="hc-ch">' + hvChart(a, sc[0], sc[1], thr) + '<span class="hc-y">' + esc(p.fmt(sc[1])) + '</span>' +
-    (thrTop != null ? '<span class="hc-tl" style="top:' + thrTop.toFixed(1) + '%">порог ' + esc(p.fmt(thr)) + '</span>' : '') + '</div>' +
-    '<div class="hc-x"><span>' + r[1] + '</span><span>' + r[2] + '</span><span>сейчас</span></div>' +
-    '<div class="hc-st"><span>мин <b class="num ' + lvOf(st.lo) + '">' + f(st.lo) + '</b></span><span>сред <b class="num ' + lvOf(st.avg) + '">' + f(st.avg) +
-    '</b></span><span>макс <b class="num ' + lvOf(st.hi) + '">' + f(st.hi) + '</b></span></div></div>';
+    '<div class="hc-ch">' + hvChart(a, sc[0], sc[1], thr) + '</div></div>';
 }
 
 function hvCardHTML(id, range, tint) {
   var c = HV_CARDS[id], parts = c.parts.map(function (p) { return hvPart(p, range); }).join('');
   var more = c.more && S ? c.more(S) : ''; // блоки без графика (96-hvcards.js)
   if (!parts && !more) return '';
-  var seg = parts ? '<span class="hc-seg">' + Object.keys(HV_RANGES).map(function (r) { return '<button data-r="' + r + '" class="' + (r === range ? 'on' : '') + '">' + HV_RANGES[r][0] + '</button>'; }).join('') + '</span>' : '';
+  var seg = parts ? '<span class="hc-seg">' + Object.keys(HV_RANGES).map(function (r) { return '<button data-r="' + r + '" class="' + (r === range ? 'on' : '') + '">' + HV_RANGES[r] + '</button>'; }).join('') + '</span>' : '';
   var name = typeof c.name === 'function' ? c.name(S || {}) : c.name;
   return '<div class="hc"' + (tint ? ' style="--a:' + tint + '"' : '') + '><div class="hc-hd"><b class="hc-nm">' + name + '</b>' + seg + '</div>' + parts + more + '</div>';
 }

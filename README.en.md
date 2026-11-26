@@ -45,7 +45,7 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 
 ### Hover details
 
-Rest the mouse on a tile. CPU, GPU, memory, network, energy and disks have charts (10 minutes or an hour with minimum, average and maximum); the other tiles show a card with details.
+Rest the mouse on a tile. CPU, GPU, memory, network, energy and disks have charts (10 minutes or an hour, with the peak for that period); the other tiles show a card with details.
 
 ![Hover cards: network, disks, weather](media/hover.png)
 
