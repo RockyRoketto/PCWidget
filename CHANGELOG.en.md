@@ -2,6 +2,12 @@
 
 [Русский](CHANGELOG.md)
 
+## 1.4
+
+- New Now playing tile: music and video from browsers and media players, with cover art, track progress and the buttons the source allows. Off by default.
+- An enabled tile is always visible: while there is no data it shows its name and a hint.
+- The update bar is now yellow and sits above the tiles.
+
 ## 1.3.3
 
 - Installing, updating and removing now show windows: what will happen, the progress and the result.

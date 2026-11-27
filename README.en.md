@@ -29,16 +29,17 @@ CPU and GPU load and temperatures, memory, network, disks and processes, always 
 
 Settings open by right-clicking the widget or its tray icon. Autostart can be turned off there. To run without installing, pass `--portable`.
 
-**Requirements.** WebView2 Runtime (preinstalled on Windows 11), .NET Framework 4 (preinstalled on Windows) and administrator rights: CPU sensors cannot be read without them. The GPU tile needs an NVIDIA card with its driver; without one it is hidden.
+**Requirements.** WebView2 Runtime (preinstalled on Windows 11), .NET Framework 4 (preinstalled on Windows) and administrator rights: CPU sensors cannot be read without them. The GPU tile needs an NVIDIA card with its driver; without one it says «Нет данных» (No data).
 
 ## Features
 
 ### What it shows
 
-Only what you need: any tile can be turned on, hidden or moved.
+Only what you need: any tile can be turned on, hidden or moved. An enabled tile is always visible: while there is no data it shows its name and a hint, such as «Выбери город в настройках» (choose a city in settings) or «Ничего не играет» (nothing is playing).
 
 - CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime.
-- Optional: clock, calendar, weather, energy, focus timer and Claude Code limits.
+- Optional: clock, calendar, weather, energy, focus timer, Now playing and Claude Code limits.
+- **Now playing:** what Windows shows in its volume flyout (browsers and media players): title, artist, cover art, track progress and the buttons the source allows. With several sources, click the name to switch between them. In Column, Strip and Square it is a row; click it to pause and resume.
 - **Energy:** CPU and GPU consumption in Wh per day and month, with the cost at your tariff. Other PC parts are not counted.
 - **Focus:** a pomodoro timer with sound and a notification.
 - **Alerts:** temperature and usage thresholds, optional Windows notifications.
@@ -74,7 +75,7 @@ The widget sits on the desktop and survives Win+D, can be always on top, scales,
 
 ## Updates and removal
 
-Shortly after start and every 6 hours the widget checks GitHub for a new version. If there is one, a blue update bar appears below the tiles: click it (or use «Настройки → Система → О программе → Обновить») and confirm. The widget downloads the new version (progress is shown), verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
+Shortly after start and every 6 hours the widget checks GitHub for a new version. If there is one, a yellow update bar appears above the tiles: click it (or use «Настройки → Система → О программе → Обновить») and confirm. The widget downloads the new version (progress is shown), verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
 
 To remove it, use «Настройки → Система → Удалить…» (Settings → System → Remove), the menu item «Удалить PC Widget…» or "Apps & features" in Windows. Settings remain in `%APPDATA%\pcwidget` and the unpacked sensor libraries in `%LOCALAPPDATA%\pcwidget`; delete these folders by hand if you wish. The PawnIO driver is removed separately.
 
