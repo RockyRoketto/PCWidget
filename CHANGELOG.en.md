@@ -2,6 +2,11 @@
 
 [Русский](CHANGELOG.md)
 
+## 1.5.1
+
+- Fixed: the widget crashed, and could then fail to start, with the Now playing tile enabled; the same bug affected Where the day went.
+- New versions are checked every hour and when you open the settings, and after a failure (for example, no network yet) the check is retried soon.
+
 ## 1.5
 
 - New Where the day went tile: time per program for today, with real names and icons. Off by default.
