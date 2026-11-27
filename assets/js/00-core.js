@@ -149,7 +149,9 @@ function weatherOn() { return Object.keys(MODES).some(function (m) { return isOn
 function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }
 // Файлы Claude Code Go читает только пока включена плитка (или строка в компакте).
 function claudeOn() { return Object.keys(MODES).some(function (m) { return isOn(m, 'claude') || (!GRID_MODES[m] && isOn(m, 'claudew')); }); }
-function syncClaude() { post('claude:' + (claudeOn() ? 1 : 0)); }
+function syncClaude() { post('claude:' + (claudeOn() ? 1 : 0)); syncMedia(); }
+// «Сейчас играет» Go опрашивает только пока плитка видна в текущем режиме.
+function syncMedia() { post('media:' + (CFG && isOn(CFG.mode, 'media') ? 1 : 0)); }
 
 // ---- форматирование: десятичная запятая, единица отдельно ----
 function dec(v, n) { return v.toFixed(n).replace('.', ','); }

@@ -26,6 +26,9 @@ var weather = startWeather()
 // claude — лимиты и расход Claude Code; включена ли плитка, сообщает страница (сообщение «claude:1»).
 var claude = startClaude()
 
+// media — что играет в системе; включена ли плитка, сообщает страница (сообщение «media:1»).
+var media = startMedia()
+
 func newCollector() *collector {
 	hub = startSensors()
 	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), energy: loadEnergy(), sensors: hub}
@@ -56,6 +59,7 @@ func (c *collector) collect() Stats {
 	s.Weather = weather.get()
 	s.WeatherState = weather.state()
 	s.Claude = claude.get()
+	s.Media = media.get()
 	s.Frames = frames.get()
 
 	if down, up, dDown, dUp, ok := c.net.read(); ok {

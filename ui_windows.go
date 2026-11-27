@@ -281,6 +281,12 @@ func onPage(m string) {
 		weather.setCity(m[8:])
 	case strings.HasPrefix(m, "claude:"):
 		claude.setOn(m[7:] == "1")
+	case m == "media:art": // страница просит обложку: она большая, поэтому не в каждом снимке
+		app.cr.Eval(media.artJS())
+	case strings.HasPrefix(m, "media:cmd:"):
+		media.command(m[10:])
+	case strings.HasPrefix(m, "media:"):
+		media.setOn(m[6:] == "1")
 	case strings.HasPrefix(m, "style:"):
 		if m[6:] != app.style {
 			setStyle(m[6:])

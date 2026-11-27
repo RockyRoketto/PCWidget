@@ -60,6 +60,9 @@ function thinOpt(id) {
   return GRID_MODES[curMode()] ? '<div class="ol">Высота<span style="width:150px">' + segment('thin:' + id, [[0, 'Обычная'], [1, 'Тонкая']], CFG.thin[id] ? 1 : 0) + '</span></div>' : '';
 }
 TILE_OPTS.net = function () { return thinOpt('net'); };
+TILE_OPTS.media = function () {
+  return thinOpt('media') + '<div class="hint">То, что Windows показывает в окне громкости: браузеры и плееры. Пока плитка выключена, виджет туда не смотрит.</div>';
+};
 TILE_OPTS.disks = function () { return thinOpt('disks'); };
 // Остальным высота добавляется к их параметрам.
 ['clock', 'weather', 'energy'].forEach(function (id) {

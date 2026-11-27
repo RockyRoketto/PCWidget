@@ -96,7 +96,7 @@ function buildCompact(mode) {
     put(it.v, segs(d.v) + (d.u ? '<small>' + d.u + '</small>' : ''));
     var temp = d.t != null, lv = temp ? level(d.t, d.thr) : d.lv || '';
     it.v.className = 'num v' + (!temp && d.lv ? ' ' + d.lv : '');
-    put(it.s, temp ? segs(Math.round(d.t)) + '°' : mode === 'strip' ? '' : d.sm || '');
+    put(it.s, temp ? segs(Math.round(d.t)) + '°' : mode === 'strip' && !it.sp.stripSm ? '' : d.sm || '');
     it.s.className = 's' + (temp ? ' num t ' + lv : '');
     setLv(it.el, lv);
     // в колонке у CPU вместо шкалы могут быть столбики по потокам

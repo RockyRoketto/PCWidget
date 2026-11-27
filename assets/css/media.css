@@ -1,0 +1,72 @@
+/* «Сейчас играет» (43-media.js): шапка — источник и пауза, обложка и название, полоса хода, время и кнопки. */
+.cb.mc { gap: 4px; }
+.mc .nm.mc-sw { cursor: pointer; }
+.mc .nm.mc-sw:hover { color: var(--text); }
+.mc-mid { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; min-height: 0; }
+.mc-art { flex: none; width: 36px; height: 36px; border-radius: calc(var(--r2, 8px) * .6); background: var(--track) center / cover no-repeat; }
+canvas.mc-art { image-rendering: pixelated; }
+.mc-art[hidden] { display: none; }
+.mc-tx { display: grid; gap: 1px; min-width: 0; white-space: nowrap; }
+.mc-t { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; }
+.mc-a { font-size: 11px; line-height: 14px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; }
+.mc-pg { flex: none; }
+.mc-pg[hidden] { display: none; }
+.mc-pg .bar { margin: 0; }
+.mc-ft { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 18px; flex: none; }
+.mc-tm { font: 11px/1 var(--vf); color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mc-bt { display: flex; gap: 2px; margin-left: auto; }
+.mc-b { width: 22px; height: 18px; display: grid; place-items: center; color: var(--lab); border-radius: 5px; }
+.mc-b:hover { color: var(--text); background: var(--ctl); }
+.mc-b[hidden] { display: none; }
+.mc-b svg { width: 14px; height: 14px; fill: currentColor; display: block; }
+.mc-b .pa, .mc-on .mc-b .pl { display: none; }
+.mc-on .mc-b .pa { display: inline; }
+.editing .mc-bt { visibility: hidden; }
+.editing .mc .nm { cursor: inherit; }
+
+/* во всю ширину: обложка и название крупнее, кнопки шире */
+.tile.w2 .mc-art { width: 40px; height: 40px; }
+.tile.w2 .mc-t { font-size: 14px; }
+.tile.w2 .mc-b { width: 28px; }
+.tile.w2 .mc-b svg { width: 16px; height: 16px; }
+
+/* тонкая (один модуль): обложка, название над исполнителем, кнопки справа; полоса хода по нижнему краю */
+.tile[data-h="1"] .cb.mc { flex-direction: row; align-items: center; padding-block: 0; gap: 8px; }
+.tile[data-h="1"] .mc .hd, .tile[data-h="1"] .mc-tm { display: none; }
+.tile[data-h="1"] .mc-art { width: 30px; height: 30px; }
+.tile[data-h="1"] .mc-ft { flex: none; }
+.tile[data-h="1"] .mc-pg { position: absolute; left: 12px; right: 12px; bottom: 4px; }
+.tile[data-h="1"]:not(.w2) .mc-b:not([data-a=toggle]) { display: none; } /* в узкой тонкой место только для пуска и паузы */
+
+/* строка компакта: значок — пуск и пауза */
+.cr[data-id=media] { cursor: pointer; }
+.cr[data-id=media] .n { flex: none; width: 18px; min-width: 18px; }
+.cr[data-id=media] .n svg { width: 16px; height: 16px; }
+.cr.mc-paused > .v { opacity: .62; }
+.mini.strip .cr[data-id=media] .s { max-width: 150px; margin-right: auto; }
+.mini.sqr .cr[data-id=media] > .s { justify-self: stretch; text-align: right; }
+.editing .cr[data-id=media] { cursor: inherit; }
+
+/* темы */
+.theme-gauge .mc-art, .theme-lcd .mc-art, .theme-osc .mc-art, .theme-bp .mc-art, .theme-pixel .mc-art { border-radius: 0; }
+.theme-gauge .mc-b, .theme-lcd .mc-b, .theme-bp .mc-b, .theme-pixel .mc-b { border-radius: 0; }
+.theme-gauge .mc-art { box-shadow: inset 0 0 0 1px var(--hair); }
+/* ЖК-табло: обложка одним цветом, как на стекле табло */
+.theme-lcd .mc-art { filter: grayscale(1) contrast(1.2); mix-blend-mode: multiply; opacity: .8; }
+.theme-lcd.tone-dark .mc-art { mix-blend-mode: screen; opacity: .55; }
+/* Осциллограф: зелёный люминофор */
+.theme-osc .mc-art { filter: grayscale(1) contrast(1.15) brightness(.95); mix-blend-mode: luminosity; box-shadow: 0 0 0 1px var(--a); }
+.theme-osc .mc-tm { color: var(--a); }
+/* Чертёж: обложка в рамке листа, время как размер */
+.theme-bp .mc-art { filter: grayscale(1) contrast(1.05); opacity: .85; outline: 1px solid var(--text); outline-offset: 1px; }
+/* Пиксели: шрифт и кнопки клетками */
+.theme-pixel .mc-b svg { shape-rendering: crispEdges; }
+.theme-pixel .mc-tm { letter-spacing: .04em; }
+.theme-pixel .tile:not(.w2) .mc-b, .theme-bp .tile:not(.w2) .mc-b, .theme-lcd .tile:not(.w2) .mc-b, .theme-osc .tile:not(.w2) .mc-b { width: 18px; } /* моноширинное время шире */
+/* Заливка: карточка наполняется по ходу трека слева направо, ниже шапки */
+.theme-fill .mc > .fill { top: 0; }
+.theme-fill .mc .mc-t, .theme-fill .mc .mc-a, .theme-fill .mc .mc-tm { text-shadow: var(--nshadow); }
+.theme-fill .mc .mc-a, .theme-fill .mc .mc-tm { color: inherit; opacity: .82; }
+.theme-fill .mc-b { color: var(--text); }
+.theme-fill .mc-art { box-shadow: 0 2px 8px rgba(0, 0, 0, .25); }
+.theme-fill .cr[data-id=media] .s { color: inherit; opacity: .82; }
