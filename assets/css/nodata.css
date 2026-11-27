@@ -1,0 +1,9 @@
+/* Плитка и строка без данных (44-empty.js): название и подсказка вместо содержимого. */
+.tile.nodata > :not(.cb-nodata):not(.ed) { display: none !important; }
+.tile:not(.nodata) > .cb-nodata { display: none; }
+.cb-nodata { flex: 1; }
+.cb-nodata .nd-t { margin-top: auto; color: var(--dim); font-size: 12px; line-height: 16px; }
+.tile[data-h="1"] .cb-nodata { padding-top: 8px; padding-bottom: 8px; gap: 2px; }
+.cr.nodata .s { justify-self: end; grid-column: 2 / -1; }
+.mini.sqr .cr.nodata .n { grid-column: 1 / -1; }
+.mini.sqr .cr.nodata .s { grid-area: v; align-self: end; justify-self: start; white-space: normal; line-height: 13px; margin-bottom: 3px; }

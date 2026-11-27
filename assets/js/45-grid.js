@@ -94,10 +94,11 @@ function buildFull() {
   return {
     el: el,
     update: function (s) {
-      each(function (x) { x.b.update(s); });
-      if (repack(el)) each(function (x) { x.b.update(s); }); // ширина поменялась: перерисовать под неё
+      var draw = function (x) { x.b.update(s); if (!isGap(x.id)) emptyTile(x); };
+      each(draw);
+      if (repack(el)) each(draw); // ширина поменялась: перерисовать под неё
     },
-    tick: function () { each(function (x) { if (x.b.tick) x.b.tick(); }); }
+    tick: function () { each(function (x) { if (x.b.tick) { x.b.tick(); emptyTile(x); } }); }
   };
 }
 

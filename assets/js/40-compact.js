@@ -89,7 +89,7 @@ function buildCompact(mode) {
   function draw(it, s) {
     if (it.face) return it.face.tick();
     var d = it.sp.get(s);
-    it.el.hidden = !d; if (!d) return;
+    emptyRow(it, !d); if (!d) return;
     var name = typeof it.sp.n === 'function' ? it.sp.n(s) : it.sp.n;
     put(it.n, name);
     it.n.classList.toggle('ico', !!it.sp.icon);

@@ -9,8 +9,6 @@ var mediaPend = null; // нажали пуск/паузу: до ответа и�
 window.__mediaArt = function (n, url) { MEDIA_ART = { n: n, url: url }; if (view && dataReady) view.tick(); };
 
 function mediaOf(s) { var m = s && s.media; return m && m.title ? m : null; }
-// Пока плитки правят, пустая не прячется: иначе после включения кажется, что она не появилась.
-var MEDIA_EMPTY = { id: '', src: 'Сейчас играет', title: 'Ничего не играет', artist: 'Включи видео или музыку', state: '' };
 function mediaPlaying(m) {
   if (mediaPend && (mediaPend.id !== m.id || m.state !== mediaPend.from || Date.now() > mediaPend.until)) mediaPend = null;
   return mediaPend ? mediaPend.play : m.state === 'playing';
@@ -106,7 +104,7 @@ TILE_BUILD.media = function () {
     });
   }
   function draw() {
-    var m = mediaOf(S) || (editing ? MEDIA_EMPTY : null); el.hidden = !m; if (!m) return;
+    var m = mediaOf(S); el.hidden = !m; if (!m) return;
     var now = Date.now(), pos = mediaPos(m, now), play = mediaPlaying(m), many = m.list && m.list.length > 1;
     put(nm, esc(m.src) + (many ? ' <small>' + (m.list.map(function (x) { return x.id; }).indexOf(m.id) + 1) + '/' + m.list.length + '</small>' : ''));
     nm.classList.toggle('mc-sw', !!many);
@@ -130,7 +128,7 @@ TILE_BUILD.media = function () {
 CSPEC.media = { g: 'media', m: 'media', bar: 1, clock: true, icon: true, stripSm: true,
   n: function (s) { var m = mediaOf(s); return m && mediaPlaying(m) ? ICONS.media : '<svg class="ico" viewBox="0 0 20 20" fill="currentColor">' + MEDIA_BTN.pause + '</svg>'; },
   get: function (s) {
-    var m = mediaOf(s); if (!m) return editing ? { v: '', pct: 0, sm: MEDIA_EMPTY.title } : null;
+    var m = mediaOf(s); if (!m) return null;
     var now = Date.now(), pos = mediaPos(m, now);
     return { v: pos != null ? mediaTime(pos) : '', pct: mediaPct(m, now), sm: esc(m.title) + (m.artist ? ' · ' + esc(m.artist) : '') };
   },
