@@ -38,8 +38,9 @@ Settings open by right-clicking the widget or its tray icon. Autostart can be tu
 Only what you need: any tile can be turned on, hidden or moved. An enabled tile is always visible: while there is no data it shows its name and a hint, such as «Выбери город в настройках» (choose a city in settings) or «Ничего не играет» (nothing is playing).
 
 - CPU, GPU, memory, network (speed, ping, daily and monthly traffic), disks, top processes, session peaks, uptime.
-- Optional: clock, calendar, weather, energy, focus timer, Now playing and Claude Code limits.
+- Optional: clock, calendar, weather, energy, focus timer, Now playing, Where the day went and Claude Code limits.
 - **Now playing:** what Windows shows in its volume flyout (browsers and media players): title, artist, cover art, track progress and the buttons the source allows. With several sources, click the name to switch between them. In Column, Strip and Square it is a row; click it to pause and resume.
+- **Where the day went** («Куда ушёл день»): how long each program was in the foreground today. Programs show real names instead of exe names (Steam and Epic games are named as in the library) with their icons. After 5 minutes without mouse or keyboard input counting stops, unless a video or a fullscreen game is on screen. In the tile settings you can give a program your own name.
 - **Energy:** CPU and GPU consumption in Wh per day and month, with the cost at your tariff. Other PC parts are not counted.
 - **Focus:** a pomodoro timer with sound and a notification.
 - **Alerts:** temperature and usage thresholds, optional Windows notifications.
@@ -88,6 +89,8 @@ There is no telemetry. The widget only connects to:
 | `1.1.1.1:443` | ping and packet loss (connection only, no data sent) | every 5 seconds |
 | `api.github.com`, `github.com` | checking for a new version, and downloading it with your consent | after start and every 6 hours, can be turned off |
 | `open-meteo.com` | weather for the city you type in | only while the weather tile is enabled |
+
+**The Where the day went tile** is off by default and counts only while enabled. It keeps program names, their icons and today's seconds on this PC (`%APPDATA%\pcwidget\day.json`); window titles and websites are not recorded, and none of this leaves the PC.
 
 **The Claude tile** is off by default. It reads local Claude Code files in `~/.claude` (logs, to count tokens, and the session list). It does not read your login token and makes no network requests. The button that connects usage limits adds a small mod to `~/.claude/skills/pcwidget-limits`; disconnecting or uninstalling the widget removes it.
 

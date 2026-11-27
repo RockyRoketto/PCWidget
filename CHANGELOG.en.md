@@ -2,6 +2,11 @@
 
 [Русский](CHANGELOG.md)
 
+## 1.5
+
+- New Where the day went tile: time per program for today, with real names and icons. Off by default.
+- Fill theme: the Now playing tile now fills to its full height as the track progresses.
+
 ## 1.4
 
 - New Now playing tile: music and video from browsers and media players, with cover art, track progress and the buttons the source allows. Off by default.
