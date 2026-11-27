@@ -63,6 +63,16 @@ TILE_OPTS.net = function () { return thinOpt('net'); };
 TILE_OPTS.media = function () {
   return thinOpt('media') + '<div class="hint">То, что Windows показывает в окне громкости: браузеры и плееры. Пока плитка выключена, виджет туда не смотрит.</div>';
 };
+// Названия берутся у Windows, Steam и Epic; любое можно заменить своим.
+TILE_OPTS.day = function () {
+  var apps = (S && S.day && S.day.apps || []).slice(0, 6);
+  var names = apps.map(function (a) {
+    return '<div class="dy-ren"><span title="' + esc(a.name) + '">' + esc(a.name) + '</span><input class="txt" type="text" maxlength="60" data-dayname="' + esc(a.name) +
+      '" value="' + esc(Object.prototype.hasOwnProperty.call(CFG.dayNames, a.name) ? CFG.dayNames[a.name] : '') + '" placeholder="Своё название" aria-label="Своё название: ' + esc(a.name) + '"></div>';
+  }).join('');
+  return (GRID_MODES[curMode()] ? '<div class="ol">Строк в списке<span style="width:110px">' + segment('dayN', [[3, '3'], [5, '5']], CFG.dayN) + '</span></div>' : '') + names +
+    '<div class="hint">Считается активное окно, пока плитка включена. Сайты и заголовки окон не записываются, всё остаётся на этом ПК.</div>';
+};
 TILE_OPTS.disks = function () { return thinOpt('disks'); };
 // Остальным высота добавляется к их параметрам.
 ['clock', 'weather', 'energy'].forEach(function (id) {
@@ -280,12 +290,13 @@ function buildSettings() {
     else if (d.k && d.k.indexOf('thin:') === 0) { var tid = d.k.slice(5); if (d.v === '1') CFG.thin[tid] = 1; else delete CFG.thin[tid]; changed(); pick(b); }
     else if (d.k === 'clockView') { CFG.clockView = d.v; changed(); render(); } // у стрелок свои параметры
     else if (d.k === 'clockA' || d.k === 'clockD' || d.k === 'calV') { CFG[d.k] = Number(d.v); changed(); render(); }
-    else if (d.k) { CFG[d.k] = /^(scale|procN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
+    else if (d.k) { CFG[d.k] = /^(scale|procN|dayN)$/.test(d.k) ? Number(d.v) : d.v; changed(); pick(b); }
   });
   el.addEventListener('change', function (e) {
     var t = e.target, k = t.dataset.k;
     if (t.hasAttribute('data-profname')) { if (profCommit(t)) render(); }
     else if (t.hasAttribute('data-city')) applyCity(t.value);
+    else if (t.hasAttribute('data-dayname')) { var an = t.getAttribute('data-dayname'); if (t.value.trim()) CFG.dayNames[an] = t.value; else delete CFG.dayNames[an]; CFG.dayNames = cleanNames(CFG.dayNames); saveCfg(); }
     else if (t.hasAttribute('data-tariff')) { var tf = Number(String(t.value).replace(',', '.')); CFG.tariff = isFinite(tf) && tf > 0 && tf <= 1000 ? Math.round(tf * 100) / 100 : 0; saveCfg(); }
     else if (t.dataset.thr || t.hasAttribute('data-glass') || t.hasAttribute('data-accc') || t.hasAttribute('data-tcc')) saveCfg();
     else if (k === 'topmost') { TOPMOST = t.checked; post('topmost:' + (t.checked ? 1 : 0)); render(); }

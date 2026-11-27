@@ -5,20 +5,20 @@
 // GAP в ряду — пустая половина: плитку оттащили к краю, и она стала короткой.
 // CFG.thin — плитки высотой в один модуль (тонкие); рядом с высокой соседкой тонкая стоит у верха ряда.
 
-var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'energy', 'disks', 'claude', 'media', 'procs', 'records', 'uptime', 'focus'];
+var TILE_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'net', 'energy', 'disks', 'claude', 'media', 'day', 'procs', 'records', 'uptime', 'focus'];
 var GAP = '_';
 var THIN_OK = { clock: 1, weather: 1, cpu: 1, gpu: 1, mem: 1, net: 1, energy: 1, disks: 1, claude: 1, media: 1 };
-var OPT_OFF = { clock: 1, weather: 1, calendar: 1, claude: 1, energy: 1, focus: 1, media: 1 };  // по умолчанию выключены
-var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', energy: 'Энергия', disks: 'Диски', claude: 'Claude', media: 'Сейчас играет', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён', focus: 'Фокус' };
-var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'energy', 'down', 'up', 'ping', 'disk', 'space', 'claude', 'claudew', 'media', 'uptime', 'focus'];
-var MINI_OFF = { clock: 1, weather: 1, calendar: 1, energy: 1, ping: 1, space: 1, claude: 1, claudew: 1, media: 1, uptime: 1, focus: 1 };
+var OPT_OFF = { clock: 1, weather: 1, calendar: 1, claude: 1, energy: 1, focus: 1, media: 1, day: 1 };  // по умолчанию выключены
+var TILE_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', net: 'Сеть', energy: 'Энергия', disks: 'Диски', claude: 'Claude', media: 'Сейчас играет', day: 'Куда ушёл день', procs: 'Процессы', records: 'Пик за сессию', uptime: 'ПК включён', focus: 'Фокус' };
+var MINI_IDS = ['clock', 'weather', 'calendar', 'cpu', 'gpu', 'mem', 'energy', 'down', 'up', 'ping', 'disk', 'space', 'claude', 'claudew', 'media', 'day', 'uptime', 'focus'];
+var MINI_OFF = { clock: 1, weather: 1, calendar: 1, energy: 1, ping: 1, space: 1, claude: 1, claudew: 1, media: 1, day: 1, uptime: 1, focus: 1 };
 var SQUARE_ON = { cpu: 1, gpu: 1, mem: 1, down: 1 }; // квадрат 2x2
-var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', energy: 'Энергия', down: 'Приём', up: 'Отдача', ping: 'Пинг', disk: 'Диски: обмен', space: 'Место', claude: 'Claude, 5 ч', claudew: 'Claude, нед.', media: 'Сейчас играет', uptime: 'ПК включён', focus: 'Фокус' };
+var MINI_NAMES = { clock: 'Часы', weather: 'Погода', calendar: 'Календарь', cpu: 'CPU', gpu: 'GPU', mem: 'Память', energy: 'Энергия', down: 'Приём', up: 'Отдача', ping: 'Пинг', disk: 'Диски: обмен', space: 'Место', claude: 'Claude, 5 ч', claudew: 'Claude, нед.', media: 'Сейчас играет', day: 'Куда ушёл день', uptime: 'ПК включён', focus: 'Фокус' };
 
 var MINI_TINT = { down: 'net', up: 'net', ping: 'net', disk: 'disks', space: 'disks', claudew: 'claude' }; // строка колонки -> плитка
 function colorKey(id) { return MINI_TINT[id] || id; }
 
-function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['energy'], ['disks'], ['claude'], ['media'], ['procs'], ['records', 'uptime'], ['focus']]; }
+function defaultRows() { return [['clock', 'weather'], ['calendar'], ['cpu', 'gpu'], ['mem'], ['net'], ['energy'], ['disks'], ['claude'], ['media'], ['day'], ['procs'], ['records', 'uptime'], ['focus']]; }
 function defaultHide() { var h = {}; Object.keys(OPT_OFF).forEach(function (id) { h[id] = 1; }); return h; }
 function defaultMini(m) { return MINI_IDS.map(function (id) { return { id: id, on: m === 'square' ? !!SQUARE_ON[id] : !MINI_OFF[id] }; }); }
 
@@ -33,7 +33,7 @@ function cleanRows(rows) {
   });
   TILE_IDS.forEach(function (id) {
     if (seen[id]) return;
-    if (OPT_OFF[id] && !/^(claude|energy|focus|media)$/.test(id)) out.unshift([id]); else out.push([id]); // новые плитки встают в конец
+    if (OPT_OFF[id] && !/^(claude|energy|focus|media|day)$/.test(id)) out.unshift([id]); else out.push([id]); // новые плитки встают в конец
   });
   return out;
 }

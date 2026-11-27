@@ -29,6 +29,9 @@ var claude = startClaude()
 // media — что играет в системе; включена ли плитка, сообщает страница (сообщение «media:1»).
 var media = startMedia()
 
+// days — «Куда ушёл день»; включена ли плитка, сообщает страница (сообщение «day:1»).
+var days = startDayTracker()
+
 func newCollector() *collector {
 	hub = startSensors()
 	return &collector{perf: newPerf(), gpu: startGPU(), ping: startPinger(), traffic: loadTraffic(), energy: loadEnergy(), sensors: hub}
@@ -61,6 +64,7 @@ func (c *collector) collect() Stats {
 	s.Claude = claude.get()
 	s.Media = media.get()
 	s.Frames = frames.get()
+	s.Day = days.tick(now, s.Idle)
 
 	if down, up, dDown, dUp, ok := c.net.read(); ok {
 		c.traffic.add(now, dDown, dUp)
@@ -87,6 +91,7 @@ func (c *collector) collect() Stats {
 	if now.Sub(c.lastSav) > 30*time.Second {
 		c.traffic.save()
 		c.energy.save()
+		days.save()
 		c.lastSav = now
 	}
 	return s
@@ -96,5 +101,6 @@ func (c *collector) collect() Stats {
 func (c *collector) close() {
 	c.traffic.save()
 	c.energy.save()
+	days.save()
 	c.sensors.close()
 }

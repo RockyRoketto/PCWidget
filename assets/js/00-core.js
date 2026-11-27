@@ -98,7 +98,7 @@ function defaults() {
     ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false, memMap: false, gpuFan: false,
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
-    notify: false, antiburn: false, updates: true, city: '', wxDays: true, wxAnim: true, clock24: true, clockSec: false, clockView: 'digital', clockA: 0, clockD: 0, calV: 0, clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
+    notify: false, antiburn: false, updates: true, city: '', wxDays: true, wxAnim: true, clock24: true, clockSec: false, clockView: 'digital', clockA: 0, clockD: 0, calV: 0, clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', dayN: 3, dayNames: {}, tariff: 0,
     profiles: []
   };
 }
@@ -137,11 +137,22 @@ function mergeCfg(saved) {
   if (saved.tileColors) TILE_IDS.forEach(function (k) { if (hex(saved.tileColors[k])) c.tileColors[k] = hex(saved.tileColors[k]); });
   if (saved.thin) Object.keys(THIN_OK).forEach(function (k) { if (saved.thin[k]) c.thin[k] = 1; });
   if (saved.procN === 5) c.procN = 5;
+  if (saved.dayN === 5) c.dayN = 5;
+  c.dayNames = cleanNames(saved.dayNames);
   if (saved.procTab === 'ram' || saved.procTab === 'disk') c.procTab = saved.procTab;
   var tf = Number(saved.tariff); if (isFinite(tf) && tf > 0 && tf <= 1000) c.tariff = Math.round(tf * 100) / 100;
   if (typeof saved.city === 'string') c.city = saved.city.trim().slice(0, 60);
   c.profiles = cleanProfiles(saved.profiles); // 07-profiles.js
   return c;
+}
+// Свои названия программ для «Куда ушёл день»: найденное название -> своё.
+function cleanNames(o) {
+  var out = {};
+  if (o && typeof o === 'object') Object.keys(o).slice(0, 200).forEach(function (k) {
+    var v = typeof o[k] === 'string' ? o[k].trim().slice(0, 60) : '';
+    if (v && k !== '__proto__') out[k] = v;
+  });
+  return out;
 }
 function saveCfg() { post('cfg:' + JSON.stringify(CFG)); }
 // Go ходит за погодой в интернет только когда плитка включена (хоть в одном режиме) и город задан.
@@ -149,7 +160,9 @@ function weatherOn() { return Object.keys(MODES).some(function (m) { return isOn
 function syncWeather() { post('weather:' + (weatherOn() ? CFG.city : '')); }
 // Файлы Claude Code Go читает только пока включена плитка (или строка в компакте).
 function claudeOn() { return Object.keys(MODES).some(function (m) { return isOn(m, 'claude') || (!GRID_MODES[m] && isOn(m, 'claudew')); }); }
-function syncClaude() { post('claude:' + (claudeOn() ? 1 : 0)); syncMedia(); }
+function syncClaude() { post('claude:' + (claudeOn() ? 1 : 0)); syncMedia(); syncDay(); }
+// «Куда ушёл день» Go считает, пока плитка или строка включена хоть в одном режиме.
+function syncDay() { post('day:' + (Object.keys(MODES).some(function (m) { return isOn(m, 'day'); }) ? 1 : 0)); }
 // «Сейчас играет» Go опрашивает только пока плитка видна в текущем режиме.
 function syncMedia() { post('media:' + (CFG && isOn(CFG.mode, 'media') ? 1 : 0)); }
 

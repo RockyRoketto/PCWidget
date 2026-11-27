@@ -16,8 +16,9 @@ type Stats struct {
 	Claude       *ClaudeStat `json:"claude,omitempty"`
 	Energy       *EnergyStat `json:"energy,omitempty"`
 	Media        *MediaStat  `json:"media,omitempty"` // «Сейчас играет», только пока плитка включена
-	Uptime      int64       `json:"uptime"` // секунды с запуска системы
-	Idle         int64       `json:"idle"`   // секунды без мыши и клавиатуры
+	Day          *DayStat    `json:"day,omitempty"`   // «Куда ушёл день», только пока плитка включена
+	Uptime       int64       `json:"uptime"`          // секунды с запуска системы
+	Idle         int64       `json:"idle"`            // секунды без мыши и клавиатуры
 	// Frames — кадры игры на переднем плане (только в игровом режиме).
 	Frames *FrameStat `json:"frames,omitempty"`
 }

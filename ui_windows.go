@@ -287,6 +287,12 @@ func onPage(m string) {
 		media.command(m[10:])
 	case strings.HasPrefix(m, "media:"):
 		media.setOn(m[6:] == "1")
+	case strings.HasPrefix(m, "day:icon:"): // значки не в каждом снимке, страница просит их по номеру
+		if n, err := strconv.Atoi(m[9:]); err == nil {
+			app.cr.Eval(days.iconJS(n))
+		}
+	case strings.HasPrefix(m, "day:"):
+		days.setOn(m[4:] == "1")
 	case strings.HasPrefix(m, "style:"):
 		if m[6:] != app.style {
 			setStyle(m[6:])

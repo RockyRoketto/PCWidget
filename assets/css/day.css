@@ -1,0 +1,26 @@
+/* «Куда ушёл день» (46-day.js): строки как у процессов, перед названием значок программы. */
+[data-id=day] .ln { grid-template-columns: minmax(0, 1fr) 0 auto; column-gap: 3px; }
+[data-id=day] .ln > .n { display: flex; align-items: center; gap: 5px; }
+[data-id=day] .ln > .n > span:not(.fill) { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dy-ic { flex: none; width: 14px; height: 14px; background: center / contain no-repeat; font-style: normal; }
+.dy-no { display: grid; place-items: center; background-color: var(--track); border-radius: 3px; font-size: 9px; font-weight: 700; line-height: 1; }
+
+/* строка компакта: значок вместо названия */
+.cr[data-id=day] .n { flex: none; width: 18px; min-width: 18px; }
+.cr[data-id=day] .n .dy-ic { display: grid; width: 16px; height: 16px; }
+.mini.strip .cr[data-id=day] .s { max-width: 140px; margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini.sqr .cr[data-id=day] > .s { justify-self: stretch; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.theme-fill .cr[data-id=day] .s { color: inherit; opacity: .82; }
+
+/* темы: значок в тон табло и чертежа */
+.theme-lcd .dy-ic { filter: grayscale(1) contrast(1.2); mix-blend-mode: multiply; }
+.theme-lcd.tone-dark .dy-ic { mix-blend-mode: screen; opacity: .75; }
+.theme-osc .dy-ic { filter: grayscale(1) contrast(1.15); mix-blend-mode: luminosity; }
+.theme-bp .dy-ic { filter: grayscale(1) contrast(1.05); opacity: .85; }
+.theme-lcd .dy-no, .theme-bp .dy-no, .theme-gauge .dy-no, .theme-pixel .dy-no { border-radius: 0; }
+.theme-pixel .dy-ic { image-rendering: pixelated; }
+
+/* имена программ в окне настроек */
+.dy-ren { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: center; gap: 6px; }
+.dy-ren > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.dy-ren > input.txt { width: 100%; min-width: 0; }
