@@ -18,9 +18,8 @@ import (
 // (писать туда может только админ, подменить файл между проверкой и запуском нельзя).
 
 const (
-	updateFirst = 20 * time.Second
-	updateEvery = 6 * time.Hour
-	updateMax   = 100 << 20
+	updateMax  = 100 << 20
+	updateTick = 15 * time.Second // как часто смотреть, не пора ли
 )
 
 type updateService struct {
@@ -47,35 +46,56 @@ func (u *updateService) setOn(on bool) {
 	u.on = on
 	u.mu.Unlock()
 	if changed && on {
-		select {
-		case u.kick <- struct{}{}:
-		default:
-		}
+		u.nudge()
 	}
 }
 
-// run проверяет вскоре после запуска, потом раз в несколько часов.
+// nudge — повод проверить раньше срока (открыли настройки, включили проверку).
+func (u *updateService) nudge() {
+	select {
+	case u.kick <- struct{}{}:
+	default:
+	}
+}
+
+// run проверяет вскоре после запуска, потом раз в час; после неудачи — скоро повторяет.
 func (u *updateService) run() {
-	wait := time.After(updateFirst)
+	first := time.After(updateFirst)
+	tick := time.NewTicker(updateTick)
+	var last time.Time // пусто, пока не проверяли
+	fails := 0
 	for {
 		select {
-		case <-wait:
+		case <-first:
+		case <-tick.C:
+			if last.IsZero() || !updateDue(time.Now(), last, updateWait(fails)) {
+				continue
+			}
 		case <-u.kick:
+			if !updateDue(time.Now(), last, updateNudge) {
+				continue
+			}
 		}
 		u.mu.Lock()
 		on := u.on
 		u.mu.Unlock()
-		if on {
-			u.check(false)
+		if !on {
+			continue
 		}
-		wait = time.After(updateEvery)
+		if u.check(false) {
+			fails = 0
+		} else {
+			fails++
+		}
+		last = time.Now()
 	}
 }
 
-// check спрашивает GitHub. manual: нажата кнопка, тогда сообщаем и «новых нет», и ошибку.
-func (u *updateService) check(manual bool) {
+// check спрашивает GitHub; false — спросить не удалось.
+// manual: нажата кнопка, тогда сообщаем и «новых нет», и ошибку.
+func (u *updateService) check(manual bool) bool {
 	if manual && !u.begin("Проверяю…") {
-		return
+		return true
 	}
 	b, err := httpGet(latestAPI)
 	var r release
@@ -99,9 +119,10 @@ func (u *updateService) check(manual bool) {
 	}
 	u.mu.Unlock()
 	runOnUI(sendSys)
+	return err == nil
 }
 
-// begin занимает службу под долгое действие; false — уже занята.
+// beginзанимает службу под долгое действие; false — уже занята.
 func (u *updateService) begin(note string) bool {
 	u.mu.Lock()
 	ok := !u.busy

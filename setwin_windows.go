@@ -74,6 +74,7 @@ func setProc(hwnd, m, wp, lp uintptr) uintptr {
 // openSettings показывает настройки на нужной вкладке ("" = на той же). Звать только через runOnUI:
 // создание WebView крутит свой цикл сообщений.
 func openSettings(tab string) {
+	updater.nudge()
 	if tab != "" {
 		set.tab = tab
 	}

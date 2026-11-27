@@ -76,7 +76,7 @@ The widget sits on the desktop and survives Win+D, can be always on top, scales,
 
 ## Updates and removal
 
-Shortly after start and every 6 hours the widget checks GitHub for a new version. If there is one, a yellow update bar appears above the tiles: click it (or use «Настройки → Система → О программе → Обновить») and confirm. The widget downloads the new version (progress is shown), verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
+Shortly after start, every hour and when you open the settings the widget checks GitHub for a new version. If there is one, a yellow update bar appears above the tiles: click it (or use «Настройки → Система → О программе → Обновить») and confirm. The widget downloads the new version (progress is shown), verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
 
 To remove it, use «Настройки → Система → Удалить…» (Settings → System → Remove), the menu item «Удалить PC Widget…» or "Apps & features" in Windows. Settings remain in `%APPDATA%\pcwidget` and the unpacked sensor libraries in `%LOCALAPPDATA%\pcwidget`; delete these folders by hand if you wish. The PawnIO driver is removed separately.
 
@@ -87,7 +87,7 @@ There is no telemetry. The widget only connects to:
 | Where | Why | When |
 |---|---|---|
 | `1.1.1.1:443` | ping and packet loss (connection only, no data sent) | every 5 seconds |
-| `api.github.com`, `github.com` | checking for a new version, and downloading it with your consent | after start and every 6 hours, can be turned off |
+| `api.github.com`, `github.com` | checking for a new version, and downloading it with your consent | after start, every hour and when you open the settings; can be turned off |
 | `open-meteo.com` | weather for the city you type in | only while the weather tile is enabled |
 
 **The Where the day went tile** is off by default and counts only while enabled. It keeps program names, their icons and today's seconds on this PC (`%APPDATA%\pcwidget\day.json`); window titles and websites are not recorded, and none of this leaves the PC.
