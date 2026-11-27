@@ -63,8 +63,9 @@ canvas.mc-art { image-rendering: pixelated; }
 .theme-pixel .mc-b svg { shape-rendering: crispEdges; }
 .theme-pixel .mc-tm { letter-spacing: .04em; }
 .theme-pixel .tile:not(.w2) .mc-b, .theme-bp .tile:not(.w2) .mc-b, .theme-lcd .tile:not(.w2) .mc-b, .theme-osc .tile:not(.w2) .mc-b { width: 18px; } /* моноширинное время шире */
-/* Заливка: карточка наполняется по ходу трека слева направо, ниже шапки */
-.theme-fill .mc > .fill { top: 0; }
+/* Заливка: карточка целиком наполняется по ходу трека слева направо, шапка поверх */
+.theme-fill .cb.mc > .fill { top: 0; }
+.theme-fill .mc .hd { text-shadow: var(--nshadow); }
 .theme-fill .mc .mc-t, .theme-fill .mc .mc-a, .theme-fill .mc .mc-tm { text-shadow: var(--nshadow); }
 .theme-fill .mc .mc-a, .theme-fill .mc .mc-tm { color: inherit; opacity: .82; }
 .theme-fill .mc-b { color: var(--text); }
