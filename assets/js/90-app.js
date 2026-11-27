@@ -21,14 +21,14 @@ function applyBody() {
   syncBadge();
 }
 
-// Полоса под плитками: вышла новая версия. Щелчок предлагает обновиться.
+// Полоса над плитками: вышла новая версия. Щелчок предлагает обновиться.
 var badge = null;
 function syncBadge() {
   if (!SYS.update) { if (badge) { rootEl.removeChild(badge); badge = null; } return; }
   if (!badge) {
     badge = mk('<button class="upd" data-nodrag><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V4M4 7.5 8 3.5l4 4"/></svg><span></span></button>');
     badge.addEventListener('click', function () { post('update'); });
-    rootEl.appendChild(badge);
+    rootEl.insertBefore(badge, rootEl.firstChild);
   }
   $('span', badge).textContent = SYS.updateBusy ? SYS.updateNote : 'Обновить до ' + SYS.update;
   badge.title = 'Вышла версия ' + SYS.update + ': нажмите, чтобы обновить';
