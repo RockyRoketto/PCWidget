@@ -192,18 +192,19 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		return 0
 	case wmEnterSizeMove:
 		dragging = true
-		dragFrom = windowRect(hwnd)
+		from := windowRect(hwnd)
+		snapTargets = otherWindows()
 		var c point
 		pGetCursorPos.Call(uintptr(unsafe.Pointer(&c)))
-		grab, grabDPI = point{X: c.X - dragFrom.L, Y: c.Y - dragFrom.T}, dpiOf(hwnd)
+		grab, grabDPI = point{X: c.X - from.L, Y: c.Y - from.T}, dpiOf(hwnd)
 	case wmMoving:
-		// Тащат мышью: окно не уходит за край экрана (того, где курсор) и прилипает к краю.
+		// Тащат мышью: окно не уходит за край экрана (того, где курсор) и прилипает к краям и окнам.
 		var p point
 		pGetCursorPos.Call(uintptr(unsafe.Pointer(&p)))
 		r := (*rect)(unsafe.Pointer(lp))
 		dpi := dpiOf(hwnd) // на мониторе с другим масштабом точка хвата растёт вместе с окном
 		at := underCursor(*r, p.X, p.Y, grab.X*int32(dpi)/int32(grabDPI), grab.Y*int32(dpi)/int32(grabDPI))
-		*r = dragRect(at, workAreaAt(int(p.X), int(p.Y)), int32(scalePx(12, dpi)))
+		*r = dragRect(at, workAreaAt(int(p.X), int(p.Y)), int32(scalePx(12, dpi)), snapTargets)
 		return 1
 	case wmWindowPosChanging:
 		onWindowPosChanging(lp)
@@ -221,15 +222,6 @@ func wndProc(hwnd, m, wp, lp uintptr) uintptr {
 		}
 		setStyle(app.style)
 		savePos()
-		// Отпустили у левого или правого края: странице стать Колонкой; оттащили от края — вернуться.
-		// Простой щелчок по виджету (окно не сдвинулось) режим не трогает.
-		if r := windowRect(hwnd); r != dragFrom {
-			if atSide(r, workAreaOf(hwnd)) {
-				sendCmd("edge:1")
-			} else {
-				sendCmd("edge:0")
-			}
-		}
 		return 0
 	case wmTray:
 		onTray(lp)

@@ -56,6 +56,5 @@ function applyProfile(i) {
   if (!p) return false;
   var m = mergeCfg(p.cfg);
   PROF_KEYS.forEach(function (k) { CFG[k] = m[k]; });
-  CFG.edgeBack = '';
   return true;
 }

@@ -104,31 +104,36 @@ func className(h uintptr) string {
 	return windows.UTF16ToString(b[:n])
 }
 
-// enumProc ищет видимое окно программы (не оболочка, не свёрнутое, не скрытое DWM).
-func enumProc(h, _ uintptr) uintptr {
-	if h == app.hwnd {
-		return 1
-	}
+// programWindow — видимое окно программы (не оболочка, не свёрнутое, не скрытое DWM).
+func programWindow(h uintptr) bool {
 	if v, _, _ := pIsWindowVisible.Call(h); v == 0 {
-		return 1
+		return false
 	}
 	if v, _, _ := pIsIconic.Call(h); v != 0 {
-		return 1
+		return false
 	}
 	ex, _, _ := pGetWindowLong.Call(h, ^uintptr(19)) // GWL_EXSTYLE = -20
 	if ex&wsExToolWindow != 0 {
-		return 1
+		return false
 	}
 	if n, _, _ := pGetWindowTextLen.Call(h); n == 0 {
-		return 1
+		return false
 	}
 	var cloaked int32
 	pDwmGetWindowAttr.Call(h, 14, uintptr(unsafe.Pointer(&cloaked)), 4) // DWMWA_CLOAKED
 	if cloaked != 0 {
-		return 1
+		return false
 	}
 	switch className(h) {
 	case "Progman", "WorkerW", "Shell_TrayWnd", "Shell_SecondaryTrayWnd":
+		return false
+	}
+	return true
+}
+
+// enumProc ищет первое окно программы.
+func enumProc(h, _ uintptr) uintptr {
+	if h == app.hwnd || !programWindow(h) {
 		return 1
 	}
 	appWindowSeen = true

@@ -99,31 +99,35 @@ func underCursor(r rect, cx, cy, gx, gy int32) rect {
 	return rect{x, y, x + r.R - r.L, y + r.B - r.T}
 }
 
-// dragRect — место окна, которое тащат мышью: целиком внутри рабочей области, а у края ближе snap
-// прилипает к нему (магнит). Размер окна не меняется.
-func dragRect(r, work rect, snap int32) rect {
+// dragRect — место окна, которое тащат мышью: целиком внутри рабочей области, а ближе snap к чему-то
+// ровному прилипает (магнит): к краям и середине экрана, к краям окон others. Размер не меняется.
+func dragRect(r, work rect, snap int32, others []rect) rect {
 	w, h := r.R-r.L, r.B-r.T
-	x, y := r.L, r.T
-	if x-work.L < snap {
-		x = work.L
+	xs := []int32{work.L, work.R - w, work.L + (work.R-work.L-w)/2}
+	ys := []int32{work.T, work.B - h, work.T + (work.B-work.T-h)/2}
+	for _, o := range others {
+		// окно притягивает, только если виджет рядом с ним по другой оси
+		if r.T < o.B+snap && o.T < r.B+snap {
+			xs = append(xs, o.L-w, o.R, o.L, o.R-w) // слева, справа, вровень по левому и правому краю
+		}
+		if r.L < o.R+snap && o.L < r.R+snap {
+			ys = append(ys, o.T-h, o.B, o.T, o.B-h)
+		}
 	}
-	if work.R-(x+w) < snap {
-		x = work.R - w
-	}
-	if y-work.T < snap {
-		y = work.T
-	}
-	if work.B-(y+h) < snap {
-		y = work.B - h
-	}
-	if x < work.L { // окно шире экрана: левый край важнее
-		x = work.L
-	}
-	if y < work.T {
-		y = work.T
-	}
+	x := magnet(r.L, xs, snap, work.L, work.R-w)
+	y := magnet(r.T, ys, snap, work.T, work.B-h)
 	return rect{x, y, x + w, y + h}
 }
 
-// atSide — окно стоит вплотную к левому или правому краю рабочей области (туда его прилепил магнит).
-func atSide(r, work rect) bool { return r.L <= work.L || r.R >= work.R }
+// magnet возвращает ближайшую к v точку притяжения (ближе snap) внутри [lo, hi]; нет такой — v,
+// не выпуская за пределы. Окно больше экрана (hi < lo): левый (верхний) край важнее.
+func magnet(v int32, points []int32, snap, lo, hi int32) int32 {
+	v = max(min(v, hi), lo)
+	best, dist := v, snap
+	for _, p := range points {
+		if d := max(p-v, v-p); d < dist && p >= lo && p <= max(hi, lo) {
+			best, dist = p, d
+		}
+	}
+	return best
+}

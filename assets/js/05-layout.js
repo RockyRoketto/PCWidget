@@ -76,7 +76,7 @@ function mergeLayout(c, saved) {
 // ---- текущий режим ----
 // Панель и Широкая собраны из одних плиток (общие ряды и скрытые), у компактных режимов свои списки.
 function curMode() { return CFG.mode; }
-function setMode(m) { if (MODES[m]) { CFG.mode = m; CFG.edgeBack = ''; } } // выбран руками: у края больше не возвращаться
+function setMode(m) { if (MODES[m]) CFG.mode = m; }
 function miniBy(list, id) { return list.filter(function (t) { return t.id === id; })[0]; }
 function modeIds(m) { return GRID_MODES[m] ? TILE_IDS : MINI_IDS; }
 function tileName(m, id) { return (GRID_MODES[m] ? TILE_NAMES : MINI_NAMES)[id]; }

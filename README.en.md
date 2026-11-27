@@ -29,7 +29,7 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 ### How it looks
 
 - **Seven themes:** Sheet (glass), Gauge (segmented scales), Fill (color gradient), LCD (segmented digits), Oscilloscope, Blueprint, Pixels. Each comes in light, dark and "follow Windows". Any tile can have its own color.
-- **Modes:** Panel, Wide, Column, Strip, Square. Dragged to the left or right screen edge, the widget turns into a column.
+- **Modes:** Panel, Wide, Column, Strip, Square. While dragged, the widget snaps to screen edges, screen center lines and window edges; only you change the mode.
 - **Layout:** drag tiles with the mouse, hide them, make them half or full width; some can also be thin.
 - **Profiles:** up to six appearance sets, transferable as a file.
 

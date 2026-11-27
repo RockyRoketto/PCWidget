@@ -95,7 +95,7 @@ function paintTile(el) {
 
 function defaults() {
   return {
-    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', edgeBack: '', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false, memMap: false, gpuFan: false,
+    ver: 3, theme: 'sheet', tone: 'auto', accent: 'win', pal: 'aurora', mode: 'full', scale: 100, glass: 62, tileColors: {}, thin: {}, cores: false, memMap: false, gpuFan: false,
     rows: defaultRows(), hide: defaultHide(), mini: { column: defaultMini('column'), strip: defaultMini('strip'), square: defaultMini('square') },
     thr: { cpuTemp: 85, gpuTemp: 80, mem: 90, disk: 90, claude: 90 },
     notify: false, antiburn: false, updates: true, city: '', wxDays: true, wxAnim: true, clock24: true, clockSec: false, clockView: 'digital', clockA: 0, clockD: 0, calV: 0, clockHand: true, clockDate: true, calView: 'month', procN: 3, procTab: 'cpu', tariff: 0,
@@ -119,7 +119,6 @@ function mergeCfg(saved) {
   if (PALS[saved.pal] || saved.pal === 'win') c.pal = saved.pal;
   if (MODES[saved.mode]) c.mode = saved.mode;
   else if (saved.mode === 'compact' && MODES[saved.compact]) c.mode = saved.compact; // до ver 3
-  if (c.mode === 'column' && GRID_MODES[saved.edgeBack]) c.edgeBack = saved.edgeBack; // Колонкой стал у края экрана
   mergeLayout(c, saved);
   mergeFocus(c, saved);
   if (saved.thr) Object.keys(c.thr).forEach(function (k) {

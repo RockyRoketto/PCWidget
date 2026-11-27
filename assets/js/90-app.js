@@ -104,7 +104,7 @@ window.__sys = function (sys) {
 if (darkMQ) darkMQ.addEventListener('change', function () { if (CFG && CFG.tone === 'auto' && view) applyBody(); });
 
 // Настройки поменялись в окне настроек. Перестраиваем виджет, только если это видно в раскладке.
-var LIGHT = { wxAnim: 1, antiburn: 1, updates: 1, edgeBack: 1, glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1, profiles: 1 };
+var LIGHT = { wxAnim: 1, antiburn: 1, updates: 1, glass: 1, accent: 1, pal: 1, tone: 1, tileColors: 1, thr: 1, notify: 1, city: 1, scale: 1, profiles: 1 };
 function shape(c) { return JSON.stringify(c, function (k, v) { return LIGHT[k] ? undefined : v; }); }
 window.__cfg = function (c) {
   var old = CFG;
@@ -122,10 +122,6 @@ window.__cmd = function (c) {
   else if (k === 'tone' && TONES[v]) { CFG.tone = v; saveCfg(); applyBody(); }
   else if (k === 'profile' && applyProfile(Number(v))) { saveCfg(); layout(); }
   else if (k === 'editing') { editing = v === '1'; layout(); }
-  // Виджет отпустили у левого или правого края экрана: Панель и Широкая становятся Колонкой,
-  // а оттащили от края — возвращаются. Колонку, выбранную руками, край не трогает.
-  else if (k === 'edge' && v === '1' && GRID_MODES[CFG.mode]) { var was = CFG.mode; setMode('column'); CFG.edgeBack = was; saveCfg(); layout(); }
-  else if (k === 'edge' && v === '0' && CFG.edgeBack && CFG.mode === 'column') { setMode(CFG.edgeBack); saveCfg(); layout(); }
 };
 
 // ---- окно ----
