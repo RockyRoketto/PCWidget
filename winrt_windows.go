@@ -30,6 +30,11 @@ var (
 // rtObj — указатель на объект COM/WinRT.
 type rtObj struct{ vt *[64]uintptr }
 
+// Адреса для ответов передавать только как uintptr(указатель) прямо в вызове: директива
+// тогда держит переменную в куче. Иначе Go может переместить стек до системного вызова,
+// и Windows запишет ответ по старому адресу.
+//
+//go:uintptrescapes
 func (o *rtObj) call(slot int, args ...uintptr) error {
 	a := append([]uintptr{uintptr(unsafe.Pointer(o))}, args...)
 	r, _, _ := syscall.SyscallN(o.vt[slot], a...)
@@ -53,10 +58,15 @@ func (o *rtObj) qi(iid *windows.GUID) (*rtObj, error) {
 	return out, nil
 }
 
-// obj вызывает метод без аргументов, который возвращает объект (может быть nil).
+// obj вызывает метод, который возвращает объект (может быть nil); args — числа, не больше одного.
 func (o *rtObj) obj(slot int, args ...uintptr) (*rtObj, error) {
 	var out *rtObj
-	err := o.call(slot, append(args, uintptr(unsafe.Pointer(&out)))...)
+	var err error
+	if len(args) == 0 {
+		err = o.call(slot, uintptr(unsafe.Pointer(&out)))
+	} else {
+		err = o.call(slot, args[0], uintptr(unsafe.Pointer(&out)))
+	}
 	return out, err
 }
 
