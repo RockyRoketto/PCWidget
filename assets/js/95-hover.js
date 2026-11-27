@@ -152,6 +152,7 @@ function hvCardHTML(id, range, tint) {
 }
 
 // ---- наведение ----
+var HV_ON = false; // карточки по наведению пока выключены; история копится дальше
 var HV_DELAY = 500, HV_KEEP = 450;
 var hv = { el: null, id: null, timer: 0, hideT: 0, open: null, over: false, range: '10m', block: null, sent: '' };
 
@@ -161,7 +162,7 @@ function hvTarget(t) {
   return id ? { id: id, el: el } : null;
 }
 function hvAt(t) {
-  if (editing || !dataReady) t = null;
+  if (!HV_ON || editing || !dataReady) t = null;
   var el = t ? t.el : null;
   if (el === hv.el) return;
   hv.el = el; hv.id = t && t.id;

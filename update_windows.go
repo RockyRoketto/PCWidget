@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -11,8 +12,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
-	"golang.org/x/sys/windows"
 )
 
 // Проверка новых версий на GitHub и обновление по согласию. Скачанное кладётся в папку установки
@@ -117,51 +116,86 @@ func (u *updateService) begin(note string) bool {
 }
 
 // offerUpdate — щелчок по значку или кнопке «Обновить». Звать только через runOnUI.
+// Окна живут в своём потоке: виджет в это время продолжает работать.
 func offerUpdate() {
 	updater.mu.Lock()
-	r, busy := updater.found, updater.busy
+	r := updater.found
 	updater.mu.Unlock()
-	if r.Version == "" || busy {
+	if r.Version == "" || dlgOpen.Load() > 0 {
 		return
 	}
 	if !installed() { // запущен без установки: заменять нечего, показываем страницу
 		openProjectPage(repoURL + "/releases/latest")
 		return
 	}
-	text := "Вышла версия " + r.Version + " (сейчас " + appVersion + "). Обновить?\n\nВиджет скачает её с GitHub и перезапустится. Настройки сохранятся."
-	if msgBox(text, windows.MB_YESNO|windows.MB_ICONQUESTION) != idYes || !updater.begin("Скачиваю…") {
-		return
+	if updater.begin("Обновление…") {
+		go runUpdate(r)
 	}
-	go func() {
-		path, err := download(r)
-		runOnUI(func() { finishUpdate(path, err) })
-	}()
 }
 
-func finishUpdate(path string, err error) {
-	if err == nil {
-		c := exec.Command(path, "--install")
-		c.Dir = filepath.Dir(path)
-		app.settings.save()
-		err = c.Start()
-	}
-	if err != nil {
-		updater.mu.Lock()
-		updater.busy, updater.note = false, "Не удалось обновить"
-		updater.mu.Unlock()
-		sendSys()
-		msgBox("Не удалось обновить: "+err.Error(), windows.MB_OK|windows.MB_ICONWARNING)
+func runUpdate(r release) {
+	text := "Сейчас стоит " + appVersion + ". Виджет скачает новую версию с GitHub и перезапустится. Настройки сохранятся."
+	if !askDialog("Вышла версия "+r.Version+". Обновить?", text, "Обновить") {
+		endUpdate("")
 		return
 	}
+	var path string
+	err := progressDialog("Скачиваю PC Widget "+r.Version, "Соединяюсь с GitHub…", true,
+		func(ctx context.Context, p *progress) (err error) {
+			path, err = download(ctx, r, func(done, total int64) {
+				p.say(downloadText(done, total))
+				if total > 0 {
+					p.percent(int(done * 100 / total))
+				}
+			})
+			return err
+		})
+	if errors.Is(err, context.Canceled) {
+		endUpdate("")
+		return
+	}
+	if err == nil {
+		started := make(chan error, 1)
+		runOnUI(func() { started <- startUpdate(path) })
+		err = <-started
+	}
+	if err != nil {
+		endUpdate("Не удалось обновить")
+		infoDialog("Не удалось обновить", err.Error()+"\n\nНовую версию можно скачать вручную: "+repoURL+"/releases/latest")
+	}
+}
+
+// endUpdate освобождает службу и задаёт подпись в «О программе».
+func endUpdate(note string) {
+	updater.mu.Lock()
+	updater.busy, updater.note = false, note
+	updater.mu.Unlock()
+	runOnUI(sendSys)
+}
+
+// startUpdate запускает скачанный установщик и закрывает виджет. Только в потоке UI.
+func startUpdate(path string) error {
+	c := exec.Command(path, "--install")
+	c.Dir = filepath.Dir(path)
+	app.settings.save()
+	if err := c.Start(); err != nil {
+		return err
+	}
 	pDestroyWindow.Call(app.hwnd) // новая копия заменит файл и запустится
+	return nil
 }
 
 func updateDir() string { return filepath.Join(installDir(os.Getenv("ProgramFiles")), "update") }
 
 // download качает exe выпуска и сверяет контрольную сумму; несовпавший файл стирается.
-func download(r release) (string, error) {
+// step получает ход загрузки не чаще пяти раз в секунду.
+func download(ctx context.Context, r release, step func(done, total int64)) (string, error) {
 	client := &http.Client{Timeout: 5 * time.Minute}
-	resp, err := client.Get(r.URL)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, r.URL, nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -178,7 +212,8 @@ func download(r release) (string, error) {
 		return "", err
 	}
 	h := sha256.New()
-	_, err = io.Copy(io.MultiWriter(f, h), io.LimitReader(resp.Body, updateMax))
+	count := &counter{total: resp.ContentLength, step: step}
+	_, err = io.Copy(io.MultiWriter(f, h, count), io.LimitReader(resp.Body, updateMax))
 	if cerr := f.Close(); err == nil {
 		err = cerr
 	}
@@ -190,6 +225,22 @@ func download(r release) (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+// counter считает скачанное и изредка сообщает о нём.
+type counter struct {
+	done, total int64
+	last        time.Time
+	step        func(done, total int64)
+}
+
+func (c *counter) Write(b []byte) (int, error) {
+	c.done += int64(len(b))
+	if time.Since(c.last) >= 200*time.Millisecond || c.done == c.total {
+		c.last = time.Now()
+		c.step(c.done, c.total)
+	}
+	return len(b), nil
 }
 
 // cleanUpdate убирает скачанный файл после обновления (установщик может ещё завершаться).

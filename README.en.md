@@ -43,12 +43,6 @@ A Windows desktop widget showing CPU and GPU load and temperatures, memory, netw
 
 ![Clock, calendar, weather, CPU threads and memory map](media/features.png)
 
-### Hover details
-
-Rest the mouse on a tile. CPU, GPU, memory, network, energy and disks have charts (10 minutes or an hour, with the peak for that period); the other tiles show a card with details.
-
-![Hover cards: network, disks, weather](media/hover.png)
-
 ### Games
 
 - **Game mode:** FPS, 1% low and frame time over a windowed or borderless game (Ctrl+Shift+F). Nothing is injected into the game; exclusive fullscreen cannot be overlaid.
@@ -74,13 +68,13 @@ The widget sits on the desktop and survives Win+D, can be always on top, scales,
 
 1. Download `widget.exe` from [Releases](../../releases) or build it yourself.
 2. Run it. The file is not code-signed, so SmartScreen may warn you: choose "More info", then "Run anyway".
-3. That is all: the program installs itself to `Program Files\PCWidget`, adds itself to the Start menu and to startup (a scheduled task) and starts. You can delete the downloaded file afterwards.
+3. Confirm in the setup window. The program copies itself to `Program Files\PCWidget`, adds itself to the Start menu and to startup (a scheduled task) and starts; progress and the result are shown on screen. You can delete the downloaded file afterwards.
 
 Autostart can be turned off in the settings. To run without installing, pass `--portable`.
 
 ## Updates
 
-Shortly after start and every 6 hours the widget checks GitHub for a new version. If there is one, a blue arrow badge appears in the widget's corner: click it (or use **«Настройки → Система → О программе → Обновить»**) and confirm. The widget downloads the new version, verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
+Shortly after start and every 6 hours the widget checks GitHub for a new version. If there is one, a blue update bar appears below the tiles: click it (or use **«Настройки → Система → О программе → Обновить»**) and confirm. The widget downloads the new version (progress is shown), verifies its checksum and restarts; settings are kept. Nothing is downloaded without your consent. The check can be turned off in the same place.
 
 Moving from version 1.0 is manual, once: download `widget.exe` and run it.
 
